@@ -8,6 +8,9 @@ all: LockTable Page PrecedenceGraph Record Schedule Transaction
 classes:
 	mkdir -p $(dest)
 
+%.scala: $(src)/%.scala
+	@touch $(src)/%.scala
+
 LockTable: classes LockTable.scala
 	scalac $(flags) $(src)/LockTable.scala
 
