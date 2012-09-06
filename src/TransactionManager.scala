@@ -7,6 +7,7 @@ class TransactionManager () extends ConcurrencyControl
   private val recent = new ListBuffer[(Transaction, Op, Int)]()
   def begin (tid: Int) { }
 
+
   def read (tid: Int, oid: Int): Array[Any] = null
 
   def write (tid: Int, oid: Int, value: Array[Any]) { }
