@@ -1,15 +1,19 @@
+import collection.mutable.ListBuffer
+import Op._
+
 class TransactionManager () extends ConcurrencyControl  
 {
 
-    def begin (tid: Int) { }
+  private val recent = new ListBuffer[(Transaction, Op, Int)]()
+  def begin (tid: Int) { }
 
-    def read (tid: Int, oid: Int): Array[Any] = null
+  def read (tid: Int, oid: Int): Array[Any] = null
 
-    def write (tid: Int, oid: Int, value: Array[Any]) { }
+  def write (tid: Int, oid: Int, value: Array[Any]) { }
 
-    def rollback (tid: Int) { }
+  def rollback (tid: Int) { }
 
-    def commit (tid: Int) { }
+  def commit (tid: Int) { }
 
 } // TransactionManager
 
