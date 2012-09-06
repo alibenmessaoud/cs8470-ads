@@ -1,48 +1,27 @@
+import collection.mutable.ListBuffer
 
-/***********************************************************************************
- * @author  John Miller
- * @version 1.0
- * @date    Thu Feb 11 12:38:17 EST 2010
- */
-
-/***********************************************************************************
- * Abstract representation of a database as a collection of data objects and a
- * lock table.
- */
-object Database
+class Transaction (tid: Int, m: TransactionManager, ops: ListBuffer[(Char, Long)]) extends Thread with ReadWrite
 {
-    /** The lock table to control concurrent access to the database
-     */
-    val lt   = new LockTable ()
+    private var randOps = false
+    private var randNum = 0
 
-    /** The abstract database representation (an array of double objects)
-     */
-    val data = new Array [Double] (100)
+    def this (tid: Int, m: TransactionManager, rand: Int) {
+      this(tid, m, null)
+      randOps = true
+      randNum = rand
+    } // this
 
-} // Database object
-
-/***********************************************************************************
- * This class models database transactions.
- * @param tid  the transaction identifier
- * @param s    the schedule of read/write operations making up the transaction
- */
-class Transaction (tid: Int, s: Schedule) extends Thread with ReadWrite
-{
     /*******************************************************************************
      * Run the transaction: begin, reads/writes, commit.
      */
     override def run ()
     {
-        var value = 0.
         begin ()
-        for (op <- s) {
-            if (op._1 == r) {
-                Database.lt.rl (tid, op._3); value = read (op._3)
-            } else {
-                Database.lt.wl (tid, op._3); write (op._3, value + 1.)
-            } // if
-        } // for
-        for (op <- s) Database.lt.ul (op._2, op._3)
+	if (randOps) {
+	  
+	} else {
+
+	}
         commit ()
     } // run
 
@@ -51,19 +30,18 @@ class Transaction (tid: Int, s: Schedule) extends Thread with ReadWrite
      */
     def begin ()
     {
-        Thread.sleep (5)
         println ("begin transaction " + tid)
+        m.begin (tid)
     } // begin
 
     /*******************************************************************************
      * Read data object oid.
      * @param oid  the database object
      */
-    def read (oid: Int): Double =
+    def read (oid: Int): Array[Any] =
     {
-        Thread.sleep (10)
-        val value = Database.data(oid) 
-        println ("read " + tid + " ( " + oid + " ) value = " + value)
+        val value = m.read (tid, oid)
+	println ("read " + tid + " ( " + oid + " ) value = " + value)
         value
     } // read
 
@@ -71,11 +49,10 @@ class Transaction (tid: Int, s: Schedule) extends Thread with ReadWrite
      * Write data object oid.
      * @param oid  the database object
      */
-    def write (oid: Int, value: Double)
+    def write (oid: Int, value: Array[Any])
     {
-        Thread.sleep (15)
         println ("write " + tid + " ( " + oid + " ) value = " + value)
-        Database.data(oid) = value
+        m.write (tid, oid, value)
     } // write
 
     /*******************************************************************************
@@ -83,23 +60,10 @@ class Transaction (tid: Int, s: Schedule) extends Thread with ReadWrite
      */
     def commit ()
     {
-        Thread.sleep (20)
         println ("commit transaction " + tid)
+        m.commit (tid)
     } // commit
 
 } // Transaction class
 
-/***********************************************************************************
- * Test the Transcation class by running several concurrent transactions/threads.
- */
-object TransactionTest extends App with ReadWrite
-{
-    println ("Test Transactions")
-    val t1 = new Transaction (1, new Schedule (List ( (w, 1, 0), (w, 1, 1) )))
-    val t2 = new Transaction (2, new Schedule (List ( (w, 2, 0), (w, 2, 1) )))
-
-    t1.start ()
-    t2.start ()
-
-} // TransactionTest object
 
