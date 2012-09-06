@@ -109,7 +109,7 @@ class LockTable
  * Test the LockTable class.  Note, typically an object of this class would would
  * be accessed by multiple threads.
  */
-object LockTableTest extends Application
+object LockTableTest extends App
 {
     val lt = new LockTable ()
     lt.wl(0, 0); lt.wl(1, 1); lt.wl(2, 2)

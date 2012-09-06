@@ -92,7 +92,7 @@ class Transaction (tid: Int, s: Schedule) extends Thread with ReadWrite
 /***********************************************************************************
  * Test the Transcation class by running several concurrent transactions/threads.
  */
-object TransactionTest extends Application with ReadWrite
+object TransactionTest extends App with ReadWrite
 {
     println ("Test Transactions")
     val t1 = new Transaction (1, new Schedule (List ( (w, 1, 0), (w, 1, 1) )))
