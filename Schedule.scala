@@ -72,7 +72,7 @@ class Schedule (s: List [Tuple3 [Char, Int, Int]]) extends ReadWrite
 /***********************************************************************************
  * This object is used to test the Schedule class.
  */
-object ScheduleTest extends Application with ReadWrite
+object ScheduleTest extends App with ReadWrite
 {
     val s1 = new Schedule (List ( (r, 0, 0), (r, 1, 0), (w, 0, 0), (w, 1, 0) ))
     val s2 = new Schedule (List ( (r, 0, 0), (r, 1, 1), (w, 0, 0), (w, 1, 1) ))

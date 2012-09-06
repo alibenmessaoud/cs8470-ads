@@ -1,4 +1,4 @@
-import scala.collection.mutable.HashMap
+import scala.collection.mutable.{HashMap, SynchronizedMap}
 
 import java.util.concurrent.Semaphore
 
@@ -10,46 +10,40 @@ class LockTable {
   } // Lock
 
   // perhaps change to a thread-safe map
-  private val locks = new HashMap[Int, Lock]
+  private val locks = new HashMap[Int, Lock] with SynchronizedMap[Int, Lock]
 
   /** Lock */
   def x (tid: Int, oid: Int) {
-    var lock: Lock = null
+
     var wait = false
+    val lock = locks get oid
 
-    this.synchronized {
-      if (locks contains oid) {
+    lock match {
+      case None       => {}
+      case Some(lock) => {
 	wait = true
-	lock = locks(oid)
-      } // if
-    } // synchronized
+	lock.sem.acquire()
+      }
+    } // match
 
-    if (wait) lock.sem.acquire()
-
-    this.synchronized {
-      locks(oid) = new Lock(tid)
-    } // synchronized
+    locks(oid) = new Lock(tid)
 
   } // x
 
   /** Unlock */
   def u (tid: Int, oid: Int) {
 
-    var lock: Lock = null
     var error = false
 
-    this.synchronized {
-      if (locks contains oid) {
-	lock = locks(oid)
-	if (lock.tid == tid) {
-	  // TODO maybe the order of the following statements matteres
-	  lock.sem.release()
-	  locks -= oid
-	} // if
-      } else {
-	error = true
-      } // if
-    } // synchronized
+    val lock = locks get oid
+
+    lock match {
+      case None       => error = true
+      case Some(lock) => if (lock.tid == tid) {
+	locks -= oid
+	lock.sem.release()
+      }
+    } // match
 
   } // u
 
