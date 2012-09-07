@@ -1,3 +1,5 @@
+package ads
+
 import collection.mutable.Set
 
 class PrecedenceGraph(n: Int) {

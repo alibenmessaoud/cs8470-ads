@@ -1,16 +1,19 @@
+package ads
+
 import actors.Actor
 import actors.Actor._
 import collection.mutable.ListBuffer
+
+import OpMessages._
 import Op._
 
 /**
- * Represents the thread objects that submit transaction requests to the TransactionManager.
- * @author Terrance Medina 
- * @author Michael Cotterell 
+ * A database transaction
  *
- * @param tid The unique ID for this Transaction.
- * @param m A reference to the Transaction Manager of the Database System.
- *
+ * @author Michael E. Cotterell
+ * @author Terrance Medina
+ * @param tid The transaction identifier.
+ * @param m The transaction manager object.
  */
 class Transaction (var tid: Int, m: TransactionManager) extends Actor {
 
@@ -39,7 +42,7 @@ class Transaction (var tid: Int, m: TransactionManager) extends Actor {
   /**
    * Begin the transaction.
    */
-  private def begin () = m ! beginMessage(this)
+  private def begin () = m ! BeginMessage(this)
 
   /**
    * Read a value into the transaction from the database.
@@ -47,7 +50,7 @@ class Transaction (var tid: Int, m: TransactionManager) extends Actor {
    * @param oid The object identifier.
    * @return the value of the object.
    */
-  private def read (oid: Int) = m !? readMessage(this, oid)
+  private def read (oid: Int) = m !? ReadMessage(this, oid)
     
   /**
    * Write a value into the database.
@@ -55,13 +58,13 @@ class Transaction (var tid: Int, m: TransactionManager) extends Actor {
    * @param oid The object identifier.
    * @param value The value to write into the database.
    */
-  private def write (oid: Int, value: Any) = m ! writeMessage(this, oid, value)
+  private def write (oid: Int, value: Any) = m ! WriteMessage(this, oid, value)
 
   /**
    * Commit this transaction.
    */
   private def commit () = {
-    m ! commitMessage(this)
+    m ! CommitMessage(this)
     exit()
   } // commit
 
@@ -80,10 +83,4 @@ class Transaction (var tid: Int, m: TransactionManager) extends Actor {
 
 } // Transaction class
 
-/**
- * Test object for Transaction
- */
-object TxnTest extends App {
 
-
-} // TxnTest
