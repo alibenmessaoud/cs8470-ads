@@ -29,12 +29,16 @@ to service it immediately. This decision is made by the manager's
 _ConcurrencyControl_.
 
 We need the following:
+
 1. ```TransactionManager``` class
+
    * This will provide the operations for transactions and will extend a
      ```ConcurrencyControl``` trait.
 2. ```ConcurrencyControl``` trait
+
    * This will provide a partially implemented interface for the concurrency
      control operations.
+
 3. A trait that extends ```ConcurrencyControl``` for each concurrency control 
    scheme that we are to implement, overriding functions as neeeded.
 
