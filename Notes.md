@@ -65,3 +65,12 @@ It will also need the following private operations:
 
 ## ConcurrencyControl
 
+The goal of the ConcurrencyControl trait is to reorder request of different 
+transactions in the arriving schedule so as to produce a correct schedule for
+servicing by the TransactionManager class.
+
+If ConcurrencyControl can determine that the (possibly interleaved) sequence of
+operations that has arrived is the prefix of a serializable schedule no matter
+what operations might be submitted later, it tells the TransactionManager to
+execute the operations as they arrive. If it can't be certain of this, some
+operations have to be delayed. Delay results in reordering.
