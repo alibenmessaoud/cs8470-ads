@@ -1,3 +1,4 @@
+Terrance Medina
 # Notes
 
 Some portions of this page may be copied verbatim or paraphrased from a 
