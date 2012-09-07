@@ -133,6 +133,29 @@ operations are conflicting if they satisfy the following three conditions:
 
 We know how to build a PrecedenceGraph and determine if their is a cycle. 
 
+We need to implement this serializable graph checking using a protocol similar
+to the following:
+
+1. Create a precedence graph (we'll need to modify it a little bit)
+
+2. Using a synchronized hash table (probably HashMap), make a list for each 
+   object.
+
+3. Each list will keep track of all operations concerning that object from the
+   second most recent write up until now.
+
+3. When a transaction requests an operation on an object, we'll compare that
+   operation will all other operations in the objects list using the conflict
+   rules.
+
+4. If there is a conflict, add it to the Precendence Graph.
+
+5. After all comparisons are made, if the graph has a cycle, then rollback
+   the (conflicting) transaction that requested the new operation.
+
+* When a tranaction commits, we can remove all edges concerning that transaction
+  from the precedence graph. 
+
 ### TwoPhaseLocking (2PL)
 
 
