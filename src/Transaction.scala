@@ -1,6 +1,7 @@
 import actors.Actor
 import actors.Actor._
 import collection.mutable.ListBuffer
+import Op._
 
 /* Authors: Terrance Medina & Michael Cotterell
  *
@@ -14,16 +15,24 @@ import collection.mutable.ListBuffer
  *				
  *
  */
-class Transaction (tid: Int, m: TransactionManager) extends Actor {
+class Transaction (var tid: Int, m: TransactionManager) extends Actor {
 
   private var randOps = false
   private var randNum = 0
 
   def this (tid: Int, m: TransactionManager, rand: Int) {
-    this(tid, m, null)
+    this(tid, m)
     randOps = true
     randNum = rand
   } // this
+
+  def act () {
+      
+    if (randOps) {
+      // TODO implement
+    } else body()
+
+  } // act
 
   /**
    * The body of the transaction, if defined.
@@ -33,7 +42,7 @@ class Transaction (tid: Int, m: TransactionManager) extends Actor {
   /**
    * Begin the transaction.
    */
-  private def begin () = m ! (this, Op.Begin)
+  private def begin () = m ! beginMessage(this)
 
   /**
    * Read a value into the transaction from the database.
@@ -41,7 +50,7 @@ class Transaction (tid: Int, m: TransactionManager) extends Actor {
    * @param oid The object identifier.
    * @return the value of the object.
    */
-  private def read (oid: Int) = m !? (this, Op.Read, oid)
+  private def read (oid: Int) = m !? readMessage(this, oid)
     
   /**
    * Write a value into the database.
@@ -49,17 +58,25 @@ class Transaction (tid: Int, m: TransactionManager) extends Actor {
    * @param oid The object identifier.
    * @param value The value to write into the database.
    */
-  private def write (oid: Int, value: Any) = m ! (this, Op.Write, oid, value)
+  private def write (oid: Int, value: Any) = m ! writeMessage(this, oid, value)
 
   /**
    * Commit this transaction.
    */
-  private def commit () = m ! (this, Op.Commit)
+  private def commit () = m ! commitMessage(this)
 
   /**
    * Rollback this transaction.
    */
-  private def rollback () = m ! (this, Op.Rollback)
+  def rollback (tid: Int) = {
+
+    this.tid = tid
+
+    // TODO make it wait some random amount of time
+
+    body()
+
+  } // rollback
 
 } // Transaction class
 
@@ -68,12 +85,5 @@ class Transaction (tid: Int, m: TransactionManager) extends Actor {
  */
 object TxnTest extends App {
 
-  val t1 = new Transaction(1, m) {
-    override def body () {
-      val x = r(100)
-      x.bank = 12
-      write(100, x)
-    } // body
-  }
 
 } // TxnTest

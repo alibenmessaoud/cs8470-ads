@@ -1,3 +1,6 @@
+import actors.Actor
+import actors.Actor._
+import collection.mutable.ListBuffer
 import collection.mutable.ListBuffer
 import Op._
 
@@ -16,36 +19,37 @@ import Op._
  *				requests from this Transaction? We don't want cascading rollbacks.
  *
  */
-class TransactionManager () extends ConcurrencyControl  
+class TransactionManager () extends Actor with ConcurrencyControl  
 {
 
   /**
    *	Incoming operation buffer.
    */
   private val opBuffer = new ListBuffer[(Transaction, Op, Int)]()
-  def begin (tid: Int) { }
 
-  def read (tid: Int, oid: Int): Array[Any] = null
 
-  def write (tid: Int, oid: Int, value: Array[Any]) { }
+  def act () = loop {
+    receive {
 
-  private def rollback (tid: Int) { }
+      case bMsg: beginMessage => {
+	
+      }
 
-	//Not needed until Project2
-  def commit (tid: Int) { }
+      case rMsg: readMessage => {
 
-	def request(op : (Transaction, Op, Int)):Boolean
+      }
 
+      case wMsg: writeMessage => {
+	
+      }
+
+      case cMsg: commitMessage => {
+
+      }
+      
+    } // recieve
+  } // act
 
 
 } // TransactionManager
 
-object TxnTest extends App 
-{
-
-  val tm = new TransactionManager ()
-
-  val t1 = new Transaction (1, tm, 10)
-
-
-}

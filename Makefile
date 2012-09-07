@@ -1,7 +1,7 @@
 src = src
 dest = classes
 classpath = $(dest)
-flags = -deprecation -cp $(classpath) -sourcepath $(src) -d $(dest)
+flags = -deprecation -unchecked -cp $(classpath) -sourcepath $(src) -d $(dest)
 
 all: ConcurrencyControl LockTable Op Page PrecedenceGraph Record StorageManager Transaction TransactionManager
 
@@ -11,11 +11,15 @@ classes:
 %.scala: $(src)/%.scala
 	@touch $(src)/%.scala
 
+
 ConcurrencyControl: classes Op ConcurrencyControl.scala
 	scalac $(flags) $(src)/ConcurrencyControl.scala
 
 LockTable: classes LockTable.scala
 	scalac $(flags) $(src)/LockTable.scala
+
+Message: classes Op Transaction Message.scala
+	scalac $(flags) $(src)/Message.scala
 
 Op: classes Op.scala
 	scalac $(flags) $(src)/Op.scala
@@ -35,7 +39,7 @@ StorageManager: classes StorageManager.scala
 Transaction: classes LockTable Transaction.scala
 	scalac $(flags) $(src)/Transaction.scala
 
-TransactionManager: classes Op ConcurrencyControl StorageManager Transaction TransactionManager.scala
+TransactionManager: classes Op ConcurrencyControl StorageManager Message Transaction TransactionManager.scala
 	scalac $(flags) $(src)/TransactionManager.scala
 
 clean:

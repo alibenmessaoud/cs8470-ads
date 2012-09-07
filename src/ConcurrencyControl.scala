@@ -1,3 +1,5 @@
+import Op._
+
 /** 
  * Handles operation request from TransactionManager. 
  *	Behavior defined by trait mixins.
@@ -14,13 +16,13 @@ trait ConcurrencyControl {
     * @param op A triple of {TransactionID, Operation Type, Object ID}
 	 * @return True if operation is schedulable, False otherwise	
 	 */
-	def check(op : (Int, Op, Int)) : Boolean = True
+	def check(op : (Int, Op, Int)) : Boolean = true
 
 } // ConcurrencyControl
 
 trait CSR extends ConcurrencyControl
 {
-	override def check(op : (Int, Op, Int)) : Boolean 
+	override def check(op : (Int, Op, Int)) : Boolean =
 	{
 	//do forever
 		//read incoming operation from buffer
@@ -36,7 +38,7 @@ trait CSR extends ConcurrencyControl
 					//if cycle, rollback(op_i)
 
 					//else execute(op_i)
-		True
+		true
 	}
 }//end CSR
 
