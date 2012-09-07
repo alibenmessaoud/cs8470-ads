@@ -1,3 +1,5 @@
+import actors.Actor
+import actors.Actor._
 import collection.mutable.ListBuffer
 
 /* Authors: Terrance Medina & Michael Cotterell
@@ -12,70 +14,66 @@ import collection.mutable.ListBuffer
  *				
  *
  */
-class Transaction (tid: Int, m: TransactionManager, ops: ListBuffer[(Char, Long)]) extends Thread with ReadWrite
-{
-    private var randOps = false
-    private var randNum = 0
+class Transaction (tid: Int, m: TransactionManager) extends Actor {
 
-    def this (tid: Int, m: TransactionManager, rand: Int) {
-      this(tid, m, null)
-      randOps = true
-      randNum = rand
-    } // this
+  private var randOps = false
+  private var randNum = 0
 
-    /*******************************************************************************
-     * Run the transaction: begin, reads/writes, commit.
-     */
-    override def run ()
-    {
-        begin ()
-	if (randOps) {
-	  
-	} else {
+  def this (tid: Int, m: TransactionManager, rand: Int) {
+    this(tid, m, null)
+    randOps = true
+    randNum = rand
+  } // this
 
-	}
-        commit ()
-    } // run
+  /**
+   * The body of the transaction, if defined.
+   */
+  def body () { }  
 
-    /*******************************************************************************
-     * Begin this transaction.
-     */
-    def begin ()
-    {
-        println ("begin transaction " + tid)
-        m.begin (tid)
-    } // begin
+  /**
+   * Begin the transaction.
+   */
+  private def begin () = m ! (this, Op.Begin)
 
-    /*******************************************************************************
-     * Read data object oid.
-     * @param oid  the database object
-     */
-    def read (oid: Int): Array[Any] =
-    {
-        val value = m.read (tid, oid)
-	println ("read " + tid + " ( " + oid + " ) value = " + value)
-        value
-    } // read
+  /**
+   * Read a value into the transaction from the database.
+   *
+   * @param oid The object identifier.
+   * @return the value of the object.
+   */
+  private def read (oid: Int) = m !? (this, Op.Read, oid)
+    
+  /**
+   * Write a value into the database.
+   *
+   * @param oid The object identifier.
+   * @param value The value to write into the database.
+   */
+  private def write (oid: Int, value: Any) = m ! (this, Op.Write, oid, value)
 
-    /*******************************************************************************
-     * Write data object oid.
-     * @param oid  the database object
-     */
-    def write (oid: Int, value: Array[Any])
-    {
-        println ("write " + tid + " ( " + oid + " ) value = " + value)
-        m.write (tid, oid, value)
-    } // write
+  /**
+   * Commit this transaction.
+   */
+  private def commit () = m ! (this, Op.Commit)
 
-    /*******************************************************************************
-     * Commit this transaction.
-     */
-    def commit ()
-    {
-        println ("commit transaction " + tid)
-        m.commit (tid)
-    } // commit
+  /**
+   * Rollback this transaction.
+   */
+  private def rollback () = m ! (this, Op.Rollback)
 
 } // Transaction class
 
+/**
+ * Test object for Transaction
+ */
+object TxnTest extends App {
 
+  val t1 = new Transaction(1, m) {
+    override def body () {
+      val x = r(100)
+      x.bank = 12
+      write(100, x)
+    } // body
+  }
+
+} // TxnTest
