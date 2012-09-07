@@ -80,11 +80,11 @@ operations have to be delayed. Delay results in reordering.
 
 There seem to be two models for concurrency control:
 
-1. immediate-update: if a transaction's request to write _x_ is granted, the
+1. __immediate-update__: if a transaction's request to write _x_ is granted, the
    value of _x_ is immediately updated in the database; if its request to read 
    _x_ is granted, the value of _x_ in the database is returned.
 
-2. deferred-update: if a transaction's request to write _x_ is granted, the
+2. __deferred-update__: if a transaction's request to write _x_ is granted, the
    value of _x_ in the database is not immediately updated. Instead, the new
    vaue is saved in the buffer maintained by the system for the transaction
    and called in its __intentions list__. If a transaction's request to read
@@ -99,6 +99,21 @@ responses to a request include:
 1. Grant the request.
 2. Make the transaction wait until some other event occurs
 3. Deny the request (and abort/rollback) the transaction.
+
+Concurrency control, in general, can be characterized into the following 
+categories: 
+
+1. __pessimistic control__: whenever a transaction attempts to perform any
+   operation, it must request permission. However, the transaction may commit
+   at any time without requesting permission.
+
+2. __optimistic control__: a transaction can perform any operation without
+   requesting permission. However, the transaction must request permission to
+   commit.
+
+The most commonly implemented concurrency control is the immediate-update
+pessimistic system. Based on the lectures from class, this seems like the way
+to go.
 
 ### TimeStampOrdering (TSO)
 
