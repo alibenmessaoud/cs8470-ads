@@ -3,16 +3,13 @@ import actors.Actor._
 import collection.mutable.ListBuffer
 import Op._
 
-/* Authors: Terrance Medina & Michael Cotterell
+/**
+ * Represents the thread objects that submit transaction requests to the TransactionManager.
+ * @author Terrance Medina 
+ * @author Michael Cotterell 
  *
- *		Transaction:
- *			Represents the thread objects that submit transaction requests to the TransactionManager.
- *			Members:
- *				begin(): Sends a 'begin' operation request to the TransactionManager
- *				read(): Sends a 'read' operation request to the TransactionManager
- *				write(): Sends a 'write' operation request to the TransactionManager
- *				commit(): Sends a 'commit' operation request to the TransactionManager
- *				
+ * @param tid The unique ID for this Transaction.
+ * @param m A reference to the Transaction Manager of the Database System.
  *
  */
 class Transaction (var tid: Int, m: TransactionManager) extends Actor {
