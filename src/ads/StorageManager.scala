@@ -1,3 +1,5 @@
+package ads
+
 class StorageManager () {
 
   def read (oid: Int): Array[Any] = null

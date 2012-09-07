@@ -1,19 +1,19 @@
+package ads
+
 import actors.Actor
 import actors.Actor._
 import collection.mutable.ListBuffer
+
+import OpMessages._
 import Op._
 
-/* Authors: Terrance Medina & Michael Cotterell
+/**
+ * A database transaction
  *
- *		Transaction:
- *			Represents the thread objects that submit transaction requests to the TransactionManager.
- *			Members:
- *				begin(): Sends a 'begin' operation request to the TransactionManager
- *				read(): Sends a 'read' operation request to the TransactionManager
- *				write(): Sends a 'write' operation request to the TransactionManager
- *				commit(): Sends a 'commit' operation request to the TransactionManager
- *				
- *
+ * @author Michael E. Cotterell
+ * @author Terrance Medina
+ * @param tid The transaction identifier.
+ * @param m The transaction manager object.
  */
 class Transaction (var tid: Int, m: TransactionManager) extends Actor {
 
@@ -42,7 +42,7 @@ class Transaction (var tid: Int, m: TransactionManager) extends Actor {
   /**
    * Begin the transaction.
    */
-  private def begin () = m ! beginMessage(this)
+  private def begin () = m ! BeginMessage(this)
 
   /**
    * Read a value into the transaction from the database.
@@ -50,7 +50,7 @@ class Transaction (var tid: Int, m: TransactionManager) extends Actor {
    * @param oid The object identifier.
    * @return the value of the object.
    */
-  private def read (oid: Int) = m !? readMessage(this, oid)
+  private def read (oid: Int) = m !? ReadMessage(this, oid)
     
   /**
    * Write a value into the database.
@@ -58,13 +58,13 @@ class Transaction (var tid: Int, m: TransactionManager) extends Actor {
    * @param oid The object identifier.
    * @param value The value to write into the database.
    */
-  private def write (oid: Int, value: Any) = m ! writeMessage(this, oid, value)
+  private def write (oid: Int, value: Any) = m ! WriteMessage(this, oid, value)
 
   /**
    * Commit this transaction.
    */
   private def commit () = {
-    m ! commitMessage(this)
+    m ! CommitMessage(this)
     exit()
   } // commit
 
@@ -83,10 +83,4 @@ class Transaction (var tid: Int, m: TransactionManager) extends Actor {
 
 } // Transaction class
 
-/**
- * Test object for Transaction
- */
-object TxnTest extends App {
 
-
-} // TxnTest

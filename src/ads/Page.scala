@@ -1,3 +1,5 @@
+package ads
+
 class Page (n: Int) {
 
   var accessed = 0     // last time of access

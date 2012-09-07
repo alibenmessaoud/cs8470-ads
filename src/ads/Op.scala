@@ -1,9 +1,10 @@
+package ads
+
 /** 
- *	An enum that defines op types.
+ * An enum that defines op types.
  *
- *	@author Michael Cotterell
- *	@author Terrance Medina
- *	
+ * @author Michael E. Cotterell
+ * @author Terrance Medina	
  */
 object Op extends Enumeration {
   type Op = Value

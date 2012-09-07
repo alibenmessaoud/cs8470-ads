@@ -1,3 +1,5 @@
+package ads
+
 
 /***********************************************************************************
  * @author  John Miller
@@ -113,11 +115,4 @@ object LockTableTest extends App
 {
     val lt = new LockTable ()
     lt.wl(0, 0); lt.wl(1, 1); lt.wl(2, 2)
-    println ("lt = " + lt)
-    lt.ul(1, 1)
-    println ("lt = " + lt)
-    lt.wl(1, 0)
-    println ("lt = " + lt)
-
-} // LockTableTest object
-
+}
