@@ -34,6 +34,10 @@ class Transaction (var tid: Int, m: TransactionManager) extends Actor {
 
   } // act
 
+  def name(args) = {
+    
+  }
+
   /**
    * The body of the transaction, if defined.
    */
@@ -63,7 +67,10 @@ class Transaction (var tid: Int, m: TransactionManager) extends Actor {
   /**
    * Commit this transaction.
    */
-  private def commit () = m ! commitMessage(this)
+  private def commit () = {
+    m ! commitMessage(this)
+    exit()
+  } // commit
 
   /**
    * Rollback this transaction.
