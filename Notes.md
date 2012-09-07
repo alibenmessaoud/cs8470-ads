@@ -28,7 +28,7 @@ behavior. Hence, when a request arrives, a decision must me made as to whether
 to service it immediately. This decision is made by the manager's
 _ConcurrencyControl_.
 
-We need the following:
+I propose the following:
 
 1. TransactionManager class: This will provide the operations for transactions 
    and will extend a ConcurrencyControl trait.
@@ -47,3 +47,21 @@ the traits in a "concurrency" package):
 import concurrency._
 val tm = new TransactionManager() with ConflictSerializability
 ```
+
+The TransactionManager class needs to provide the following public operations:
+
+1. begin
+2. read
+3. write
+4. rollback
+5. commit
+
+It will also need the following private operations:
+
+1. shared lock
+2. exclusive lock
+3. upgrade lock
+4. unlock
+
+## ConcurrencyControl
+
