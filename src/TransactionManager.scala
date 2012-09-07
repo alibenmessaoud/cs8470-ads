@@ -40,7 +40,7 @@ class TransactionManager () extends Actor with ConcurrencyControl
       }
 
       case wMsg: writeMessage => {
-	
+
       }
 
       case cMsg: commitMessage => {

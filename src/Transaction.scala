@@ -34,10 +34,6 @@ class Transaction (var tid: Int, m: TransactionManager) extends Actor {
 
   } // act
 
-  def name(args) = {
-    
-  }
-
   /**
    * The body of the transaction, if defined.
    */

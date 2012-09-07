@@ -3,44 +3,22 @@ dest = classes
 classpath = $(dest)
 flags = -deprecation -unchecked -cp $(classpath) -sourcepath $(src) -d $(dest)
 
-all: ConcurrencyControl LockTable Op Page PrecedenceGraph Record StorageManager Transaction TransactionManager
+srcs = $(shell find ./$(src) -name *.scala)
+objs = $(patsubst %.scala,%,$(srcs))
+
+all: classes $(objs)
 
 classes:
 	mkdir -p $(dest)
 
-%.scala: $(src)/%.scala
-	@touch $(src)/%.scala
+$(objs): %: %.scala
+	scalac $(flags) $< 
 
+src/Message: src/Op
 
-ConcurrencyControl: classes Op ConcurrencyControl.scala
-	scalac $(flags) $(src)/ConcurrencyControl.scala
+src/Transaction: src/Op src/Message
 
-LockTable: classes LockTable.scala
-	scalac $(flags) $(src)/LockTable.scala
-
-Message: classes Op Transaction Message.scala
-	scalac $(flags) $(src)/Message.scala
-
-Op: classes Op.scala
-	scalac $(flags) $(src)/Op.scala
-
-Page: classes Record Page.scala
-	scalac $(flags) $(src)/Page.scala
-
-PrecedenceGraph: classes PrecedenceGraph.scala
-	scalac $(flags) $(src)/PrecedenceGraph.scala
-
-Record: classes Record.scala
-	scalac $(flags) $(src)/Record.scala
-
-StorageManager: classes StorageManager.scala
-	scalac $(flags) $(src)/StorageManager.scala
-
-Transaction: classes LockTable Transaction.scala
-	scalac $(flags) $(src)/Transaction.scala
-
-TransactionManager: classes Op ConcurrencyControl StorageManager Message Transaction TransactionManager.scala
-	scalac $(flags) $(src)/TransactionManager.scala
+src/TransactionManager: src/Op src/Transaction src/ConcurrencyControl src/Message
 
 clean:
 	rm -rf $(dest)
