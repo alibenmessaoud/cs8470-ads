@@ -1,5 +1,17 @@
 import collection.mutable.ListBuffer
 
+/* Authors: Terrance Medina & Michael Cotterell
+ *
+ *		Transaction:
+ *			Represents the thread objects that submit transaction requests to the TransactionManager.
+ *			Members:
+ *				begin(): Sends a 'begin' operation request to the TransactionManager
+ *				read(): Sends a 'read' operation request to the TransactionManager
+ *				write(): Sends a 'write' operation request to the TransactionManager
+ *				commit(): Sends a 'commit' operation request to the TransactionManager
+ *				
+ *
+ */
 class Transaction (tid: Int, m: TransactionManager, ops: ListBuffer[(Char, Long)]) extends Thread with ReadWrite
 {
     private var randOps = false

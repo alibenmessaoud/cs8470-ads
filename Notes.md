@@ -1,4 +1,3 @@
-Terrance Medina
 # Notes
 
 Some portions of this page may be copied verbatim or paraphrased from a 
@@ -132,7 +131,7 @@ operations are conflicting if they satisfy the following three conditions:
 2. Operating on the same object
 3. At least one operation is a write
 
-We know how to build a PrecedenceGraph and determine if their is a cycle. 
+We know how to build a PrecedenceGraph and determine if there is a cycle. 
 
 We need to implement this serializable graph checking using a protocol similar
 to the following:
