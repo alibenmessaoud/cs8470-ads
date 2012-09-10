@@ -5,6 +5,8 @@ import collection.mutable.{ListMap, Set}
 
 /**
  * A Precedence Graph.
+ *
+ * @author Michael E. Cotterell
  */
 class PrecedenceGraph () {
 
@@ -12,6 +14,12 @@ class PrecedenceGraph () {
   private var color = Array.empty[Char]
   private var max   = 0
 
+  /**
+   * Adds a directed edge to this precedence graph.
+   *
+   * @param i The first vertex in the directed edge
+   * @param j The second vertex in the directed edge
+   */
   def addEdge(i: Int, j: Int) = {
 
     if (j > max) max = j
@@ -24,18 +32,34 @@ class PrecedenceGraph () {
 
   } // adEdge
 
+  /**
+   * Removes a vertex from this precedence graph.
+   *
+   * @param i The vertex to be removed.
+   */
   def removeVertex(i: Int) = {
     graph -= i
     for (set <- graph.values) set.remove(i)
   } // removeVertex
 
+  /**
+   * Returns true if this precedence graph has a cycle.
+   *
+   * @return true if a cycle exists, false otherwise.
+   */
   def hasCycle: Boolean = {
     color = Array.fill(max + 1)('G')
     for (i <- 0 to max if color(i) == 'G' && loopback(i)) return true
     false
   } // hasCycle
 
-  def loopback(i: Int): Boolean = {
+  /**
+   * Determines if there has been a loopback in the cycle checking yet.
+   *
+   * @param i The vertex to begin checking with.
+   * @return true if there has been a loopback, false otherwise.
+   */
+  private def loopback(i: Int): Boolean = {
 
     // check for Y
     if (color(i) == 'Y') true
@@ -53,6 +77,7 @@ class PrecedenceGraph () {
     color(i) = 'R'
 
     false
+
   } // loopback
   
 } // PrecedenceGraph
