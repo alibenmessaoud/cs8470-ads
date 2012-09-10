@@ -15,7 +15,7 @@ import Op._
  */
 object Transaction {
 
-  private var x: Int = System.currentTimeMillis.toInt
+  private var x: Int = 0
 
   def getNextTID: Int  = synchronized { 
     val ret = x
@@ -72,7 +72,14 @@ class Transaction (m: TransactionManager) extends Actor {
    * @param oid The object identifier.
    * @return the value of the object.
    */
-  def read (oid: Int) = m !? ReadMessage(this, oid)
+  def read (oid: Int): Any = {
+    m ! ReadMessage(this, oid)
+    var ret: Any = null
+    receive {
+      case value: Any => ret = value
+    }
+    ret
+  }
     
   /**
    * Write a value into the database.
@@ -99,22 +106,35 @@ class Transaction (m: TransactionManager) extends Actor {
 
     // TODO make it wait some random amount of time
 
-    body()
+    restart()
 
   } // rollback
+
+  override def toString = "T%d".format(tid)
 
 } // Transaction class
 
 
 object TxnTest extends App {
 
+  import java.util.Random
+
+  val rand = new Random()
+
   val tm = new TransactionManager
 
-  val t1 = new Transaction(tm) {
+  val txns = for (i <- 1 to 1000) yield new Transaction(tm) {
     override def body() {
       begin()
+      val x = read(7)
+      write(7, 5)
       commit()
     }
   }
+
+  txns.par foreach (t => {
+    Thread.sleep(rand.nextInt(500))
+    t.start
+  })
 
 }
