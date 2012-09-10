@@ -1,21 +1,37 @@
 package ads
+package util
 
-import collection.mutable.Set
+import collection.mutable.{ListMap, Set}
 
-class PrecedenceGraph(n: Int) {
+/**
+ * A Precedence Graph.
+ */
+class PrecedenceGraph () {
 
-  val graph = new Array[Set[Int]](n)
-  val color = new Array[Char](n)
+  private val graph = ListMap.empty[Int, Set[Int]]
+  private var color = Array.empty[Char]
+  private var max   = 0
 
-  for (i <- 0 until n) {
-    graph(i) = Set[Int]()
-    color(i) - 'G'
-  } // for
+  def addEdge(i: Int, j: Int) = {
 
-  def addEdge(i: Int, j: Int) = graph(i) += j
+    if (j > max) max = j
+    if (i > max) max = i
+
+    graph.get(i) match {
+      case None    => graph += i -> Set(j)
+      case Some(s) => s.add(j)
+    } // match
+
+  } // adEdge
+
+  def removeVertex(i: Int) = {
+    graph -= i
+    for (set <- graph.values) set.remove(i)
+  } // removeVertex
 
   def hasCycle: Boolean = {
-    for (i <- 0 until n if color(i) == 'G' && loopback(i)) return true
+    color = Array.fill(max + 1)('G')
+    for (i <- 0 to max if color(i) == 'G' && loopback(i)) return true
     false
   } // hasCycle
 
@@ -26,9 +42,12 @@ class PrecedenceGraph(n: Int) {
 
     // set color to Y
     color(i) = 'Y'
-    
+
     // foreach child if not red, check for a loop, if found then return true
-    for (j <- graph(i) if color(j) != 'R') return true
+    graph.get(i) match {
+      case None      => { }
+      case Some(set) => for (j <- set if color(j) == 'R') return true
+    }
 
     // set it to red
     color(i) = 'R'
@@ -38,9 +57,4 @@ class PrecedenceGraph(n: Int) {
   
 } // PrecedenceGraph
 
-object PGTest extends App {
-  val pg = new PrecedenceGraph(2)
-  pg.addEdge(1, 0)
-  pg.addEdge(0, 1)
-  println(pg.hasCycle)
-} // PGTest
+
