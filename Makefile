@@ -7,21 +7,11 @@ flags = -deprecation -unchecked -cp $(classpath) -sourcepath $(src) -d $(dest)
 srcs = $(shell find ./$(src) -name *.scala)
 objs = $(patsubst %.scala,%,$(srcs))
 
-all: classes $(objs) doc
+all: classes
+	scalac $(flags) $(srcs)
 
 classes:
 	mkdir -p $(dest)
-
-$(objs): %: %.scala
-	scalac $(flags) $< 
-
-src/ads/message/Message: src/ads/Op
-
-src/ads/Transaction: src/ads/Op src/ads/message/Message
-
-src/ads/TransactionManager: src/ads/concurrency/ConcurrencyControl src/ads/Op src/ads/Transaction src/ads/message/Message
-
-src/ads/concurrency/SGC: src/ads/util/PrecedenceGraph
 
 doc: 
 	mkdir -p $(doc)

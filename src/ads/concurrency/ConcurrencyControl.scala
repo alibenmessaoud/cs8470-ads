@@ -18,7 +18,7 @@ trait ConcurrencyControl {
    * @param op A triple of {TransactionID, Operation Type, Object ID}
    * @return True if operation is schedulable, False otherwise	
    */
-  def check(op : (Transaction, Op, Int)) : Boolean = true
+  def check(t: Transaction, opType: Op, oid: Int): Boolean = true
 
 } // ConcurrencyControl
 
