@@ -1,7 +1,10 @@
 package ads
 package concurrency
 
-import Op._
+import collection.mutable.{ListBuffer, ListMap}
+
+import ads.util.PrecedenceGraph
+import ads.Op._
 
 /**
  * Implementation of Serialization Graph Checking
@@ -12,21 +15,49 @@ import Op._
 trait SGC extends ConcurrencyControl 
 {
 
-  override def check(op : (Int, Op, Int)) : Boolean = {
-    //do forever
-    //read incoming operation from buffer
+  /**
+   * Recent operations that have been checked.
+   */
+  val recent = ListMap.empty[Int, ListMap[Int, Op]]
 
-    //lookup object in Object HashMap
+  val pg = new PrecedenceGraph()
 
-    //foreach operation in List
-    
-    //if it conflicts add edge to PrecedenceGraph
+  override def check(op : (Transaction, Op, Int)) : Boolean = {
 
-    //check PrecedenceGraph for cycles
+    // get the transaction id, operation type and object identifier from the op
+    // tuple that's passed into the function
+    val (t, opType, oid) = op
+    val tid = t.tid
 
-    //if cycle, rollback(op_i)
+    recent(oid) match {
 
-    //else execute(op_i)
+      case None       => recent += oid -> ListMap((tid, otype))
+
+      case Some(list) => {
+
+	// check for conflicts, adding to the precedence graph as needed
+	for (item <- list) {
+	  val (tid2, opType2) = item
+	  if (tid != tid2 && (opType == Op.Write || oyType2 == Op.Write)) pg.addEdge(tid2, tid)
+	} // for
+
+	// if the graph has a cycle then we need to do some house cleaning and
+	// return false, otherwise we add the operation to the recent list and
+	// return true
+	if (pg.hasCycle) {
+
+	  pg.removeVertex(tid)
+	  t.rollback
+	  return false
+
+	} // if
+
+	list.add( (tid, opType) ) 
+
+      } // case
+
+    } // match
+
     true
   } // check
 

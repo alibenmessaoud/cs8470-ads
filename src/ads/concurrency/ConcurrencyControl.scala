@@ -1,4 +1,5 @@
 package ads
+package concurrency
 
 import Op._
 
@@ -17,7 +18,7 @@ trait ConcurrencyControl {
    * @param op A triple of {TransactionID, Operation Type, Object ID}
    * @return True if operation is schedulable, False otherwise	
    */
-  def check(op : (Int, Op, Int)) : Boolean = true
+  def check(op : (Transaction, Op, Int)) : Boolean = true
 
 } // ConcurrencyControl
 

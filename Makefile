@@ -15,11 +15,13 @@ classes:
 $(objs): %: %.scala
 	scalac $(flags) $< 
 
-src/ads/Message: src/ads/Op
+src/ads/message/Message: src/ads/Op
 
-src/ads/Transaction: src/ads/Op src/ads/Message
+src/ads/Transaction: src/ads/Op src/ads/message/Message
 
-src/ads/TransactionManager: src/ads/Op src/ads/Transaction src/ads/ConcurrencyControl src/ads/Message
+src/ads/TransactionManager: src/ads/concurrency/ConcurrencyControl src/ads/Op src/ads/Transaction src/ads/message/Message
+
+src/ads/concurrency/SGC: src/ads/util/PrecedenceGraph
 
 doc: 
 	mkdir -p $(doc)

@@ -5,7 +5,8 @@ import actors.Actor._
 import collection.mutable.ListBuffer
 import collection.mutable.ListBuffer
 
-import OpMessages._
+import concurrency._
+import message._
 import Op._
 
 /**
