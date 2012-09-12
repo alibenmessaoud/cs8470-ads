@@ -45,7 +45,7 @@ the traits in a "concurrency" package):
 
 ```scala
 import concurrency._
-val tm = new TransactionManager() with ConflictSerializability
+val tm = new TransactionManager() with SGC
 ```
 
 The TransactionManager class needs to provide the following public operations:

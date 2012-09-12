@@ -3,23 +3,22 @@ dest = classes
 doc = doc
 classpath = $(dest)
 flags = -deprecation -unchecked -cp $(classpath) -sourcepath $(src) -d $(dest)
+test_cases = ads.test.TransactionTest
 
 srcs = $(shell find ./$(src) -name *.scala)
 objs = $(patsubst %.scala,%,$(srcs))
 
-all: classes $(objs) doc
+all: test
+
+build: classes
+	scalac $(flags) $(srcs)
+
+test: build
+	scalac -classpath ./lib/scalatest_2.9.0-1.8.jar:./classes -d ./test/ads ./test/ads/*.scala
+	scala -classpath ./lib/scalatest_2.9.0-1.8.jar:./classes:./test/ads org.scalatest.run $(test_cases)
 
 classes:
 	mkdir -p $(dest)
-
-$(objs): %: %.scala
-	scalac $(flags) $< 
-
-src/ads/Message: src/ads/Op
-
-src/ads/Transaction: src/ads/Op src/ads/Message
-
-src/ads/TransactionManager: src/ads/Op src/ads/Transaction src/ads/ConcurrencyControl src/ads/Message
 
 doc: 
 	mkdir -p $(doc)
@@ -28,3 +27,4 @@ doc:
 clean:
 	rm -rf $(doc)
 	rm -rf $(dest)
+	rm ./tests/*.class
