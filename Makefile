@@ -3,7 +3,7 @@ dest = classes
 doc = doc
 classpath = $(dest)
 flags = -deprecation -unchecked -cp $(classpath) -sourcepath $(src) -d $(dest)
-test_cases = ads.test.TransactionTest
+test_cases = ads.test.TransactionTest ads.test.PGTest ads.test.LockTableTest
 
 srcs = $(shell find ./$(src) -name *.scala)
 objs = $(patsubst %.scala,%,$(srcs))
