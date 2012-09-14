@@ -3,7 +3,7 @@ dest = classes
 doc = doc
 classpath = $(dest)
 flags = -deprecation -unchecked -cp $(classpath) -sourcepath $(src) -d $(dest)
-test_cases = ads.test.TransactionTest ads.test.PGTest ads.test.LockTableTest
+test_cases = ads.test.TransactionTest ads.test.TMTest ads.test.PGTest #ads.test.LockTableTest
 
 srcs = $(shell find ./$(src) -name *.scala)
 objs = $(patsubst %.scala,%,$(srcs))
@@ -14,7 +14,7 @@ build: classes
 	scalac $(flags) $(srcs)
 
 test: build
-	scalac -classpath ./lib/scalatest_2.9.0-1.8.jar:./classes -d ./test/ads ./test/ads/*.scala
+	scalac -classpath ./lib/scalatest_2.9.0-1.8.jar:./classes -d ./classes ./test/ads/*.scala
 	scala -classpath ./lib/scalatest_2.9.0-1.8.jar:./classes:./test/ads org.scalatest.run $(test_cases)
 
 classes:
@@ -27,4 +27,4 @@ doc:
 clean:
 	rm -rf $(doc)
 	rm -rf $(dest)
-	rm ./tests/*.class
+
