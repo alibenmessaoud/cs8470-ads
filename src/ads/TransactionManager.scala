@@ -47,9 +47,12 @@ class TransactionManager() extends Actor with ConcurrencyControl with Traceable[
       case wMsg: WriteMessage => {
         trace("Message recieved: %s".format(wMsg))
         if (check(wMsg.t, Op.Write, wMsg.oid)) {
-          // TODO
-        } 
-      }
+	  
+	  // send back an okay response
+          wMsg.t ! OkayMessage()
+	  
+        } // if
+      } // case
 
       case cMsg: CommitMessage => {
         trace("Message recieved: %s".format(cMsg))

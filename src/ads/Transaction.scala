@@ -1,12 +1,13 @@
 package ads
 
-import actors.Actor
-import actors.Actor._
-import collection.mutable.ListBuffer
+import scala.actors.Actor
+import scala.actors.Actor._
+import scala.collection.mutable.ListBuffer
+import scala.util.Random
 
-import message._
-import util._
-import Op._
+import ads.message._
+import ads.util._
+import ads.Op._
 
 /**
  * Companion object for Transaction
@@ -15,6 +16,8 @@ import Op._
  * @author Terrance Medina
  */
 object Transaction {
+
+  private val rand = new Random()
 
   private var x: Int = (System.currentTimeMillis / 1000).toInt
 
@@ -29,6 +32,10 @@ object Transaction {
     return ret
   } // getNextTID
 
+  def getRandomInt (n: Int): Int = synchronized {
+    rand.nextInt(n)
+  } // getRandomInt
+
 } // Transaction
 
 /**
@@ -42,7 +49,9 @@ object Transaction {
 class Transaction(m: TransactionManager) extends Actor with Traceable[Transaction] {
 
   TRACE = true
-  
+
+  var timestamp = System.currentTimeMillis
+    
   private var randOps = false
   private var randNum = 0
   
@@ -85,12 +94,21 @@ class Transaction(m: TransactionManager) extends Actor with Traceable[Transactio
    * @return the value of the object.
    */
   def read(oid: Int): Any = {
+
     trace("T%d read(%d)".format(tid, oid))
-    m ! ReadMessage(this, oid)
     var ret: Any = null
-    react {
-      case value: Any => ret = value
-    }
+
+    while (ret == null) {
+      m ! ReadMessage(this, oid)
+      react {
+	case msg: PostponeReadMessage => {
+	  // wait for 1 sec
+	  Thread sleep 1000
+	}
+	case value: Any => ret = value
+      } // react
+    } // while
+
     ret
   } // read
 
@@ -102,7 +120,19 @@ class Transaction(m: TransactionManager) extends Actor with Traceable[Transactio
    */
   def write(oid: Int, value: Any) = {
     trace("T%d write(%d, %s)".format(tid, oid, value))
-    m ! WriteMessage(this, oid, value) 
+    var postpone = true
+    while (postpone) {
+      m ! WriteMessage(this, oid, value) 
+      react {
+	case postpone: PostponeWriteMessage => {
+	  // wait for 1 sec
+	  Thread sleep 1000
+	} // case
+	case okay: OkayMessage => {
+	  postpone = false
+	} // case
+      } // react
+    } // while
   } // write
 
   /**
@@ -120,10 +150,14 @@ class Transaction(m: TransactionManager) extends Actor with Traceable[Transactio
   def rollback() = {
 
     trace(Level.Warning, "T%d rollback()".format(tid))
+
     this.tid = Transaction.getNextTID
+    this.timestamp = System.currentTimeMillis
 
-    // TODO make it wait some random amount of time
+    // make the transaction wait for a random amount of time
+    Thread sleep Transaction.getRandomInt(1000)
 
+    // restart the transaction
     restart
 
   } // rollback

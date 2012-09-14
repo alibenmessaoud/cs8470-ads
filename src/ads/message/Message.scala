@@ -12,6 +12,15 @@ import Op._
 abstract class Message () { }
 
 /**
+ * A general purpose message indicating an okay.
+ *
+ * @author Michael E. Cotterell
+ * @author Terrance Medina
+
+ */
+case class OkayMessage () extends Message ()
+
+/**
  * A message idicating that a Transaction has begun.
  *
  * @author Michael E. Cotterell
@@ -52,3 +61,22 @@ case class WriteMessage (t: Transaction, oid: Int, value: Any) extends Message (
  * @param t A Transaction object.
  */
 case class CommitMessage (t: Transaction) extends Message ()
+
+/**
+ * A message indicating that a Transaction should postone a read for some amount
+ * of time.
+ *
+ * @author Michael E. Cotterell
+ * @author Terrance Medina
+ */
+case class PostponeReadMessage () extends Message ()
+
+/**
+ * A message indicating that a Transaction should postone a write for some amount
+ * of time.
+ *
+ * @author Michael E. Cotterell
+ * @author Terrance Medina
+ */
+case class PostponeWriteMessage () extends Message ()
+
