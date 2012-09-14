@@ -19,7 +19,8 @@ object Transaction {
 
   private val rand = new Random()
 
-  private var x: Int = (System.currentTimeMillis / 1000).toInt
+//  private var x: Int = (System.currentTimeMillis / 1000).toInt
+  private var x: Int = 0
 
   /** 
    * Returns the next available Transaction identifier.
@@ -98,16 +99,21 @@ class Transaction(m: TransactionManager) extends Actor with Traceable[Transactio
     trace("T%d read(%d)".format(tid, oid))
     var ret: Any = null
 
-    while (ret == null) {
-      m ! ReadMessage(this, oid)
-      react {
-	case msg: PostponeReadMessage => {
-	  // wait for 1 sec
-	  Thread sleep 1000
-	}
-	case value: Any => ret = value
-      } // react
-    } // while
+    trace("T%d trying to request read".format(tid));
+    m ! ReadMessage(this, oid)
+
+    self.receive {
+      case msg: PostponeReadMessage => {
+	// wait for 1 sec
+	// Thread sleep 1000
+//	trace("T%d was instructed to postpone read request".format(tid))
+	ret = this.read(oid)
+      }
+      case value: String => {
+//	trace("T%d received value from read request".format(tid))
+	ret = value
+      }
+    } // react
 
     ret
   } // read
@@ -118,22 +124,22 @@ class Transaction(m: TransactionManager) extends Actor with Traceable[Transactio
    * @param oid The object identifier.
    * @param value The value to write into the database.
    */
-  def write(oid: Int, value: Any) = {
+  def write(oid: Int, value: Any): Unit = {
     trace("T%d write(%d, %s)".format(tid, oid, value))
-    var postpone = true
-    while (postpone) {
-      m ! WriteMessage(this, oid, value) 
-      react {
-	case postpone: PostponeWriteMessage => {
-	  // wait for 1 sec
-	  Thread sleep 1000
-	} // case
-	case okay: OkayMessage => {
-	  postpone = false
-	} // case
-      } // react
-    } // while
+    
+    m ! WriteMessage(this, oid, value) 
+    
+    self.receive {
+      case postpone: PostponeWriteMessage => {
+	// wait for 1 sec
+	//Thread sleep 1000
+	this.write(oid, value)
+      } // case
+      case _ => { }
+    } // react
+
   } // write
+
 
   /**
    * Commit this transaction.
@@ -157,8 +163,8 @@ class Transaction(m: TransactionManager) extends Actor with Traceable[Transactio
     // make the transaction wait for a random amount of time
     Thread sleep Transaction.getRandomInt(1000)
 
-    // restart the transaction
-    restart
+    body
+    exit
 
   } // rollback
 

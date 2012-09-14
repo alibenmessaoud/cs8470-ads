@@ -29,7 +29,7 @@ class TransactionManager() extends Actor with ConcurrencyControl with Traceable[
   private val opBuffer = new ListBuffer[(Transaction, Op, Int)]()
 
   def act() = loop {
-    react {
+    receive {
 
       case bMsg: BeginMessage => {
         trace("Message recieved: %s".format(bMsg))
@@ -37,7 +37,7 @@ class TransactionManager() extends Actor with ConcurrencyControl with Traceable[
 
       case rMsg: ReadMessage => {
         trace("Message recieved: %s".format(rMsg))
-        rMsg.t ! ""
+        rMsg.t ! "hello"
         if (check(rMsg.t, Op.Read, rMsg.oid)) {
           // TODO
         } // if
