@@ -7,17 +7,8 @@ import collection.mutable.ListBuffer
 
 import concurrency._
 import message._
+import util._
 import Op._
-
-/**
- * Companion object for TransactionManager
- *
- * @author Michael E. Cotterell
- * @author Terrance Medina
- */
-object TransactionManager {
-  val TRACE = true
-} // TransactionManager
 
 /**
  * Handles operation requests from the various Transaction threads.
@@ -25,8 +16,10 @@ object TransactionManager {
  * @author Michael E. Cotterell
  * @author Terrance Medina
  */
-class TransactionManager() extends Actor with ConcurrencyControl {
+class TransactionManager() extends Actor with ConcurrencyControl with Traceable[TransactionManager] {
 
+  TRACE = true
+  
   // start when created
   this.start
 
@@ -34,10 +27,6 @@ class TransactionManager() extends Actor with ConcurrencyControl {
    * 	Incoming operation buffer.
    */
   private val opBuffer = new ListBuffer[(Transaction, Op, Int)]()
-
-  private def trace(msg: String) = if (TransactionManager.TRACE) {
-    println("[TransactionManager] %d - %s".format(System.currentTimeMillis, msg))
-  } // trace
 
   def act() = loop {
     react {
@@ -59,7 +48,7 @@ class TransactionManager() extends Actor with ConcurrencyControl {
         trace("Message recieved: %s".format(wMsg))
         if (check(wMsg.t, Op.Write, wMsg.oid)) {
           // TODO
-        } // if
+        } 
       }
 
       case cMsg: CommitMessage => {

@@ -5,6 +5,7 @@ import actors.Actor._
 import collection.mutable.ListBuffer
 
 import message._
+import util._
 import Op._
 
 /**
@@ -38,8 +39,10 @@ object Transaction {
  * @param m The transaction manager object.
  * @param body The set of statements to be executed by this transaction.
  */
-class Transaction(m: TransactionManager) extends Actor {
+class Transaction(m: TransactionManager) extends Actor with Traceable[Transaction] {
 
+  TRACE = true
+  
   private var randOps = false
   private var randNum = 0
   
@@ -53,7 +56,7 @@ class Transaction(m: TransactionManager) extends Actor {
     randOps = true
     randNum = rand
   } // this
-
+  
   /**
    * The body of the transaction
    */
@@ -61,6 +64,7 @@ class Transaction(m: TransactionManager) extends Actor {
 
   // implementation of act function for actor
   def act() {
+    trace("T%d act()".format(tid))
     begin
     body
     commit
@@ -69,7 +73,10 @@ class Transaction(m: TransactionManager) extends Actor {
   /**
    * Begin the transaction.
    */
-  def begin() = m ! BeginMessage(this)
+  def begin() = {
+    trace("T%d begin()".format(tid))
+    m ! BeginMessage(this)
+  } // begin
 
   /**
    * Read a value into the transaction from the database.
@@ -78,13 +85,14 @@ class Transaction(m: TransactionManager) extends Actor {
    * @return the value of the object.
    */
   def read(oid: Int): Any = {
+    trace("T%d read(%d)".format(tid, oid))
     m ! ReadMessage(this, oid)
     var ret: Any = null
     react {
       case value: Any => ret = value
     }
     ret
-  }
+  } // read
 
   /**
    * Write a value into the database.
@@ -92,12 +100,16 @@ class Transaction(m: TransactionManager) extends Actor {
    * @param oid The object identifier.
    * @param value The value to write into the database.
    */
-  def write(oid: Int, value: Any) = m ! WriteMessage(this, oid, value)
+  def write(oid: Int, value: Any) = {
+    trace("T%d write(%d, %s)".format(tid, oid, value))
+    m ! WriteMessage(this, oid, value) 
+  } // write
 
   /**
    * Commit this transaction.
    */
   def commit() = {
+    trace("T%d commit()".format(tid))
     m ! CommitMessage(this)
     exit
   } // commit
@@ -107,6 +119,7 @@ class Transaction(m: TransactionManager) extends Actor {
    */
   def rollback() = {
 
+    trace(Level.Warning, "T%d rollback()".format(tid))
     this.tid = Transaction.getNextTID
 
     // TODO make it wait some random amount of time
