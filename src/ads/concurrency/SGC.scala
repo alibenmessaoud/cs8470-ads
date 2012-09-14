@@ -3,6 +3,7 @@ package concurrency
 
 import collection.mutable.{ ListBuffer, ListMap }
 
+import ads.Transaction
 import ads.util.PrecedenceGraph
 import ads.Op._
 
@@ -86,7 +87,7 @@ trait SGC extends ConcurrencyControl {
 
     // remove instances of tid from the recent transaction list
     for (i <- recent.values) {
-      i = i.filter( e => e._1 != tid )
+      i --= i.filter( e => e._1 == tid )
     } // for
 
     // remove tid from graph

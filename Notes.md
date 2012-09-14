@@ -122,10 +122,12 @@ another transaction already has operations in the TransactionManager, then the
 transaction needs to wait for some random amount of time and assigned a new
 timestamp.
 
-### ConflictSerializability (CSR)
 
-ConflictSerializability will be based on conflict equivalence. We know that two
-operations are conflicting if they satisfy the following three conditions:
+
+### SerializableGraphChecking (SGC)
+
+SerializableGraphChecking will be based on conflict equivalence. We know that 
+two operations are conflicting if they satisfy the following three conditions:
 
 1. In different transactions
 2. Operating on the same object
