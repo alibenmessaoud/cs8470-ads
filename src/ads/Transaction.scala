@@ -15,9 +15,14 @@ import Op._
  */
 object Transaction {
 
-  private var x: Int = 0
+  private var x: Int = (System.currentTimeMillis / 1000).toInt
 
-  def getNextTID: Int  = synchronized { 
+  /** 
+   * Returns the next available Transaction identifier.
+   * 
+   * @return The next available TID
+   */
+  def getNextTID: Int = synchronized {
     val ret = x
     x += 1
     return ret
@@ -33,31 +38,38 @@ object Transaction {
  * @param m The transaction manager object.
  * @param body The set of statements to be executed by this transaction.
  */
-class Transaction (m: TransactionManager) extends Actor {
+class Transaction(m: TransactionManager) extends Actor {
 
-	var randOps = false
-	var randNum = 0
+  private var randOps = false
+  private var randNum = 0
+  
   /**
    * The transaction identifier.
    */
   var tid = Transaction.getNextTID
 
-  def this (m: TransactionManager, rand: Int) {
+  def this(m: TransactionManager, rand: Int) {
     this(m)
     randOps = true
     randNum = rand
-		
   } // this
 
-	def body() {}
-  def act () { } // act
+  /**
+   * The body of the transaction
+   */
+  def body() {}
 
-
+  // implementation of act function for actor
+  def act() {
+    begin
+    body
+    commit
+  } // act
 
   /**
    * Begin the transaction.
    */
-  def begin () = m ! BeginMessage(this)
+  def begin() = m ! BeginMessage(this)
 
   /**
    * Read a value into the transaction from the database.
@@ -65,41 +77,41 @@ class Transaction (m: TransactionManager) extends Actor {
    * @param oid The object identifier.
    * @return the value of the object.
    */
-  def read (oid: Int): Any = {
+  def read(oid: Int): Any = {
     m ! ReadMessage(this, oid)
     var ret: Any = null
-    receive {
+    react {
       case value: Any => ret = value
     }
     ret
   }
-    
+
   /**
    * Write a value into the database.
    *
    * @param oid The object identifier.
    * @param value The value to write into the database.
    */
-  def write (oid: Int, value: Any) = m ! WriteMessage(this, oid, value)
+  def write(oid: Int, value: Any) = m ! WriteMessage(this, oid, value)
 
   /**
    * Commit this transaction.
    */
-  def commit () = {
+  def commit() = {
     m ! CommitMessage(this)
-    exit()
+    exit
   } // commit
 
   /**
    * Rollback this transaction.
    */
-  def rollback () = {
+  def rollback() = {
 
     this.tid = Transaction.getNextTID
 
     // TODO make it wait some random amount of time
 
-    restart()
+    restart
 
   } // rollback
 
@@ -107,26 +119,3 @@ class Transaction (m: TransactionManager) extends Actor {
 
 } // Transaction class
 
-object TxnTest extends App {
-
-  import java.util.Random
-
-  val rand = new Random()
-
-  val tm = new TransactionManager
-
-  val txns = for (i <- 1 to 10) yield new Transaction(tm) {
-    override def body() {
-      begin()
-      val x = read(7)
-      write(7, 5)
-      commit()
-    }
-  }
-
-  txns.par foreach (t => {
-    //Thread.sleep(rand.nextInt(500))
-    t.start
-  })
-
-}

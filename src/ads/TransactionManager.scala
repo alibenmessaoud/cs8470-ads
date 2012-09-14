@@ -25,47 +25,49 @@ object TransactionManager {
  * @author Michael E. Cotterell
  * @author Terrance Medina
  */
-class TransactionManager () extends Actor with ConcurrencyControl {
+class TransactionManager() extends Actor with ConcurrencyControl {
 
   // start when created
   this.start
 
   /**
-   *	Incoming operation buffer.
+   * 	Incoming operation buffer.
    */
   private val opBuffer = new ListBuffer[(Transaction, Op, Int)]()
 
+  private def trace(msg: String) = if (TransactionManager.TRACE) {
+    println("[TransactionManager] %d - %s".format(System.currentTimeMillis, msg))
+  } // trace
 
-  def act () = loop {
-    receive {
+  def act() = loop {
+    react {
 
       case bMsg: BeginMessage => {
-	if (TransactionManager.TRACE) println("Message recieved: %s".format(bMsg))
+        trace("Message recieved: %s".format(bMsg))
       }
 
       case rMsg: ReadMessage => {
-	if (TransactionManager.TRACE) println("Message recieved: %s".format(rMsg))
-	rMsg.t ! ""
-	if (check(rMsg.t, Op.Read, rMsg.oid)) {
-	  // TODO
-	} // if
+        trace("Message recieved: %s".format(rMsg))
+        rMsg.t ! ""
+        if (check(rMsg.t, Op.Read, rMsg.oid)) {
+          // TODO
+        } // if
 
       }
 
       case wMsg: WriteMessage => {
-	if (TransactionManager.TRACE) println("Message recieved: %s".format(wMsg))
-	if (check(wMsg.t, Op.Write, wMsg.oid)) {
-	  // TODO
-	} // if
+        trace("Message recieved: %s".format(wMsg))
+        if (check(wMsg.t, Op.Write, wMsg.oid)) {
+          // TODO
+        } // if
       }
 
       case cMsg: CommitMessage => {
-	if (TransactionManager.TRACE) println("Message recieved: %s".format(cMsg))
+        trace("Message recieved: %s".format(cMsg))
       }
-      
+
     } // recieve
   } // act
-
 
 } // TransactionManager
 
