@@ -7,12 +7,23 @@ import ads.util.PrecedenceGraph
 import ads.Op._
 
 /**
+ * Companion object for SGC trait
+ */
+object SGC {
+
+  val CLEANUP_COUNT = 10
+
+} // SGC
+
+/**
  * Implementation of Serialization Graph Checking
  *
  * @author Michael E. Coterell
  * @author Terrance Medina
  */
 trait SGC extends ConcurrencyControl {
+
+  private var cleanup = 0
 
   /**
    * Recent operations that have been checked.
@@ -51,7 +62,13 @@ trait SGC extends ConcurrencyControl {
 
         } // if
 
-        list += ((tid, opType))
+	// If the operation is a commit and it's made it this far then we don't
+	// even need to add it to the list. Instead, we'll do some cleanup.
+	if (opType == Op.Commit) {
+	  cleanup(tid)
+	} else {
+          list += ((tid, opType))
+	} // if
 
       } // case
 
@@ -59,5 +76,25 @@ trait SGC extends ConcurrencyControl {
 
     true
   } // check
+
+  /**
+   * Perform rudamentary garbage collection
+   *
+   * @param tid The transaction identifier to cleanup
+   */
+  private def cleanup (tid: Int) {
+
+    // remove instances of tid from the recent transaction list
+    for (i <- recent.values) {
+      i = i.filter( e => e._1 != tid )
+    } // for
+
+    // remove tid from graph
+    pg.removeVertex(tid)
+
+    // reset the counter
+    cleanup = 0
+
+  } // cleanup
 
 } // SGC
