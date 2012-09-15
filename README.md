@@ -5,5 +5,11 @@
 A distribution of sbt is included. To compile the project, simply make sure
 you're in the project directory and type the following command:
 
-    sbt compile
+    ./sbt compile
+
+To run the tests, use the following command:
+
+    ./sbt test
+
+
 
