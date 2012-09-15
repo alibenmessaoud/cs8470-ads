@@ -233,11 +233,11 @@ class TransactionImpl (tm: ActorRef) extends Transaction {
     trace.warning("T%d going to sleep for a while".format(tid))
     Thread sleep Transaction.getRandomInt(1000)
 
-    // reexecute the body
+    // TODO reexecute the body
     // execute   
 
     // kill the actor
-    // TypedActor.context.stop(TypedActor.context.self)
+    // TODO TypedActor.context.stop(TypedActor.context.self)
 
   } // rollback
 
@@ -261,7 +261,7 @@ class TransactionImpl (tm: ActorRef) extends Transaction {
 
 object TypedTransactionTest extends App {
 
-  import ads.concurrency.SGC
+  import ads.concurrency.{ SGC, TSO }
 
   // Setup the TransactionManager and its ActorSystem
   val tmsys  = ActorSystem("TransactionManager")

@@ -10,7 +10,8 @@ import akka.util.duration._
 
 import ads.{Op, Transaction}
 import ads.util.PrecedenceGraph
-import ads.message.TIDRequest
+import ads.message.CheckResponse
+import ads.message.CheckResponses._
 import ads.Op._
 
 /**
@@ -42,7 +43,9 @@ trait SGC extends ConcurrencyControl {
    */
   val pg = new PrecedenceGraph()
 
-  override def check(t: Transaction, opType: Op, oid: Int): Boolean = {
+  override def check(t: Transaction, opType: Op, oid: Int): CheckResponse = {
+
+    println("checking %s request for %s on %d".format(t, opType, oid))
 
     val tid = t.getTID.get
 
@@ -65,7 +68,7 @@ trait SGC extends ConcurrencyControl {
 
           pg.removeVertex(tid)
           t.rollback
-          return false
+          return Rollbacked
 
         } // if
 
@@ -81,7 +84,7 @@ trait SGC extends ConcurrencyControl {
 
     } // match
 
-    true
+    Granted
   } // check
 
   /**

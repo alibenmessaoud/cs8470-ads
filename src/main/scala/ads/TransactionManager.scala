@@ -8,7 +8,8 @@ import akka.actor.Props
 import akka.event.Logging
 
 import ads.concurrency.ConcurrencyControl
-import ads.message._
+import ads.message.{ BeginMessage, CheckResponse, CommitMessage, ReadMessage, ReadResponse, WriteMessage, WriteResponse }
+import ads.message.CheckResponses._
 import ads.util._
 import ads.Op._
 
@@ -39,35 +40,64 @@ class TransactionManager() extends Actor with ConcurrencyControl {
     case rMsg: ReadMessage => {
       trace.info("Message recieved: %s".format(rMsg))
 
-      if (check(rMsg.t, Op.Read, rMsg.oid)) {
-        trace.info("Request Granted: %s".format(rMsg))
-      } else {
-        trace.warning("Request Denied: %s".format(rMsg))
-      } // if
+      check(rMsg.t, Op.Read, rMsg.oid) match {
+	case Granted    => {
+	  trace.info("read request granted: %s".format(rMsg))
+	  sender ! ReadResponse("hello", false, false)
+	} // case
+	case Denied     => {
+	  trace.info("read request denied: %s".format(rMsg))
+	  sender ! ReadResponse("hello", false, true)
+	} // case
+	case Postponed  => {
+	  trace.info("read request postponed: %s".format(rMsg))
+	  // sender ! ReadResponse("hello", true)
+	} // case
+	case Rollbacked => {
+	  trace.info("read request resulted in rollback: %s".format(rMsg))
+	  // sender ! ReadResponse("hello", false)
+	} // case
+	case _ => {
+	  trace.info("read request resulted in unknown message: %s".format(rMsg))
+	} // case
+      } // match
 
-      sender ! "hello"
+      // sender ! "hello"
+
     } // case
 
     case wMsg: WriteMessage => {
+
       trace.info("Message recieved: %s".format(wMsg))
-      if (check(wMsg.t, Op.Write, wMsg.oid)) {
 
-	trace.info("Request Granted: %s".format(wMsg))	
+      check(wMsg.t, Op.Write, wMsg.oid) match {
+	case Granted    => {
+	  trace.info("write request granted: %s".format(wMsg))
+	  sender ! WriteResponse(false, false)
+	} // case
+	case Denied     => {
+	  trace.info("write request denied: %s".format(wMsg))
+	  sender ! WriteResponse(false, true)
+	} // case
+	case Postponed  => {
+	  trace.info("write request postponed: %s".format(wMsg))
+	  sender ! WriteResponse(true, false)
+	} // case
+	case Rollbacked => {
+	  trace.info("write request resulted in rollback: %s".format(wMsg))
+	  sender ! WriteResponse(false, false)
+	} // case
+	case Thomas     => {
+	  trace.info("write request invoked Thomas Write Rule?: %s".format(wMsg))
+	  sender ! WriteResponse(false, false)
+	} // case
+      } // match
 
-	// send back an okay response
-        sender ! WriteResponse(false)
-
-      } else {
-
-	sender ! WriteResponse(true)
-	trace.warning("Request Denied: %s".format(wMsg))
-
-      }// if
     } // case
 
     case cMsg: CommitMessage => {
       trace.info("Message recieved: %s".format(cMsg))
-    }
+    } // case
 
   } // recieve
 

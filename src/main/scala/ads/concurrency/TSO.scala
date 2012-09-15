@@ -8,6 +8,7 @@ import akka.pattern.ask
 import ads.{Op, Transaction}
 import ads.Op._
 import ads.message._
+import ads.message.CheckResponses._
 
 /**
  * Implementation of Time Stamp Ordering
@@ -28,14 +29,14 @@ trait TSO extends ConcurrencyControl {
    * @param c A flag that indicates whether the transaction that last wrote to
    *          the object has committed.
    */
-  case class TSOTimestamp(var r: Long, var w: Long, var c: Boolean)
+  case class TSOTimestamp (var r: Long, var w: Long, var c: Boolean)
 
   /**
    * Timestamp Map
    */
   val map = ListMap.empty[Int, TSOTimestamp]
 
-  override def check(t: Transaction, opType: Op, oid: Int): Boolean = {
+  override def check(t: Transaction, opType: Op, oid: Int): CheckResponse = {
 
     val timestamp = t.getTimestamp.get
 
@@ -43,7 +44,7 @@ trait TSO extends ConcurrencyControl {
 
       case None => {
 	map += oid -> TSOTimestamp(0, System.currentTimeMillis, true)
-	return true
+	return Granted
       } // case
 
       case Some(ts) => {
@@ -55,7 +56,7 @@ trait TSO extends ConcurrencyControl {
 	  // transaction
 
 	  t.rollback
-	  return false
+	  return Rollbacked
 
 	} else {
 
@@ -69,7 +70,7 @@ trait TSO extends ConcurrencyControl {
 	    // request is granted.
 
 	    if (timestamp > ts.r) ts.r = timestamp
-	    return true
+	    return Granted
 
 	  } else {
 
@@ -78,7 +79,7 @@ trait TSO extends ConcurrencyControl {
 	    // order to avoid a dirty read
 
 	    // TODO t ! PostponeReadMessage()
-	    return false
+	    return Postponed
 
 	  } // if
 
@@ -92,7 +93,7 @@ trait TSO extends ConcurrencyControl {
 
       case None => {
 	map += oid -> TSOTimestamp(System.currentTimeMillis, 0, true)
-	return true;
+	return Granted
       } // case
 
       case Some(ts) => {
@@ -103,7 +104,7 @@ trait TSO extends ConcurrencyControl {
 	  // last read to the object then the transaction is rolledback
 
 	  t.rollback
-	  return false
+	  return Rollbacked
 
 	} else if (ts.r < timestamp && timestamp < ts.w) {
 
@@ -120,7 +121,7 @@ trait TSO extends ConcurrencyControl {
 	    // effectively do the same thing as granting the request without
 	    // actually performing the write.
 
-	    return false
+	    return Thomas
 
 	  } else {
 
@@ -128,7 +129,7 @@ trait TSO extends ConcurrencyControl {
 	    // then postpone the write
 
 	    // TODO t ! PostponeWriteMessage()
-	    return false
+	    return Postponed
 
 	  } // if
 
@@ -145,12 +146,12 @@ trait TSO extends ConcurrencyControl {
 	    ts.w = timestamp
 	    ts.c = false
 
-	    return true
+	    return Granted
 
 	  } else {
 
 	    // TODO t ! PostponeWriteMessage()
-	    return false
+	    return Postponed
 
 	  } // if
 
@@ -163,7 +164,7 @@ trait TSO extends ConcurrencyControl {
    // If the operation being requested by the transaction is not a read or a
    // write then we can go ahead and grant the request.
 
-   return true
+   return Granted
 
   } // check  
 
