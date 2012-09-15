@@ -55,7 +55,7 @@ trait TSO extends ConcurrencyControl {
 	  // most recent write on the object, then we need to rollback the
 	  // transaction
 
-	  t.rollback
+	  // t.rollback
 	  return Rollbacked
 
 	} else {
@@ -103,7 +103,7 @@ trait TSO extends ConcurrencyControl {
 	  // If the transaction's timestamp is less than the timestamp of the
 	  // last read to the object then the transaction is rolledback
 
-	  t.rollback
+	  // t.rollback
 	  return Rollbacked
 
 	} else if (ts.r < timestamp && timestamp < ts.w) {

@@ -171,6 +171,7 @@ class TransactionImpl (tm: ActorRef) extends Transaction {
 
     trace.info("T%d read(%d)".format(tid, oid))
 
+    var postpone = false
     var ret: ReadResponse = null
 
     do {
@@ -179,13 +180,19 @@ class TransactionImpl (tm: ActorRef) extends Transaction {
 	  val future = (tm ask ReadMessage(this, oid)).mapTo[ReadResponse]
 	  ret = Await.result(future, timeout.duration)
 
+	  if (ret.postpone) {
+	    trace.info("T%d read(%d) postponed".format(tid, oid))
+	    postpone = true
+	    // Thread sleep 5000
+	  } // if
+
 	  if (ret.rollback) this.rollback
 
 	} catch {
 	  case e: TimeoutException => trace.warning("T%d read(%d) timed out; trying again".format(tid, oid))
 	} // try
       } // while
-    } while (ret == true)
+    } while (postpone)
 
     trace.info("T%d read(%d) succesfull".format(tid, oid))
 
@@ -210,7 +217,7 @@ class TransactionImpl (tm: ActorRef) extends Transaction {
 	 
 	  if (ret.postpone) {
 	    trace.info("T%d write(%d, %s) postponed".format(tid, oid, value))
-	    postpone = false
+	    postpone = true
 	    // Thread sleep 5000
 	  } // if
 
@@ -272,7 +279,7 @@ class TransactionImpl (tm: ActorRef) extends Transaction {
 
 } // Transaction class
 
-object TypedTransactionTest extends App {
+object TypedTransactionTestSGC extends App {
 
   import ads.concurrency.{ SGC, TSO }
 
@@ -303,6 +310,41 @@ object TypedTransactionTest extends App {
 
   } // for
 
-} // TypedTransactionTest
+} // TypedTransactionTestTSO
+
+object TypedTransactionTestTSO extends App {
+
+  import ads.concurrency.{ SGC, TSO }
+
+  // Setup the TransactionManager and its ActorSystem
+  val tmsys  = ActorSystem("TransactionManager")
+  val tm     = tmsys.actorOf(Props{new TransactionManager() with TSO}, name = "tm")
+
+  // Setup the Transaction ActorSystem
+  val tsys = ActorSystem("Transaction")
+
+  for (i <- 1 to 10) {
+
+    val timpl = new TransactionImpl(tm) {
+      override def body () {
+	val a = read(7)
+	val c = read(9)
+	write(7, 1)
+	val b = read(8)
+	write(9, 32)
+      } // body
+    } // timpl
+
+    // The following line turns the TransactionImpl into a TypedActor
+    val t: Transaction = TypedActor(tsys).typedActorOf(TypedProps(classOf[Transaction], timpl), "t%d".format(i-1))
+
+    // execute the transaction
+    t.execute
+
+  } // for
+
+} // TypedTransactionTestTSO
+
+
 
 
