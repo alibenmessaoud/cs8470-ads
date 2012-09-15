@@ -36,10 +36,9 @@ trait TSO extends ConcurrencyControl {
    */
   val map = ListMap.empty[Int, TSOTimestamp]
 
-  override def check(t: ActorRef, opType: Op, oid: Int): Boolean = {
+  override def check(t: Transaction, opType: Op, oid: Int): Boolean = {
 
-    val future    = ask(t, TimestampRequest()).mapTo[Long]
-    val timestamp = Await.result(future, timeout.duration)
+    val timestamp = t.getTimestamp.get
 
     if (opType == Op.Read) map.get(oid) match {
 
@@ -56,7 +55,7 @@ trait TSO extends ConcurrencyControl {
 	  // most recent write on the object, then we need to rollback the
 	  // transaction
 
-	  t ! "rollback"
+	  t.rollback
 	  return false
 
 	} else {
@@ -79,7 +78,7 @@ trait TSO extends ConcurrencyControl {
 	    // then we need to send a postpone message to the transaction in
 	    // order to avoid a dirty read
 
-	    t ! PostponeReadMessage()
+	    // TODO t ! PostponeReadMessage()
 	    return false
 
 	  } // if
@@ -104,7 +103,7 @@ trait TSO extends ConcurrencyControl {
 	  // If the transaction's timestamp is less than the timestamp of the
 	  // last read to the object then the transaction is rolledback
 
-	  t ! "rollback"
+	  t.rollback
 	  return false
 
 	} else if (ts.r < timestamp && timestamp < ts.w) {
@@ -129,7 +128,7 @@ trait TSO extends ConcurrencyControl {
 	    // If the last transaction to write to the object has not committed,
 	    // then postpone the write
 
-	    t ! PostponeWriteMessage()
+	    // TODO t ! PostponeWriteMessage()
 	    return false
 
 	  } // if
@@ -151,7 +150,7 @@ trait TSO extends ConcurrencyControl {
 
 	  } else {
 
-	    t ! PostponeWriteMessage()
+	    // TODO t ! PostponeWriteMessage()
 	    return false
 
 	  } // if

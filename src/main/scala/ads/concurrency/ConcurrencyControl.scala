@@ -1,9 +1,9 @@
 package ads.concurrency
 
-import akka.actor.ActorRef
 import akka.util.Timeout
 import akka.util.duration._
 
+import ads.Transaction
 import ads.Op._
 
 /** 
@@ -26,7 +26,7 @@ trait ConcurrencyControl {
    * @param op A triple of {TransactionID, Operation Type, Object ID}
    * @return True if operation is schedulable, False otherwise	
    */
-  def check(t: ActorRef, opType: Op, oid: Int): Boolean = true
+  def check(t: Transaction, opType: Op, oid: Int): Boolean = true
 
 } // ConcurrencyControl
 

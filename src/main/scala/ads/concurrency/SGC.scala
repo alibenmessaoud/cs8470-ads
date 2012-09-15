@@ -42,10 +42,9 @@ trait SGC extends ConcurrencyControl {
    */
   val pg = new PrecedenceGraph()
 
-  override def check(t: ActorRef, opType: Op, oid: Int): Boolean = {
+  override def check(t: Transaction, opType: Op, oid: Int): Boolean = {
 
-    val future  = ask(t, TIDRequest()).mapTo[Int]
-    val tid     = Await.result(future, timeout.duration)
+    val tid = t.getTID.get
 
     recent.get(oid) match {
 
@@ -65,7 +64,7 @@ trait SGC extends ConcurrencyControl {
         if (pg.hasCycle) {
 
           pg.removeVertex(tid)
-          t ! "rollback"
+          t.rollback
           return false
 
         } // if

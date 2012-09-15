@@ -3,7 +3,7 @@ package ads
 import scala.collection.mutable.ListBuffer
 import scala.collection.mutable.ListBuffer
 
-import akka.actor.{Actor, ActorRef}
+import akka.actor.{Actor, ActorRef, ActorSystem}
 import akka.actor.Props
 import akka.event.Logging
 
@@ -38,7 +38,7 @@ class TransactionManager() extends Actor with ConcurrencyControl {
 
     case rMsg: ReadMessage => {
       trace.info("Message recieved: %s".format(rMsg))
-      rMsg.t ! "hello"
+      sender ! "hello"
       if (check(rMsg.t, Op.Read, rMsg.oid)) {
         // TODO
       } // if
@@ -50,7 +50,7 @@ class TransactionManager() extends Actor with ConcurrencyControl {
       if (check(wMsg.t, Op.Write, wMsg.oid)) {
 	
 	// send back an okay response
-        wMsg.t ! OkayMessage()
+        sender ! OkayMessage()
 	
       } // if
     } // case
