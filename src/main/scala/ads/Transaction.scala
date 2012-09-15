@@ -3,8 +3,7 @@ package ads
 import scala.collection.mutable.ListBuffer
 import scala.util.Random
 
-import akka.actor.{ Actor, ActorContext, ActorRef, ActorSystem, Props, 
-                    TypedActor, TypedProps }
+import akka.actor.{ Actor, ActorContext, ActorRef, ActorSystem, Props, TypedActor, TypedProps }
 import akka.dispatch.{ Promise, Future, Await }
 import akka.event.Logging
 import akka.pattern.ask
@@ -169,28 +168,34 @@ class TransactionImpl (tm: ActorRef) extends Transaction {
 
     trace.info("T%d read(%d)".format(tid, oid))
 
-    val future = ask(tm, ReadMessage(this, oid)).mapTo[Any]
-    val ret    = Await.result(future, timeout.duration)
+    var ret: Any = null
 
+    while (ret == null) {
+      try {
+	val future = ask(tm, ReadMessage(this, oid)).mapTo[Any]
+	ret = Await.result(future, timeout.duration)
+      } catch {
+	case e: java.util.concurrent.TimeoutException => trace.warning("T%d read(%d) timed out".format(tid, oid))
+      } // try
+    } // while
+
+    // return the value as an Option
     Some(ret)
+
   } // read
 
   // implementation of Transaction write()
-  def write (oid: Int, value: Any): Unit = {
-    
+  def write (oid: Int, value: Any): Unit = {    
     trace.info("T%d write(%d, %s)".format(tid, oid, value))
-    
     tm ! WriteMessage(this, oid, value) 
-    
     // TODO finish implementing
-
   } // write
 
   // implementation of Transaction commit()
   def commit () = {
     trace.info("T%d commit()".format(tid))
     tm ! CommitMessage(this)
-    exit
+    TypedActor.context.stop(TypedActor.context.self)
   } // commit
 
   // implementation of Transaction rollback()
@@ -220,17 +225,21 @@ class TransactionImpl (tm: ActorRef) extends Transaction {
     getTimestamp
   } // touch
 
-
+  // implementation of toString
   override def toString = "T%d".format(tid)
 
 } // Transaction class
 
 object TypedTransactionTest extends App {
 
-  val system = ActorSystem("TypedTransactionTest")
-  val tm     = system.actorOf(Props[TransactionManager], name = "tm")
+  // Setup the TransactionManager and its ActorSystem
+  val tmsys  = ActorSystem("TransactionManager")
+  val tm     = tmsys.actorOf(Props[TransactionManager], name = "tm")
 
-  for (i <- 1 to 10) {
+  // Setup the Transaction ActorSystem
+  val tsys = ActorSystem("Transaction")
+
+  for (i <- 1 to 100) {
 
     val timpl = new TransactionImpl(tm) {
       override def body () {
@@ -239,10 +248,14 @@ object TypedTransactionTest extends App {
       } // body
     } // timpl
 
-    val t: Transaction = TypedActor(system).typedActorOf(TypedProps(classOf[Transaction], timpl), "t%d".format(i))
+    // The following line turns the TransactionImpl into a TypedActor
+    val t: Transaction = TypedActor(tsys).typedActorOf(TypedProps(classOf[Transaction], timpl), "t%d".format(i-1))
 
+    // execute the transaction
     t.execute
 
   } // for
 
-}
+} // TypedTransactionTest
+
+
