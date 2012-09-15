@@ -38,21 +38,31 @@ class TransactionManager() extends Actor with ConcurrencyControl {
 
     case rMsg: ReadMessage => {
       trace.info("Message recieved: %s".format(rMsg))
-      sender ! "hello"
+
       if (check(rMsg.t, Op.Read, rMsg.oid)) {
-        // TODO
+        trace.info("Request Granted: %s".format(rMsg))
+      } else {
+        trace.warning("Request Denied: %s".format(rMsg))
       } // if
 
-    }
+      sender ! "hello"
+    } // case
 
     case wMsg: WriteMessage => {
       trace.info("Message recieved: %s".format(wMsg))
       if (check(wMsg.t, Op.Write, wMsg.oid)) {
-	
+
+	trace.info("Request Granted: %s".format(wMsg))	
+
 	// send back an okay response
-        sender ! OkayMessage()
-	
-      } // if
+        sender ! WriteResponse(false)
+
+      } else {
+
+	sender ! WriteResponse(true)
+	trace.warning("Request Denied: %s".format(wMsg))
+
+      }// if
     } // case
 
     case cMsg: CommitMessage => {

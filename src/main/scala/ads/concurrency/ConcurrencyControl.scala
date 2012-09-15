@@ -18,7 +18,7 @@ trait ConcurrencyControl {
   /**
    * The timeout for actor responses
    */
-  implicit val timeout = Timeout(5 seconds)
+  implicit val cctimeout = Timeout(5 seconds)
 
   /**
    * Checks if the given operation is schedulable.		

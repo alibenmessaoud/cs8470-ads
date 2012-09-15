@@ -33,6 +33,7 @@ case class BeginMessage (t: Transaction) extends Message ()
 
 case class TimestampRequest () extends Message ()
 case class TIDRequest () extends Message ()
+case class WriteResponse (postpone: Boolean = false) extends Message ()
 
 /**
  * A message indicating that a Transaction requests to read a value from

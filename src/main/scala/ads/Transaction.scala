@@ -3,6 +3,8 @@ package ads
 import scala.collection.mutable.ListBuffer
 import scala.util.Random
 
+import java.util.concurrent.TimeoutException
+
 import akka.actor.{ Actor, ActorContext, ActorRef, ActorSystem, Props, TypedActor, TypedProps }
 import akka.dispatch.{ Promise, Future, Await }
 import akka.event.Logging
@@ -53,10 +55,6 @@ object Transaction {
  * @author Terrance Medina
  */
 trait Transaction {
-  /**
-   * The implicit timeout for blocking messages
-   */
-  implicit val timeout = Timeout(5 seconds)
 
   /**
    * Begin the transaction.
@@ -139,6 +137,8 @@ class TransactionImpl (tm: ActorRef) extends Transaction {
   // So we can create Promises
   import TypedActor.dispatcher
 
+  implicit val timeout = Timeout(10 seconds)
+
   /**
    * Used for trace statements
    */
@@ -172,12 +172,14 @@ class TransactionImpl (tm: ActorRef) extends Transaction {
 
     while (ret == null) {
       try {
-	val future = ask(tm, ReadMessage(this, oid)).mapTo[Any]
+	val future = (tm ask ReadMessage(this, oid)).mapTo[Any]
 	ret = Await.result(future, timeout.duration)
       } catch {
-	case e: java.util.concurrent.TimeoutException => trace.warning("T%d read(%d) timed out".format(tid, oid))
+	case e: TimeoutException => trace.warning("T%d read(%d) timed out; trying again".format(tid, oid))
       } // try
     } // while
+
+    trace.info("T%d read(%d) succesfull".format(tid, oid))
 
     // return the value as an Option
     Some(ret)
@@ -187,8 +189,29 @@ class TransactionImpl (tm: ActorRef) extends Transaction {
   // implementation of Transaction write()
   def write (oid: Int, value: Any): Unit = {    
     trace.info("T%d write(%d, %s)".format(tid, oid, value))
-    tm ! WriteMessage(this, oid, value) 
-    // TODO finish implementing
+
+    var ret: WriteResponse = null
+    var postpone = false
+
+    do {
+      while (ret == null) {
+	try {
+	 
+	  val future = (tm ask WriteMessage(this, oid, value)).mapTo[WriteResponse]
+	  ret = Await.result(future, timeout.duration).asInstanceOf[WriteResponse]
+	 
+	  if (ret.postpone) {
+	    trace.info("T%d write(%d, %s) postponed".format(tid, oid, value))
+	    postpone = false
+	    Thread sleep 5000
+	  } // if
+
+	} catch {
+	  case e: TimeoutException => trace.warning("T%d write(%d) timed out; trying again".format(tid, oid))
+	} // try
+      } // while
+    } while (postpone)
+
   } // write
 
   // implementation of Transaction commit()
@@ -207,9 +230,14 @@ class TransactionImpl (tm: ActorRef) extends Transaction {
     this.touch
 
     // make the transaction wait for a random amount of time
+    trace.warning("T%d going to sleep for a while".format(tid))
     Thread sleep Transaction.getRandomInt(1000)
 
-    // TODO actually rollback :/
+    // reexecute the body
+    // execute   
+
+    // kill the actor
+    // TypedActor.context.stop(TypedActor.context.self)
 
   } // rollback
 
@@ -221,6 +249,7 @@ class TransactionImpl (tm: ActorRef) extends Transaction {
 
   // implementation of Transaction touch()
   def touch (): Option[Long] = {
+    trace.info("T%d touch()".format(tid))
     timestamp = System.currentTimeMillis
     getTimestamp
   } // touch
@@ -232,19 +261,24 @@ class TransactionImpl (tm: ActorRef) extends Transaction {
 
 object TypedTransactionTest extends App {
 
+  import ads.concurrency.SGC
+
   // Setup the TransactionManager and its ActorSystem
   val tmsys  = ActorSystem("TransactionManager")
-  val tm     = tmsys.actorOf(Props[TransactionManager], name = "tm")
+  val tm     = tmsys.actorOf(Props{new TransactionManager() with SGC}, name = "tm")
 
   // Setup the Transaction ActorSystem
   val tsys = ActorSystem("Transaction")
 
-  for (i <- 1 to 10000) {
+  for (i <- 1 to 10) {
 
     val timpl = new TransactionImpl(tm) {
       override def body () {
-	read(7)
-	write(7, 32)
+	val a = read(7)
+	val c = read(9)
+	write(7, 1)
+	val b = read(8)
+	write(9, 32)
       } // body
     } // timpl
 
