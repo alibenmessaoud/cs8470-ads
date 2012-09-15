@@ -1,10 +1,16 @@
-package ads
-package concurrency
+package ads.concurrency
 
-import collection.mutable.{ ListBuffer, ListMap }
+import scala.collection.mutable.{ListBuffer, ListMap}
 
-import ads.Transaction
+import akka.actor.ActorRef
+import akka.dispatch.Await
+import akka.pattern.ask
+import akka.util.Timeout
+import akka.util.duration._
+
+import ads.{Op, Transaction}
 import ads.util.PrecedenceGraph
+import ads.message.TIDRequest
 import ads.Op._
 
 /**
@@ -36,9 +42,10 @@ trait SGC extends ConcurrencyControl {
    */
   val pg = new PrecedenceGraph()
 
-  override def check(t: Transaction, opType: Op, oid: Int): Boolean = {
+  override def check(t: ActorRef, opType: Op, oid: Int): Boolean = {
 
-    val tid = t.tid
+    val future  = ask(t, TIDRequest()).mapTo[Int]
+    val tid     = Await.result(future, timeout.duration)
 
     recent.get(oid) match {
 
@@ -58,7 +65,7 @@ trait SGC extends ConcurrencyControl {
         if (pg.hasCycle) {
 
           pg.removeVertex(tid)
-          t.rollback
+          t ! "rollback"
           return false
 
         } // if

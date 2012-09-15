@@ -10,3 +10,5 @@ libraryDependencies += "org.scalatest" %% "scalatest" % "1.8" % "test"
 
 libraryDependencies += "com.typesafe.akka" % "akka-actor" % "2.0.3"
 
+scalacOptions ++= Seq("-unchecked", "-deprecation")
+

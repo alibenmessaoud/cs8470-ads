@@ -1,10 +1,13 @@
-package ads
-package concurrency
+package ads.concurrency
 
-import scala.collection.mutable.ListMap
+import scala.collection.mutable.{ListMap, SynchronizedMap}
 
+import akka.actor.ActorRef
+import akka.dispatch.Await
+import akka.pattern.ask
+
+import ads.{Op, Transaction}
 import ads.Op._
-import ads.Transaction
 import ads.message._
 
 /**
@@ -33,7 +36,10 @@ trait TSO extends ConcurrencyControl {
    */
   val map = ListMap.empty[Int, TSOTimestamp]
 
-  override def check(t: Transaction, opType: Op, oid: Int): Boolean = {
+  override def check(t: ActorRef, opType: Op, oid: Int): Boolean = {
+
+    val future    = ask(t, TimestampRequest()).mapTo[Long]
+    val timestamp = Await.result(future, timeout.duration)
 
     if (opType == Op.Read) map.get(oid) match {
 
@@ -44,13 +50,13 @@ trait TSO extends ConcurrencyControl {
 
       case Some(ts) => {
 
-	if (t.timestamp < ts.w) {
+	if (timestamp < ts.w) {
 
 	  // If the transaction's timestamp is less than the timestamp of the the
 	  // most recent write on the object, then we need to rollback the
 	  // transaction
 
-	  t.rollback
+	  t ! "rollback"
 	  return false
 
 	} else {
@@ -64,7 +70,7 @@ trait TSO extends ConcurrencyControl {
 	    // then we update the read timestamp, if necessary and the read
 	    // request is granted.
 
-	    if (t.timestamp > ts.r) ts.r = t.timestamp
+	    if (timestamp > ts.r) ts.r = timestamp
 	    return true
 
 	  } else {
@@ -93,15 +99,15 @@ trait TSO extends ConcurrencyControl {
 
       case Some(ts) => {
 
-	if (t.timestamp < ts.r) {
+	if (timestamp < ts.r) {
 
 	  // If the transaction's timestamp is less than the timestamp of the
 	  // last read to the object then the transaction is rolledback
 
-	  t.rollback
+	  t ! "rollback"
 	  return false
 
-	} else if (ts.r < t.timestamp && t.timestamp < ts.w) {
+	} else if (ts.r < timestamp && timestamp < ts.w) {
 
 	  // If the timestamp of the transaction is greater than the timestamp
 	  // of the last read to the object and is less than the timestamp of
@@ -138,7 +144,7 @@ trait TSO extends ConcurrencyControl {
 	    // the request is granted. The value of this transactions timestamp
 	    // is assigned to ts.w and the value of ts.c is set to false.
 
-	    ts.w = t.timestamp
+	    ts.w = timestamp
 	    ts.c = false
 
 	    return true

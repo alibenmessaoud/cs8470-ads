@@ -1,7 +1,8 @@
-package ads
-package message
+package ads.message
 
-import Op._
+import akka.actor.ActorRef
+
+import ads.Op._
 
 /**
  * Represents a message.
@@ -27,7 +28,10 @@ case class OkayMessage () extends Message ()
  * @author Terrance Medina
  * @param t A Transaction object.
  */
-case class BeginMessage (t: Transaction) extends Message ()
+case class BeginMessage (t: ActorRef) extends Message ()
+
+case class TimestampRequest () extends Message ()
+case class TIDRequest () extends Message ()
 
 /**
  * A message indicating that a Transaction requests to read a value from
@@ -38,7 +42,7 @@ case class BeginMessage (t: Transaction) extends Message ()
  * @param t A Transaction object.
  * @param oid An object identifier.
  */
-case class ReadMessage (t: Transaction, oid: Int) extends Message ()
+case class ReadMessage (t: ActorRef, oid: Int) extends Message ()
 
 /**
  * A message indicating that a Transaction requests to write a value into
@@ -50,7 +54,7 @@ case class ReadMessage (t: Transaction, oid: Int) extends Message ()
  * @param oid An object identifier.
  * @param value The value that is to be written.
  */
-case class WriteMessage (t: Transaction, oid: Int, value: Any) extends Message ()
+case class WriteMessage (t: ActorRef, oid: Int, value: Any) extends Message ()
 
 /**
  * A message indicating that a Transaction requests to commit itself to the
@@ -60,7 +64,7 @@ case class WriteMessage (t: Transaction, oid: Int, value: Any) extends Message (
  * @author Terrance Medina
  * @param t A Transaction object.
  */
-case class CommitMessage (t: Transaction) extends Message ()
+case class CommitMessage (t: ActorRef) extends Message ()
 
 /**
  * A message indicating that a Transaction should postone a read for some amount

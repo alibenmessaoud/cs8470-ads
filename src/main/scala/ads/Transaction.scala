@@ -1,9 +1,11 @@
 package ads
 
-import scala.actors.Actor
-import scala.actors.Actor._
 import scala.collection.mutable.ListBuffer
 import scala.util.Random
+
+import akka.actor.{Actor, ActorRef}
+import akka.actor.Props
+import akka.event.Logging
 
 import ads.message._
 import ads.util._
@@ -19,7 +21,6 @@ object Transaction {
 
   private val rand = new Random()
 
-//  private var x: Int = (System.currentTimeMillis / 1000).toInt
   private var x: Int = 0
 
   /** 
@@ -47,25 +48,22 @@ object Transaction {
  * @param m The transaction manager object.
  * @param body The set of statements to be executed by this transaction.
  */
-class Transaction(m: TransactionManager) extends Actor with Traceable[Transaction] {
+class Transaction (m: ActorRef) extends Actor {
 
-  TRACE = true
+  /**
+   * Used for trace statements
+   */
+  private val trace = Logging(context.system, this) 
 
+  /**
+   * The timestamp of the transaction
+   */
   var timestamp = System.currentTimeMillis
-    
-  private var randOps = false
-  private var randNum = 0
-  
+      
   /**
    * The transaction identifier.
    */
   var tid = Transaction.getNextTID
-
-  def this(m: TransactionManager, rand: Int) {
-    this(m)
-    randOps = true
-    randNum = rand
-  } // this
   
   /**
    * The body of the transaction
@@ -74,7 +72,6 @@ class Transaction(m: TransactionManager) extends Actor with Traceable[Transactio
 
   // implementation of act function for actor
   def act() {
-    trace("T%d act()".format(tid))
     begin
     body
     commit
@@ -84,8 +81,8 @@ class Transaction(m: TransactionManager) extends Actor with Traceable[Transactio
    * Begin the transaction.
    */
   def begin() = {
-    trace("T%d begin()".format(tid))
-    m ! BeginMessage(this)
+    trace.info("T%d begin".format(tid))
+    m ! BeginMessage(self)
   } // begin
 
   /**
@@ -96,13 +93,12 @@ class Transaction(m: TransactionManager) extends Actor with Traceable[Transactio
    */
   def read(oid: Int): Any = {
 
-    trace("T%d read(%d)".format(tid, oid))
+    trace.info("T%d read(%d)".format(tid, oid))
     var ret: Any = null
 
-    trace("T%d trying to request read".format(tid));
-    m ! ReadMessage(this, oid)
+    m ! ReadMessage(self, oid)
 
-    self.receive {
+/*    self.receive {
       case msg: PostponeReadMessage => {
 	// wait for 1 sec
 	// Thread sleep 1000
@@ -114,7 +110,7 @@ class Transaction(m: TransactionManager) extends Actor with Traceable[Transactio
 	ret = value
       }
     } // react
-
+*/
     ret
   } // read
 
@@ -125,11 +121,11 @@ class Transaction(m: TransactionManager) extends Actor with Traceable[Transactio
    * @param value The value to write into the database.
    */
   def write(oid: Int, value: Any): Unit = {
-    trace("T%d write(%d, %s)".format(tid, oid, value))
+    trace.info("T%d write(%d, %s)".format(tid, oid, value))
     
-    m ! WriteMessage(this, oid, value) 
+    m ! WriteMessage(self, oid, value) 
     
-    self.receive {
+/*    self.receive {
       case postpone: PostponeWriteMessage => {
 	// wait for 1 sec
 	//Thread sleep 1000
@@ -137,7 +133,7 @@ class Transaction(m: TransactionManager) extends Actor with Traceable[Transactio
       } // case
       case _ => { }
     } // react
-
+*/
   } // write
 
 
@@ -145,8 +141,8 @@ class Transaction(m: TransactionManager) extends Actor with Traceable[Transactio
    * Commit this transaction.
    */
   def commit() = {
-    trace("T%d commit()".format(tid))
-    m ! CommitMessage(this)
+    trace.info("T%d commit()".format(tid))
+    m ! CommitMessage(self)
     exit
   } // commit
 
@@ -155,20 +151,34 @@ class Transaction(m: TransactionManager) extends Actor with Traceable[Transactio
    */
   def rollback() = {
 
-    trace(Level.Warning, "T%d rollback()".format(tid))
+    trace.info("T%d rollback()".format(tid))
 
     this.tid = Transaction.getNextTID
     this.timestamp = System.currentTimeMillis
 
     // make the transaction wait for a random amount of time
     Thread sleep Transaction.getRandomInt(1000)
-
+    
+    begin
     body
+    commit
     exit
 
   } // rollback
 
   override def toString = "T%d".format(tid)
+
+  def receive = {
+    case _: TimestampRequest => sender ! this.timestamp
+    case _: TIDRequest => sender ! this.tid
+    case _ => { }
+  }
+
+  override def preStart() = {
+    begin
+    body
+    commit
+  }
 
 } // Transaction class
 
