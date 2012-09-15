@@ -153,7 +153,10 @@ class TransactionImpl (tm: ActorRef) extends Transaction {
    * The transaction identifier.
    */
   private var tid = Transaction.getNextTID
-  
+
+  def deepCopy[A](a: A)(implicit m: reflect.Manifest[A]): A =
+    scala.util.Marshal.load[A](scala.util.Marshal.dump(a))
+
   // implementation of Transaction body()
   def body () {}
 
@@ -168,21 +171,26 @@ class TransactionImpl (tm: ActorRef) extends Transaction {
 
     trace.info("T%d read(%d)".format(tid, oid))
 
-    var ret: Any = null
+    var ret: ReadResponse = null
 
-    while (ret == null) {
-      try {
-	val future = (tm ask ReadMessage(this, oid)).mapTo[Any]
-	ret = Await.result(future, timeout.duration)
-      } catch {
-	case e: TimeoutException => trace.warning("T%d read(%d) timed out; trying again".format(tid, oid))
-      } // try
-    } // while
+    do {
+      while (ret == null) {
+	try {
+	  val future = (tm ask ReadMessage(this, oid)).mapTo[ReadResponse]
+	  ret = Await.result(future, timeout.duration)
+
+	  if (ret.rollback) this.rollback
+
+	} catch {
+	  case e: TimeoutException => trace.warning("T%d read(%d) timed out; trying again".format(tid, oid))
+	} // try
+      } // while
+    } while (ret == true)
 
     trace.info("T%d read(%d) succesfull".format(tid, oid))
 
     // return the value as an Option
-    Some(ret)
+    Some(ret.value)
 
   } // read
 
@@ -203,8 +211,10 @@ class TransactionImpl (tm: ActorRef) extends Transaction {
 	  if (ret.postpone) {
 	    trace.info("T%d write(%d, %s) postponed".format(tid, oid, value))
 	    postpone = false
-	    Thread sleep 5000
+	    // Thread sleep 5000
 	  } // if
+
+	  if (ret.rollback) this.rollback
 
 	} catch {
 	  case e: TimeoutException => trace.warning("T%d write(%d) timed out; trying again".format(tid, oid))
@@ -231,13 +241,16 @@ class TransactionImpl (tm: ActorRef) extends Transaction {
 
     // make the transaction wait for a random amount of time
     trace.warning("T%d going to sleep for a while".format(tid))
-    Thread sleep Transaction.getRandomInt(1000)
+    // Thread sleep Transaction.getRandomInt(1000)
 
     // TODO reexecute the body
     // execute   
 
     // kill the actor
     // TODO TypedActor.context.stop(TypedActor.context.self)
+
+    val child: Transaction = TypedActor(TypedActor.context).typedActorOf(TypedProps(classOf[Transaction], this), "t%d-child".format(tid))
+    child.execute
 
   } // rollback
 

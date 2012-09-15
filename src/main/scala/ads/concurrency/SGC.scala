@@ -67,7 +67,7 @@ trait SGC extends ConcurrencyControl {
         if (pg.hasCycle) {
 
           pg.removeVertex(tid)
-          t.rollback
+          // t.rollback
           return Rollbacked
 
         } // if

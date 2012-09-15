@@ -51,11 +51,11 @@ class TransactionManager() extends Actor with ConcurrencyControl {
 	} // case
 	case Postponed  => {
 	  trace.info("read request postponed: %s".format(rMsg))
-	  // sender ! ReadResponse("hello", true)
+	  sender ! ReadResponse("hello", true)
 	} // case
 	case Rollbacked => {
 	  trace.info("read request resulted in rollback: %s".format(rMsg))
-	  // sender ! ReadResponse("hello", false)
+	  sender ! ReadResponse("hello", false, false, true)
 	} // case
 	case _ => {
 	  trace.info("read request resulted in unknown message: %s".format(rMsg))
@@ -73,23 +73,23 @@ class TransactionManager() extends Actor with ConcurrencyControl {
       check(wMsg.t, Op.Write, wMsg.oid) match {
 	case Granted    => {
 	  trace.info("write request granted: %s".format(wMsg))
-	  sender ! WriteResponse(false, false)
+	  sender ! WriteResponse(false, false, false)
 	} // case
 	case Denied     => {
 	  trace.info("write request denied: %s".format(wMsg))
-	  sender ! WriteResponse(false, true)
+	  sender ! WriteResponse(false, true, false)
 	} // case
 	case Postponed  => {
 	  trace.info("write request postponed: %s".format(wMsg))
-	  sender ! WriteResponse(true, false)
+	  sender ! WriteResponse(true, false, false)
 	} // case
 	case Rollbacked => {
 	  trace.info("write request resulted in rollback: %s".format(wMsg))
-	  sender ! WriteResponse(false, false)
+	  sender ! WriteResponse(false, false, true)
 	} // case
 	case Thomas     => {
 	  trace.info("write request invoked Thomas Write Rule?: %s".format(wMsg))
-	  sender ! WriteResponse(false, false)
+	  sender ! WriteResponse(false, false, false)
 	} // case
       } // match
 
