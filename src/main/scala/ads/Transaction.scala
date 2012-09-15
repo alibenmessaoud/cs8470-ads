@@ -183,7 +183,7 @@ class TransactionImpl (tm: ActorRef) extends Transaction {
 	  if (ret.postpone) {
 	    trace.info("T%d read(%d) postponed".format(tid, oid))
 	    postpone = true
-	    // Thread sleep 5000
+	    Thread sleep 1000
 	  } // if
 
 	  if (ret.rollback) this.rollback
@@ -218,7 +218,7 @@ class TransactionImpl (tm: ActorRef) extends Transaction {
 	  if (ret.postpone) {
 	    trace.info("T%d write(%d, %s) postponed".format(tid, oid, value))
 	    postpone = true
-	    // Thread sleep 5000
+	    Thread sleep 1000
 	  } // if
 
 	  if (ret.rollback) this.rollback
@@ -248,7 +248,7 @@ class TransactionImpl (tm: ActorRef) extends Transaction {
 
     // make the transaction wait for a random amount of time
     trace.warning("T%d going to sleep for a while".format(tid))
-    // Thread sleep Transaction.getRandomInt(1000)
+    Thread sleep Transaction.getRandomInt(1000)
 
     // TODO reexecute the body
     // execute   

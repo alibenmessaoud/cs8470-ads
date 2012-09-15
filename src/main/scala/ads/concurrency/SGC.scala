@@ -45,7 +45,7 @@ trait SGC extends ConcurrencyControl {
 
   override def check(t: Transaction, opType: Op, oid: Int): CheckResponse = {
 
-    println("checking %s request for %s on %d".format(t, opType, oid))
+    // println("checking %s request for %s on %d".format(t, opType, oid))
 
     val tid = t.getTID.get
 
