@@ -21,7 +21,7 @@ import ads.Op._
  * @author Michael E. Cotterell
  * @author Terrance Medina
  */
-object TransactionUtil {
+object Transaction {
 
   private val rand = new Random()
 
@@ -45,7 +45,7 @@ object TransactionUtil {
     rand.nextInt(n)
   } // getRandomInt
 
-} // TransactionUtil
+} // Transaction
 
 /**
  * Interface for a database transaction
@@ -54,7 +54,6 @@ object TransactionUtil {
  * @author Terrance Medina
  */
 trait Transaction {
-
   /**
    * The implicit timeout for blocking messages
    */
@@ -144,7 +143,7 @@ class TransactionImpl (tm: ActorRef) extends Transaction {
   /**
    * Used for trace statements
    */
-  private val trace = Logging(TypedActor.context.system, TypedActor.context.self) 
+  private lazy val trace = Logging(TypedActor.context.system, TypedActor.context.self) 
 
   /**
    * The timestamp of the transaction
@@ -154,7 +153,7 @@ class TransactionImpl (tm: ActorRef) extends Transaction {
   /**
    * The transaction identifier.
    */
-  private var tid = TransactionUtil.getNextTID
+  private var tid = Transaction.getNextTID
   
   // implementation of Transaction body()
   def body () {}
@@ -199,11 +198,11 @@ class TransactionImpl (tm: ActorRef) extends Transaction {
 
     trace.warning("T%d rollback()".format(tid))
 
-    this.tid = TransactionUtil.getNextTID
+    this.tid = Transaction.getNextTID
     this.touch
 
     // make the transaction wait for a random amount of time
-    Thread sleep TransactionUtil.getRandomInt(1000)
+    Thread sleep Transaction.getRandomInt(1000)
 
     // TODO actually rollback :/
 
@@ -231,13 +230,19 @@ object TypedTransactionTest extends App {
   val system = ActorSystem("TypedTransactionTest")
   val tm     = system.actorOf(Props[TransactionManager], name = "tm")
 
-  val timpl = new TransactionImpl(tm) {
-    override def body () {
-      read(7)
-      write(7, 32)
-    } // body
-  } // timpl
+  for (i <- 1 to 10) {
 
-  val t: Transaction = TypedActor(system).typedActorOf(TypedProps(classOf[Transaction], timpl), "t")
+    val timpl = new TransactionImpl(tm) {
+      override def body () {
+	read(7)
+	write(7, 32)
+      } // body
+    } // timpl
+
+    val t: Transaction = TypedActor(system).typedActorOf(TypedProps(classOf[Transaction], timpl), "t%d".format(i))
+
+    t.execute
+
+  } // for
 
 }
