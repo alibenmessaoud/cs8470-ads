@@ -239,7 +239,7 @@ object TypedTransactionTest extends App {
   // Setup the Transaction ActorSystem
   val tsys = ActorSystem("Transaction")
 
-  for (i <- 1 to 100) {
+  for (i <- 1 to 10000) {
 
     val timpl = new TransactionImpl(tm) {
       override def body () {
