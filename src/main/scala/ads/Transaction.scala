@@ -236,6 +236,7 @@ class TransactionImpl (tm: ActorRef) extends Transaction {
     trace.info("T%d commit()".format(tid))
     tm ! CommitMessage(this)
     TypedActor.context.stop(TypedActor.context.self)
+    sys.exit(0)
   } // commit
 
   // implementation of Transaction rollback()
@@ -258,6 +259,9 @@ class TransactionImpl (tm: ActorRef) extends Transaction {
 
     val child: Transaction = TypedActor(TypedActor.context).typedActorOf(TypedProps(classOf[Transaction], this), "t%d-child".format(tid))
     child.execute
+
+    TypedActor.context.stop(TypedActor.context.self)
+    sys.exit(0)
 
   } // rollback
 
@@ -290,7 +294,7 @@ object TypedTransactionTestSGC extends App {
   // Setup the Transaction ActorSystem
   val tsys = ActorSystem("Transaction")
 
-  for (i <- 1 to 10) {
+  for (i <- 1 to 100) {
 
     val timpl = new TransactionImpl(tm) {
       override def body () {
@@ -323,7 +327,7 @@ object TypedTransactionTestTSO extends App {
   // Setup the Transaction ActorSystem
   val tsys = ActorSystem("Transaction")
 
-  for (i <- 1 to 10) {
+  for (i <- 1 to 5) {
 
     val timpl = new TransactionImpl(tm) {
       override def body () {

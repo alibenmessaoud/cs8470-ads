@@ -43,19 +43,19 @@ class TransactionManager() extends Actor with ConcurrencyControl {
       check(rMsg.t, Op.Read, rMsg.oid) match {
 	case Granted    => {
 	  trace.info("read request granted: %s".format(rMsg))
-	  sender ! ReadResponse("hello", false, false)
+	  sender ! ReadResponse("hello")
 	} // case
 	case Denied     => {
 	  trace.info("read request denied: %s".format(rMsg))
-	  sender ! ReadResponse("hello", false, true)
+	  sender ! ReadResponse(value = "hello", denied = true)
 	} // case
 	case Postponed  => {
 	  trace.info("read request postponed: %s".format(rMsg))
-	  sender ! ReadResponse("hello", true)
+	  sender ! ReadResponse(value = "hello", postpone = true)
 	} // case
 	case Rollbacked => {
 	  trace.info("read request resulted in rollback: %s".format(rMsg))
-	  sender ! ReadResponse("hello", false, false, true)
+	  sender ! ReadResponse(value = "hello", rollback = true)
 	} // case
 	case _ => {
 	  trace.info("read request resulted in unknown message: %s".format(rMsg))
