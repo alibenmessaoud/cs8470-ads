@@ -249,7 +249,7 @@ class TransactionImpl (tm: ActorRef) extends Transaction {
 
     // make the transaction wait for a random amount of time
     trace.warning("T%d going to sleep for a while".format(tid))
-    Thread sleep Transaction.getRandomInt(1000)
+    Thread sleep Transaction.getRandomInt(5000)
 
     // TODO reexecute the body
     // execute   
@@ -287,6 +287,8 @@ object TypedTransactionTestSGC extends App {
 
   import ads.concurrency.{ SGC, TSO }
 
+  val rand = new Random()
+
   // Setup the TransactionManager and its ActorSystem
   val tmsys  = ActorSystem("TransactionManager")
   val tm     = tmsys.actorOf(Props{new TransactionManager() with SGC}, name = "tm")
@@ -294,7 +296,7 @@ object TypedTransactionTestSGC extends App {
   // Setup the Transaction ActorSystem
   val tsys = ActorSystem("Transaction")
 
-  for (i <- 1 to 100) {
+  for (i <- 1 to 1000) {
 
     val timpl = new TransactionImpl(tm) {
       override def body () {
@@ -309,12 +311,14 @@ object TypedTransactionTestSGC extends App {
     // The following line turns the TransactionImpl into a TypedActor
     val t: Transaction = TypedActor(tsys).typedActorOf(TypedProps(classOf[Transaction], timpl), "t%d".format(i-1))
 
+    Thread sleep rand.nextInt(100)
+
     // execute the transaction
     t.execute
 
   } // for
 
-} // TypedTransactionTestTSO
+} // TypedTransactionTestSGC
 
 object TypedTransactionTestTSO extends App {
 
