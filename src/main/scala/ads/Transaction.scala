@@ -294,7 +294,10 @@ object TypedTransactionTestSGC extends App {
   val tm     = tmsys.actorOf(Props{new TransactionManager() with SGC}, name = "tm")
 
   // Setup the Transaction ActorSystem
-  val tsys = ActorSystem("Transaction")
+  implicit val tsys = ActorSystem("Transaction")
+
+  def txn (impl: Transaction, name: String) (implicit tsys: ActorSystem) = 
+    TypedActor(tsys).typedActorOf(TypedProps(classOf[Transaction], impl), name)
 
   for (i <- 1 to 1000) {
 
@@ -309,7 +312,8 @@ object TypedTransactionTestSGC extends App {
     } // timpl
 
     // The following line turns the TransactionImpl into a TypedActor
-    val t: Transaction = TypedActor(tsys).typedActorOf(TypedProps(classOf[Transaction], timpl), "t%d".format(i-1))
+    // val t: Transaction = TypedActor(tsys).typedActorOf(TypedProps(classOf[Transaction], timpl), "t%d".format(i-1))
+    val t: Transaction = txn(timpl, "t%d".format(i-1))
 
     Thread sleep rand.nextInt(100)
 
@@ -319,40 +323,5 @@ object TypedTransactionTestSGC extends App {
   } // for
 
 } // TypedTransactionTestSGC
-
-object TypedTransactionTestTSO extends App {
-
-  import ads.concurrency.{ SGC, TSO }
-
-  // Setup the TransactionManager and its ActorSystem
-  val tmsys  = ActorSystem("TransactionManager")
-  val tm     = tmsys.actorOf(Props{new TransactionManager() with TSO}, name = "tm")
-
-  // Setup the Transaction ActorSystem
-  val tsys = ActorSystem("Transaction")
-
-  for (i <- 1 to 5) {
-
-    val timpl = new TransactionImpl(tm) {
-      override def body () {
-	val a = read(7)
-	val c = read(9)
-	write(7, 1)
-	val b = read(8)
-	write(9, 32)
-      } // body
-    } // timpl
-
-    // The following line turns the TransactionImpl into a TypedActor
-    val t: Transaction = TypedActor(tsys).typedActorOf(TypedProps(classOf[Transaction], timpl), "t%d".format(i-1))
-
-    // execute the transaction
-    t.execute
-
-  } // for
-
-} // TypedTransactionTestTSO
-
-
 
 
