@@ -2,21 +2,23 @@ package ads.schema
 
 import java.nio.ByteBuffer
 
+import ads.Database
+
 case class IntProperty (name: String, default: Int = 0, required: Boolean = false, index: Boolean = false, validator: Int => Boolean = (e: Int) => true) 
                        (implicit schema: Schema) extends Property [Int] (name, default, required, index, validator) (schema) {
+
+  def width = Property.INT_BYTES_WIDTH
 
   def getAsByteArray: Array[Byte] = {
 
     // create the byte buffer 
-    val byteBuffer = ByteBuffer.allocate(Property.INT_BYTES_WIDTH)
+    val byteBuffer = ByteBuffer.allocate(width)
 
     // add the number to the buffer
     byteBuffer.putInt(get)
 
     // return the bytes array
     byteBuffer.array
-
-//    byteBuffer.array.slice(byteBuffer.position, byteBuffer.limit)
 
   } // toByteArray
 
@@ -37,13 +39,14 @@ case class IntProperty (name: String, default: Int = 0, required: Boolean = fals
 
   } // setFromByteArray
 
-  override def toString = "IntProperty(%s = \"%s\")".format(name, get)
+  override def toString = "IntProperty(%s = \"%s\")".format(name, getName)
 
 } // IntProperty
 
 object IntPropertyTest extends App {
 
-  implicit val s = new Schema("test")
+  val db = new Database("TestDB", null)
+  implicit val s = new Schema("test", db)
 
   val p = new IntProperty("p")
 

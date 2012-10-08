@@ -5,7 +5,9 @@ import scala.collection.mutable.StringBuilder
 import java.nio.{ ByteBuffer, CharBuffer }
 import java.nio.charset.Charset
 
-case class StringProperty (name: String, default: String = "", required: Boolean = false, index: Boolean = false, validator: String => Boolean = (e: String) => true) 
+import ads.Database
+
+case class StringProperty (name: String, maxLength: Int = 32, default: String = "", required: Boolean = false, index: Boolean = false, validator: String => Boolean = (e: String) => true) 
                           (implicit schema: Schema) extends Property [String] (name, default, required, index, validator) (schema) {
 
   private val encoding = "UTF-8"
@@ -13,6 +15,15 @@ case class StringProperty (name: String, default: String = "", required: Boolean
   private def encoder = Charset.forName(encoding).newEncoder
 
   private def decoder = Charset.forName(encoding).newDecoder
+
+  def width = maxLength * 2
+
+  override def set (value: String): Boolean = if(value.length <= maxLength) {
+    super.set(value)
+    true
+  } else {
+    false
+  } // set
 
   def getAsByteArray: Array[Byte] = {
 
@@ -22,7 +33,7 @@ case class StringProperty (name: String, default: String = "", required: Boolean
     val bytes      = byteBuffer.array.slice(byteBuffer.position, byteBuffer.limit)
 
     // calculate and create the padding
-    val padLength = Property.STRING_BYTES_WIDTH - (bytes.length % Property.STRING_BYTES_WIDTH)
+    val padLength = width - (bytes.length % width)
     val padding = Array.ofDim[Byte](padLength)
 
     // return the padded array
@@ -46,13 +57,14 @@ case class StringProperty (name: String, default: String = "", required: Boolean
 
   } // setFromByteArray
 
-  override def toString = "StringProperty(%s = \"%s\")".format(name, get)
+  override def toString = "StringProperty(%s = \"%s\")".format(name, getName)
 
 } // StringProperty
 
 object StringPropertyTest extends App {
 
-  implicit val s = new Schema("test")
+  val db = new Database("TestDB", null)
+  implicit val s = new Schema("test", db)
 
   val p = new StringProperty("p")
 

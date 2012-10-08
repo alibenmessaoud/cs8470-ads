@@ -15,18 +15,24 @@ object Property {
 
   val FLOAT_BYTES_WIDTH  = 4
   val DOUBLE_BYTES_WIDTH = 8
-
-  val STRING_BYTES_WIDTH = 32
  
 } // Property
 
 abstract class Property [T] (name: String, default: T, required: Boolean = false, index: Boolean = false, validator: T => Boolean = (e: T) => true) 
                             (implicit schema: Schema) {
 
+  // register the property with the schema
+  schema.register(this)
+
   /**
    * Holds the current value of the Property
    */
   private var value: T = default
+
+  /**
+   * The maximum byte width of this property
+   */
+  def width: Int
 
   /**
    * Return the current value of the Property
@@ -65,6 +71,9 @@ abstract class Property [T] (name: String, default: T, required: Boolean = false
    * @return a property generated from the byte array
    */
   def setFromByteArray [T] (bytes: Array[Byte]): Boolean
+
+  def getName = name
+  def isRequired = required
 
 } // Property
 

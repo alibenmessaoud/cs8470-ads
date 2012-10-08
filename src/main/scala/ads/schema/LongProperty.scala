@@ -2,13 +2,17 @@ package ads.schema
 
 import java.nio.ByteBuffer
 
+import ads.Database
+
 case class LongProperty (name: String, default: Long = 0L, required: Boolean = false, index: Boolean = false, validator: Long => Boolean = (e: Long) => true) 
                         (implicit schema: Schema) extends Property [Long] (name, default, required, index, validator) (schema) {
+
+  def width = Property.LONG_BYTES_WIDTH
 
   def getAsByteArray: Array[Byte] = {
 
     // create the byte buffer 
-    val byteBuffer = ByteBuffer.allocate(Property.LONG_BYTES_WIDTH)
+    val byteBuffer = ByteBuffer.allocate(width)
 
     // add the number to the buffer
     byteBuffer.putLong(get)
@@ -35,13 +39,14 @@ case class LongProperty (name: String, default: Long = 0L, required: Boolean = f
 
   } // setFromByteArray
 
-  override def toString = "LongProperty(%s = \"%s\")".format(name, get)
+  override def toString = "LongProperty(%s = \"%s\")".format(name, getName)
 
 } // LongProperty
 
 object LongPropertyTest extends App {
 
-  implicit val s = new Schema("test")
+  val db = new Database("TestDB", null)
+  implicit val s = new Schema("test", db)
 
   val p = new LongProperty("p")
 
