@@ -46,7 +46,7 @@ class FileMap (val name: String, val filename: String, val schema: Schema) exten
     trace.info("flushing")
 
     // TODO need to prevent flusing uncommitted pages
-    for (page <- pages.values if page.modified) {
+    for (page <- pages.values if page.modified && !page.dirty) {
 
       trace.info("writing page %d to disk".format(page.pid))
       
@@ -57,31 +57,28 @@ class FileMap (val name: String, val filename: String, val schema: Schema) exten
 
 	val oid = (page.pid * PAGE_SIZE) + i
 
-	trace.info("writing oid = %d to disk")
-
 	for (prop <- cache(oid)) {
-	  datFile.write(prop.getAsByteArray)
-	} // for
 
-	trace.info("finished writing oid = %d to disk")
+	  val bytes = prop.getAsByteArray
+	  
+	  if (bytes.sum == 0) {
+	    datFile.seek(datFile.getFilePointer + prop.width)
+	  } else {
+	    datFile.write(prop.getAsByteArray)
+	  } // if
+	  
+	} // for
 
       } // for
 
       trace.info("finished writing page %d to disk".format(page.pid))
 
+      page.modified = false
+
     } // for
 
   } // flush
   
-  /**
-   * Reorganize the files so that they are in order
-   */
-  def optimize: Unit = {
-
-    trace.info("optimizing")
-
-  } // optimize
-
   /**
    * Returns the page where a record should live
    */
@@ -122,38 +119,34 @@ class FileMap (val name: String, val filename: String, val schema: Schema) exten
       // calculate oid for the object about to be read
       val oid = (pid * PAGE_SIZE) + i
 
-      trace.info("reading %d bytes from disk for record with oid = %d".format(schema.width, oid))
-
       // read them in property by property
       for (p <- schema.properties.values.toArray) {
-
-	trace.info("reading bytes for %s".format(p))
 
 	val bytes = Array.ofDim[Byte](p.width)
 	val prop: Property[_] = p.makeClone
 
+	// read into the array
 	datFile.read(bytes)
 
-	trace.info("read bytes: %s".format(bytes.deep))
-	
-	prop.setFromByteArray(bytes)
 
-	trace.info("value = %s".format(prop.get))
+	// set the value from the bytes
+	prop.setFromByteArray(bytes)
 
 	// add the cloned property to the array
 	array(j) = prop
+
+
+	// increment counter
 	j += 1
 
       } // for
-
-      trace.info("finished reading record with oid = %d".format(oid))
 
       // add the array to the cache
       cache(oid) = array
 
     } // for
 
-    trace.info("finished reading page %d".format(pid))
+    trace.info("finished reading page %d from disk".format(pid))
 
     // update the page
     pages(pid) = new Page(pid)
@@ -162,6 +155,7 @@ class FileMap (val name: String, val filename: String, val schema: Schema) exten
 
   def get (key: Int): Option[Array[Property[_]]] = {
 
+    // this will make sure the page is in memory
     val p = getPage(key)
 
     // create the array
@@ -178,13 +172,17 @@ class FileMap (val name: String, val filename: String, val schema: Schema) exten
   def += (kv: (Int, Array[Property[_]])) = {
 
     val (oid, props) = kv
+
+    // make sure the page is in memory
     val p = getPage(oid)
 
+    // update the page
     p.modified = true
-    p.dirty = true
 
+    // update the cache
     cache(oid) = props
 
+    // return this map
     this
 
   } // 
@@ -194,7 +192,7 @@ class FileMap (val name: String, val filename: String, val schema: Schema) exten
 
   override def empty = null
 
-  override def toString = "FileMap(name = \"%s\", filename = \"%s\", schema = %s)".format(name, filename, schema)
+  override def toString = "FileMap(name = \"%s\", filename = \"%s\", schema = %s, PAGE_SIZE = %d)".format(name, filename, schema, PAGE_SIZE)
 
 } // FileMap
 
@@ -209,8 +207,6 @@ object FileMapTest extends App {
 
   val schema = new PersonSchema()
 
-  schema.printSchema
-
   val fm = new FileMap("person", "person.dat", schema)
 
   val array = fm(20)
@@ -220,11 +216,15 @@ object FileMapTest extends App {
   println(array(0)) //.asInstanceOf[IntProperty].set(20)
   println(array(1)) //.asInstanceOf[StringProperty].set("michael")
 
-  array(0).asInstanceOf[StringProperty].set("michael")
+  array(0).asInstanceOf[StringProperty].set("michael e. cotterell")
   array(1).asInstanceOf[IntProperty].set(20)
 
   fm += 20 -> array
 
+  println("new value = " + fm(20)(0).get)
+
   fm.flush
-  
+
+  println("should be all nulls -> " + fm(108).deep)
+
 } // FileMapTest
