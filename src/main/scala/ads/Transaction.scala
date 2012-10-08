@@ -24,11 +24,10 @@ import ads.Op._
  */
 object Transaction {
 
+  // random number generator
   private val rand = new Random()
 
-  /**
-   * TID counter
-   */
+  // transaction id counter
   private var x: Int = 0
 
   /** 
@@ -132,7 +131,7 @@ trait Transaction {
  * @param m The transaction manager object.
  * @param body The set of statements to be executed by this transaction.
  */
-class TransactionImpl (tm: ActorRef) extends Transaction {
+class TransactionImpl (db: Database) extends Transaction {
 
   // So we can create Promises
   import TypedActor.dispatcher
@@ -142,7 +141,7 @@ class TransactionImpl (tm: ActorRef) extends Transaction {
   /**
    * Used for trace statements
    */
-  private lazy val trace = Logging(TypedActor.context.system, TypedActor.context.self) 
+  private lazy val trace = Logging(db.system, TypedActor.context.self) 
 
   /**
    * The timestamp of the transaction
@@ -163,7 +162,7 @@ class TransactionImpl (tm: ActorRef) extends Transaction {
   // implementation of Transaction begin()
   def begin () = {
     trace.info("T%d begin".format(tid))
-    tm ! BeginMessage(this)
+    db.tm ! BeginMessage(this)
   } // begin
 
   // implementation of Transaction read()
@@ -177,7 +176,7 @@ class TransactionImpl (tm: ActorRef) extends Transaction {
     do {
       while (ret == null) {
 	try {
-	  val future = (tm ask ReadMessage(this, oid)).mapTo[ReadResponse]
+	  val future = (db.tm ask ReadMessage(this, oid)).mapTo[ReadResponse]
 	  ret = Await.result(future, timeout.duration)
 
 	  if (ret.postpone) {
@@ -203,6 +202,7 @@ class TransactionImpl (tm: ActorRef) extends Transaction {
 
   // implementation of Transaction write()
   def write (oid: Int, value: Any): Unit = {    
+
     trace.info("T%d write(%d, %s)".format(tid, oid, value))
 
     var ret: WriteResponse = null
@@ -212,7 +212,7 @@ class TransactionImpl (tm: ActorRef) extends Transaction {
       while (ret == null) {
 	try {
 	 
-	  val future = (tm ask WriteMessage(this, oid, value)).mapTo[WriteResponse]
+	  val future = (db.tm ask WriteMessage(this, oid, value)).mapTo[WriteResponse]
 	  ret = Await.result(future, timeout.duration).asInstanceOf[WriteResponse]
 	 
 	  if (ret.postpone) {
@@ -234,7 +234,7 @@ class TransactionImpl (tm: ActorRef) extends Transaction {
   // implementation of Transaction commit()
   def commit () = {
     trace.info("T%d commit()".format(tid))
-    tm ! CommitMessage(this)
+    db.tm ! CommitMessage(this)
     TypedActor.context.stop(TypedActor.context.self)
     sys.exit(0)
   } // commit
@@ -289,19 +289,18 @@ object TypedTransactionTestSGC extends App {
 
   val rand = new Random()
 
-  // Setup the TransactionManager and its ActorSystem
-  val tmsys  = ActorSystem("TransactionManager")
-  val tm     = tmsys.actorOf(Props{new TransactionManager() with SGC}, name = "tm")
+  // Setup the database
+  val db = new Database("MyTestDB")
 
   // Setup the Transaction ActorSystem
-  implicit val tsys = ActorSystem("Transaction")
+  implicit val tsys = db.system
 
   def txn (impl: Transaction, name: String) (implicit tsys: ActorSystem) = 
     TypedActor(tsys).typedActorOf(TypedProps(classOf[Transaction], impl), name)
 
-  for (i <- 1 to 1000) {
+  for (i <- 1 to 10) {
 
-    val timpl = new TransactionImpl(tm) {
+    val timpl = new TransactionImpl(db) {
       override def body () {
 	val a = read(7)
 	val c = read(9)

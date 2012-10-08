@@ -63,7 +63,7 @@ case class StringProperty (name: String, maxLength: Int = 32, default: String = 
 
 object StringPropertyTest extends App {
 
-  val db = new Database("TestDB", null)
+  val db = new Database("TestDB")
   implicit val s = new Schema("test", db)
 
   val p = new StringProperty("p")

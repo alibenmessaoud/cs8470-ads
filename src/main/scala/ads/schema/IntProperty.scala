@@ -45,7 +45,7 @@ case class IntProperty (name: String, default: Int = 0, required: Boolean = fals
 
 object IntPropertyTest extends App {
 
-  val db = new Database("TestDB", null)
+  val db = new Database("TestDB")
   implicit val s = new Schema("test", db)
 
   val p = new IntProperty("p")

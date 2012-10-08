@@ -3,8 +3,21 @@ package ads
 import ads.concurrency._
 
 import akka.actor.{ Actor, ActorContext, ActorSystem, Props, TypedActor, TypedProps }
+import akka.event.{ Logging, LogSource }
 
-case class Database [CC <: ConcurrencyControl] (val name: String, private val tm: TransactionManager with CC) {
+/**
+ * Companion object for Database class
+ */
+object Database {
+
+  implicit val logSource: LogSource[AnyRef] = new LogSource[AnyRef] {
+    def genString(o: AnyRef): String = "Database(\"%s\")".format(o.asInstanceOf[Database].name)
+    override def getClazz(o: AnyRef): Class[_] = o.getClass
+  }
+
+} // Database
+
+class Database (val name: String) {
 
   /**
    * This Database's ActorSystem.
@@ -14,7 +27,12 @@ case class Database [CC <: ConcurrencyControl] (val name: String, private val tm
   /**
    * This database's TransactionManager as an Actor
    */
-  val manager = system.actorOf(Props(tm), name = "TransactionManager")
+  val tm = system.actorOf(Props(new TransactionManager() with SGC), name = "TransactionManager")
+
+  /**
+   * Logger for this database
+   */
+  val trace = Logging(system, this)
 
   /**
    * Creates a Transaction for this database based on an implementation of the

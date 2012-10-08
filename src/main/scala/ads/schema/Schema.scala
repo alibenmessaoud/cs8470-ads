@@ -58,7 +58,7 @@ class Schema (val _name: String, val db: Database) {
 
 object SchemaTest extends App {
 
-  val db = new Database("TestDB", null)
+  val db = new Database("TestDB")
 
   class MySchema () extends Schema ("MySchema", db) {
 
