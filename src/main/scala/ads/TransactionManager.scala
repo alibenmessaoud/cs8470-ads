@@ -2,7 +2,7 @@ package ads
 
 import scala.collection.mutable.ListBuffer
 
-import akka.actor.{ Actor, ActorRef, ActorSystem, Props }
+import akka.actor.{ Actor, ActorRef, ActorSystem, Props, TypedActor }
 import akka.dispatch.{ Await, Future }
 import akka.event.Logging
 import akka.pattern.{ ask, pipe }
@@ -46,7 +46,7 @@ class TransactionManager(db: Database) extends Actor with ConcurrencyControl {
 	case Granted    => {
 	  trace.info("read request granted: %s".format(rMsg))
 	  val future: Future[Option[Any]] = ask(db.sm, Read(rMsg.t.getTID.get, rMsg.table, rMsg.oid, rMsg.prop)).mapTo[Option[Any]]
-	  val response: Option[Any] = Await.result(future, 4 second)
+	  val response: Option[Any] = Await.result(future, 10 second)
 	  sender ! ReadResponse(response.get)
 	} // case
 	case Denied     => {
@@ -103,6 +103,7 @@ class TransactionManager(db: Database) extends Actor with ConcurrencyControl {
     case cMsg: CommitMessage => {
       trace.info("Message recieved: %s".format(cMsg))
       db.sm ! Commit(cMsg.t.getTID.get)
+      TypedActor(db.system).poisonPill(sender)
     } // case
 
   } // recieve

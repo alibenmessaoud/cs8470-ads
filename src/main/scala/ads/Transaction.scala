@@ -236,8 +236,6 @@ class TransactionImpl (db: Database) extends Transaction {
   def commit () = {
     trace.info("T%d commit()".format(tid))
     db.tm ! CommitMessage(this)
-    TypedActor.context.stop(TypedActor.context.self)
-    sys.exit(0)
   } // commit
 
   // implementation of Transaction rollback()
@@ -252,11 +250,8 @@ class TransactionImpl (db: Database) extends Transaction {
     trace.warning("T%d going to sleep for a while".format(tid))
     Thread sleep Transaction.getRandomInt(5000)
 
-    val child: Transaction = TypedActor(TypedActor.context).typedActorOf(TypedProps(classOf[Transaction], this), "Transaction-%d-child".format(tid))
-    child.execute
-
-    TypedActor.context.stop(TypedActor.context.self)
-    sys.exit(0)
+//    val child: Transaction = TypedActor(TypedActor.context).typedActorOf(TypedProps(classOf[Transaction], this), "Transaction-%d-child".format(tid))
+//    child.execute
 
   } // rollback
 
@@ -296,12 +291,12 @@ object TypedTransactionTestSGC extends App {
   // register the schema
   db.registerSchema(new PersonSchema())
 
-  for (i <- 1 to 10000) {
+  for (i <- 1 to 1000) {
 
     val timpl = new TransactionImpl(db) {
       override def body () {
 
-	val oid  = rand.nextInt(10000)
+	val oid  = rand.nextInt(100)
 
 	val name = read("person", oid, "name").get.asInstanceOf[String]
 	val age  = read("person", oid, "age").get.asInstanceOf[Int]
@@ -314,7 +309,7 @@ object TypedTransactionTestSGC extends App {
 
     val t: Transaction = db.makeTransaction(timpl, "Transaction-%d".format(i-1))
 
-    Thread sleep (10 + rand.nextInt(40))
+    Thread sleep (10 + rand.nextInt(35))
 
     // execute the transactiono
     t.execute
