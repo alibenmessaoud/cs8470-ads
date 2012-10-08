@@ -26,7 +26,7 @@ object Schema {
 class Schema (val _name: String, val db: Database) {
 
   // the FileMap for this schema
-  private lazy val fileMap = new FileMap(_name, "%s.dat".format(_name), this)
+  lazy val fileMap = new FileMap(_name, "%s-%s.dat".format(db.name, _name), this)
 
   // akka logger
   val trace = Logging(db.system, this)
@@ -96,6 +96,16 @@ class Schema (val _name: String, val db: Database) {
    * @return the schema row for that object
    */
   def apply (oid: Int) = getById(oid)
+
+  /**
+   * Flush modified, non dirty objects in this table to disk
+   */
+  def flush = fileMap.flush
+
+  /**
+   * Returns the page id for an object
+   */
+  def getPageIdFor (oid: Int) = (oid * width) / (width * fileMap.PAGE_SIZE)
 
 } // Schema
 
@@ -175,8 +185,8 @@ object SchemaTest extends App {
 
   db.registerSchema(new PersonSchema())
 
-  db.person(10).setAge(25)
-  db.person(10).setName("Michael")
+//  db.person(10).setAge(25)
+//  db.person(10).setName("Michael")
 
   println("age of oid %d = %s".format(10, db.person(10).getAge))
   println("name of oid %d = %s".format(10, db.table("person")(10).get("name")))

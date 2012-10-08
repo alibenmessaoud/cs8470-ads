@@ -1,11 +1,13 @@
 package ads
 
 import scala.collection.mutable.ListBuffer
-import scala.collection.mutable.ListBuffer
 
-import akka.actor.{Actor, ActorRef, ActorSystem}
-import akka.actor.Props
+import akka.actor.{ Actor, ActorRef, ActorSystem, Props }
+import akka.dispatch.{ Await, Future }
 import akka.event.Logging
+import akka.pattern.{ ask, pipe }
+import akka.util.duration._
+import akka.util.Timeout
 
 import ads.concurrency.ConcurrencyControl
 import ads.message.{ BeginMessage, CheckResponse, CommitMessage, ReadMessage, ReadResponse, WriteMessage, WriteResponse }
@@ -19,7 +21,7 @@ import ads.Op._
  * @author Michael E. Cotterell
  * @author Terrance Medina
  */
-class TransactionManager() extends Actor with ConcurrencyControl {
+class TransactionManager(db: Database) extends Actor with ConcurrencyControl {
 
   /**
    * Used for trace statements
@@ -43,7 +45,9 @@ class TransactionManager() extends Actor with ConcurrencyControl {
       check(rMsg.t, Op.Read, rMsg.oid) match {
 	case Granted    => {
 	  trace.info("read request granted: %s".format(rMsg))
-	  sender ! ReadResponse("hello")
+	  val future: Future[Option[Any]] = ask(db.sm, Read(rMsg.t.getTID.get, rMsg.table, rMsg.oid, rMsg.prop)).mapTo[Option[Any]]
+	  val response: Option[Any] = Await.result(future, 4 second)
+	  sender ! ReadResponse(response.get)
 	} // case
 	case Denied     => {
 	  trace.info("read request denied: %s".format(rMsg))
@@ -73,6 +77,7 @@ class TransactionManager() extends Actor with ConcurrencyControl {
       check(wMsg.t, Op.Write, wMsg.oid) match {
 	case Granted    => {
 	  trace.info("write request granted: %s".format(wMsg))
+	  db.sm ! Write(wMsg.t.getTID.get, wMsg.table, wMsg.oid, wMsg.prop, wMsg.value)
 	  sender ! WriteResponse(false, false, false)
 	} // case
 	case Denied     => {
@@ -97,6 +102,7 @@ class TransactionManager() extends Actor with ConcurrencyControl {
 
     case cMsg: CommitMessage => {
       trace.info("Message recieved: %s".format(cMsg))
+      db.sm ! Commit(cMsg.t.getTID.get)
     } // case
 
   } // recieve

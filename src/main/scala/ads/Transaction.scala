@@ -13,6 +13,7 @@ import akka.util.Timeout
 import akka.util.duration._
 
 import ads.message._
+import ads.schema._
 import ads.util._
 import ads.Op._
 
@@ -69,7 +70,7 @@ trait Transaction {
    * @param oid The object identifier.
    * @return the value of the object as an Option.
    */
-  def read (oid: Int): Option[Any]
+  def read (table: String, oid: Int, prop: String): Option[Any]
 
   /**
    * Write a value into the database.
@@ -77,7 +78,7 @@ trait Transaction {
    * @param oid The object identifier.
    * @param value The value to write into the database.
    */
-  def write (oid: Int, value: Any): Unit
+  def write (table: String, oid: Int, prop: String, value: Any): Unit
 
   /**
    * Commit this transaction.
@@ -166,7 +167,7 @@ class TransactionImpl (db: Database) extends Transaction {
   } // begin
 
   // implementation of Transaction read()
-  def read (oid: Int): Option[Any] = {
+  def read (table: String, oid: Int, prop: String): Option[Any] = {
 
     trace.info("T%d read(%d)".format(tid, oid))
 
@@ -176,7 +177,7 @@ class TransactionImpl (db: Database) extends Transaction {
     do {
       while (ret == null) {
 	try {
-	  val future = (db.tm ask ReadMessage(this, oid)).mapTo[ReadResponse]
+	  val future = (db.tm ask ReadMessage(this, table, oid, prop)).mapTo[ReadResponse]
 	  ret = Await.result(future, timeout.duration)
 
 	  if (ret.postpone) {
@@ -201,7 +202,7 @@ class TransactionImpl (db: Database) extends Transaction {
   } // read
 
   // implementation of Transaction write()
-  def write (oid: Int, value: Any): Unit = {    
+  def write (table: String, oid: Int, prop: String, value: Any): Unit = {    
 
     trace.info("T%d write(%d, %s)".format(tid, oid, value))
 
@@ -212,7 +213,7 @@ class TransactionImpl (db: Database) extends Transaction {
       while (ret == null) {
 	try {
 	 
-	  val future = (db.tm ask WriteMessage(this, oid, value)).mapTo[WriteResponse]
+	  val future = (db.tm ask WriteMessage(this, table, oid, prop, value)).mapTo[WriteResponse]
 	  ret = Await.result(future, timeout.duration).asInstanceOf[WriteResponse]
 	 
 	  if (ret.postpone) {
@@ -283,26 +284,39 @@ object TypedTransactionTestSGC extends App {
 
   val rand = new Random()
 
-  // Setup the database
+  // set up the database
   val db = new Database("MyTestDB")
 
-  for (i <- 1 to 100) {
+  // create a schema
+  class PersonSchema () extends Schema ("person", db) {
+    register(IntProperty("age"))
+    register(StringProperty("name", 32))
+  } // PersonSchema
+
+  // register the schema
+  db.registerSchema(new PersonSchema())
+
+  for (i <- 1 to 10000) {
 
     val timpl = new TransactionImpl(db) {
       override def body () {
-	val a = read(7)
-	val c = read(9)
-	write(7, 1)
-	val b = read(8)
-	write(9, 32)
+
+	val oid  = rand.nextInt(10000)
+
+	val name = read("person", oid, "name").get.asInstanceOf[String]
+	val age  = read("person", oid, "age").get.asInstanceOf[Int]
+	
+	write("person", oid, "name", "bob")
+	write("person", oid, "age", age + 1)
+
       } // body
     } // timpl
 
     val t: Transaction = db.makeTransaction(timpl, "Transaction-%d".format(i-1))
 
-    Thread sleep rand.nextInt(100)
+    Thread sleep (10 + rand.nextInt(40))
 
-    // execute the transaction
+    // execute the transactiono
     t.execute
 
   } // for

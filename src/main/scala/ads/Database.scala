@@ -40,8 +40,12 @@ class Database (val name: String) extends Dynamic {
   /**
    * This database's TransactionManager as an Actor
    */
-//  val tm = system.actorOf(Props(new TransactionManager() with SGC), name = "TransactionManager")
-  val tm = system.actorOf(Props(new TransactionManager() with SGC), name = "TransactionManager")
+  val tm = system.actorOf(Props(new TransactionManager(this) with SGC), name = "TransactionManager")
+
+  /**
+   * This database's StorageManager
+   */
+  val sm = system.actorOf(Props(new StorageManager(this)), name = "StorageManager")
 
   /**
    * Logger for this database

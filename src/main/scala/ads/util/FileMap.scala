@@ -30,11 +30,11 @@ class FileMap (val name: String, val filename: String, val schema: Schema) exten
   /**
    * The page size
    */
-  private val PAGE_SIZE = 10
+  val PAGE_SIZE = 10
 
-  private val datFile = new RandomAccessFile(filename, "rw")
-  private val cache   = new HashMap[Int, Array[Property[_]]]() with SynchronizedMap[Int, Array[Property[_]]]
-  private val pages   = new HashMap[Int, Page] with SynchronizedMap[Int, Page]
+  val datFile = new RandomAccessFile(filename, "rw")
+  val cache   = new HashMap[Int, Array[Property[_]]]() with SynchronizedMap[Int, Array[Property[_]]]
+  val pages   = new HashMap[Int, Page] with SynchronizedMap[Int, Page]
 
   trace.info("%s initialized".format(this))
 
@@ -107,7 +107,7 @@ class FileMap (val name: String, val filename: String, val schema: Schema) exten
     trace.info("Reading page %d from disk".format(pid))
     
     // seek to the appropriate place
-    datFile.seek(pid * schema.width * PAGE_SIZE)
+    datFile.seek(pid * (schema.width * PAGE_SIZE))
     trace.info("Seeking to %d".format(pid * schema.width * PAGE_SIZE))
 
     // read in the values
@@ -128,13 +128,11 @@ class FileMap (val name: String, val filename: String, val schema: Schema) exten
 	// read into the array
 	datFile.read(bytes)
 
-
 	// set the value from the bytes
 	prop.setFromByteArray(bytes)
 
 	// add the cloned property to the array
 	array(j) = prop
-
 
 	// increment counter
 	j += 1
@@ -153,13 +151,13 @@ class FileMap (val name: String, val filename: String, val schema: Schema) exten
 
   } // readPage
 
-  def get (key: Int): Option[Array[Property[_]]] = {
+  def get (oid: Int): Option[Array[Property[_]]] = {
 
     // this will make sure the page is in memory
-    val p = getPageFor(key)
+    val p = getPageFor(oid)
 
     // create the array
-    val array = cache(key)
+    val array = cache(oid)
 
     // return the array
     Some(array)
@@ -183,6 +181,9 @@ class FileMap (val name: String, val filename: String, val schema: Schema) exten
 
     // update the cache
     cache(oid) = props
+
+    // mark the page as dirty
+    p.dirty = true
 
     // return this map
     this
