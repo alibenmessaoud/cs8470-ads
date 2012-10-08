@@ -20,7 +20,7 @@ object Schema {
 } // Schema
 
 /**
- * A Database Schema
+ * A Database Table Schema
  */
 class Schema (val _name: String, val db: Database) {
 
@@ -31,7 +31,7 @@ class Schema (val _name: String, val db: Database) {
   private val trace = Logging(db.system, this)
 
   // properties list
-  private val properties: Map[String, Property[_]] = new HashMap[String, Property[_]]()
+  val properties: Map[String, Property[_]] = new HashMap[String, Property[_]]()
 
   // register a property with this schema
   def register (p: Property[_]): Unit = {
@@ -48,11 +48,30 @@ class Schema (val _name: String, val db: Database) {
 
   } // register
 
+  /**
+   * The byte width of this table schema
+   */
   def width = properties.values.map(_.width).sum
+
+  /**
+   * The number of properties in this table schema
+   */
+  def size = properties.values.size
 
   override def toString = "Schema(name = \"%s\", width = %d)".format(_name, width)
 
   def getName = _name
+
+  def printSchema: Unit = {
+    println(this)
+    println(" - name: %s".format(getName))
+    println(" - db: %s".format(db))
+    println(" - row byte width: %d".format(width))
+    println(" - properties:")
+    for (p <- properties.keys) println("    - %s -> %s".format(p, properties(p)))
+  } // printSchema
+
+  def getPropArray: Array[Property[_]] = properties.values.map(_.makeClone).toArray
 
 } // Schema
 
@@ -69,6 +88,6 @@ object SchemaTest extends App {
 
   val schema = new MySchema()
 
-  println(schema)
+  schema.printSchema
 
 } // SchemaTest

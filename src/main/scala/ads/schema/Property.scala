@@ -21,9 +21,6 @@ object Property {
 abstract class Property [T] (name: String, default: T, required: Boolean = false, index: Boolean = false, validator: T => Boolean = (e: T) => true) 
                             (implicit schema: Schema) {
 
-  // register the property with the schema
-  schema.register(this)
-
   /**
    * Holds the current value of the Property
    */
@@ -33,6 +30,8 @@ abstract class Property [T] (name: String, default: T, required: Boolean = false
    * The maximum byte width of this property
    */
   def width: Int
+
+  def makeClone [U <: Property[T]]: U
 
   /**
    * Return the current value of the Property

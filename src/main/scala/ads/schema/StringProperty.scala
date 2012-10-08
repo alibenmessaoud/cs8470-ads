@@ -18,6 +18,12 @@ case class StringProperty (name: String, maxLength: Int = 32, default: String = 
 
   def width = maxLength * 2
 
+  def makeClone [StringProperty] = {
+    val obj = StringProperty(name, maxLength, default, required, index, validator)
+    obj.set(get)
+    obj.asInstanceOf[StringProperty]
+  } // clone
+
   override def set (value: String): Boolean = if(value.length <= maxLength) {
     super.set(value)
     true

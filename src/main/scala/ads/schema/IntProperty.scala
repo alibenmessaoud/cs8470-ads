@@ -9,6 +9,12 @@ case class IntProperty (name: String, default: Int = 0, required: Boolean = fals
 
   def width = Property.INT_BYTES_WIDTH
 
+  def makeClone [IntProperty] = {
+    val obj = IntProperty(name, default, required, index, validator)
+    obj.set(get)
+    obj.asInstanceOf[IntProperty]
+  } // clone
+
   def getAsByteArray: Array[Byte] = {
 
     // create the byte buffer 

@@ -1,6 +1,6 @@
 package ads
 
-class StorageManager () {
+class StorageManager (db: Database) {
 
   def read (oid: Int): Array[Any] = null
 

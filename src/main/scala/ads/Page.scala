@@ -1,12 +1,12 @@
 package ads
 
-class Page (n: Int) {
+import scala.collection.mutable.{ HashMap, Map }
 
-  var accessed = 0     // last time of access
+class Page (val pid: Int) {
+
+  var accessed = System.currentTimeMillis // last time of access
   var modified = false // change to the page
   var dirty    = false // data written, but not yet comitted.
-
-  val contents = Array.ofDim[Record](n)
 
 } // Page
 

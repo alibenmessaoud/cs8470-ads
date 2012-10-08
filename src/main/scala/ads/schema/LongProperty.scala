@@ -9,6 +9,12 @@ case class LongProperty (name: String, default: Long = 0L, required: Boolean = f
 
   def width = Property.LONG_BYTES_WIDTH
 
+  def makeClone [LongProperty] = {
+    val obj = LongProperty(name, default, required, index, validator)
+    obj.set(get)
+    obj.asInstanceOf[LongProperty]
+  } // clone
+
   def getAsByteArray: Array[Byte] = {
 
     // create the byte buffer 
