@@ -1,6 +1,6 @@
 package ads.util
 
-import scala.collection.mutable.{ HashMap, Map }
+import scala.collection.mutable.{ HashMap, Map, SynchronizedMap }
 
 import java.io.RandomAccessFile
 
@@ -33,15 +33,15 @@ class FileMap (val name: String, val filename: String, val schema: Schema) exten
   private val PAGE_SIZE = 10
 
   private val datFile = new RandomAccessFile(filename, "rw")
-  private val cache   = new HashMap[Int, Array[Property[_]]]()
-  private val pages   = new HashMap[Int, Page]
+  private val cache   = new HashMap[Int, Array[Property[_]]]() with SynchronizedMap[Int, Array[Property[_]]]
+  private val pages   = new HashMap[Int, Page] with SynchronizedMap[Int, Page]
 
   trace.info("%s initialized".format(this))
 
   /**
    * Write modified, non-dirty pages to the file
    */
-  def flush: Unit = {
+  def flush: Unit = synchronized {
 
     trace.info("flushing")
 
@@ -82,7 +82,7 @@ class FileMap (val name: String, val filename: String, val schema: Schema) exten
   /**
    * Returns the page where a record should live
    */
-  private def getPage (oid: Int): Page = {
+  private def getPageFor (oid: Int): Page = {
 
     trace.info("Page for oid = %d requested".format(oid))
     
@@ -90,19 +90,19 @@ class FileMap (val name: String, val filename: String, val schema: Schema) exten
     val pid = (oid * schema.width) / (schema.width * PAGE_SIZE)
 
     pages.get(pid) match {
-      case Some(page) => {} // do nothing
+      case Some(page) => trace.info("Page %d already in memory".format(page.pid))
       case None       => readPage(pid)
     } // match
 
     // return the page
     pages(pid)
 
-  } // getPage
+  } // getPageFor
 
   /**
    * Reads a page into the cache from disk
    */
-  private def readPage (pid: Int): Unit = {
+  private def readPage (pid: Int): Unit = synchronized {
 
     trace.info("Reading page %d from disk".format(pid))
     
@@ -156,7 +156,7 @@ class FileMap (val name: String, val filename: String, val schema: Schema) exten
   def get (key: Int): Option[Array[Property[_]]] = {
 
     // this will make sure the page is in memory
-    val p = getPage(key)
+    val p = getPageFor(key)
 
     // create the array
     val array = cache(key)
@@ -174,10 +174,12 @@ class FileMap (val name: String, val filename: String, val schema: Schema) exten
     val (oid, props) = kv
 
     // make sure the page is in memory
-    val p = getPage(oid)
+    val p = getPageFor(oid)
 
     // update the page
-    p.modified = true
+    synchronized {
+      p.modified = true
+    } // synchronized
 
     // update the cache
     cache(oid) = props
@@ -185,7 +187,7 @@ class FileMap (val name: String, val filename: String, val schema: Schema) exten
     // return this map
     this
 
-  } // 
+  } // +-
 
   override def - (key: Int) = null
   def -= (key: Int) = null

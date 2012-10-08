@@ -72,12 +72,28 @@ class Database (val name: String) extends Dynamic {
     makeTransaction(impl, name).execute
 
   /**
+   * Return a table by name
+   *
+   * @param tbl the name of the table
+   * @return the table schema
+   */
+  def table (tbl: String): Schema = {
+
+    // if there is a table schema by that name then return it
+    if (schemas.contains(tbl)) return schemas(tbl)
+
+    trace.warning("thought you wanted a table called \"%s\", but it does not exist".format(tbl))
+    null
+
+  } // table
+
+  /**
    * Allows us to grab table schemas as if they were methods
    */
   def applyDynamic (methodName: String) (args: Any*) : SchemaRow = {
 
     // if there is a table schema by that name then return it
-    if (schemas.contains(methodName)) return schemas(methodName)(args(0).asInstanceOf[Int])
+    if (schemas.contains(methodName)) return table(methodName)(args(0).asInstanceOf[Int])
 
     trace.warning("thought you wanted a table called \"%s\", but it does not exist".format(methodName))
 

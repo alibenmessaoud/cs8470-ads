@@ -110,39 +110,49 @@ class Schema (val _name: String, val db: Database) {
  */
 class SchemaRow (schema: Schema, oid: Int, fileMap: FileMap) extends Dynamic {
 
+  def get (elem: String): Any = {
+      schema.trace.info("getting value for property \"%s\" for oid %d".format(elem, oid))
+      for (prop <- fileMap(oid) if prop.getName == elem) return prop.get
+      return null
+  } // get
+
+  def set (elem: String) (value: Any): Any = {
+
+      schema.trace.info("setting value for property \"%s\" = %s for oid %d".format(elem, value, oid))
+
+      val row = fileMap(oid)
+
+      // check to make sure the property exists
+      for (prop <- row if prop.getName == elem) {
+	
+	// set the value
+	val ret = prop.setFromAny(value)
+
+	if (ret) {
+	  // update the map
+	  fileMap += oid -> row
+	} // if
+
+	return ret
+
+      } // for
+
+      return true
+  } // set
+
   // allows us to get a property by name
   def applyDynamic (elem: String) (args: Any*): Any = {
 
     if (elem.startsWith("get")) {
 
       val pName = elem.substring(3, 4).toLowerCase + elem.replaceAllLiterally("get", "").substring(1)
-
-      schema.trace.info("getting value for property \"%s\" for oid %d".format(pName, oid))
-
-      // check to make sure the property exists
-      for (prop <- fileMap(oid) if prop.getName == pName) return prop.get
-
+      return get(pName)
+      
     } else if (elem.startsWith("set")) {
 
       val pName = elem.substring(3, 4).toLowerCase + elem.replaceAllLiterally("set", "").substring(1)
-
-      schema.trace.info("setting value for property \"%s\" = %s for oid %d".format(pName, args(0), oid))
-
-      val row = fileMap(oid)
-
-      // check to make sure the property exists
-      for (prop <- row if prop.getName == pName) {
-	
-	// set the value
-	prop.setFromAny(args(0))
-
-	// update the map
-	fileMap += oid -> row
-
-      } // for
-
-      return true
-
+      return set(pName)(args(0))
+      
     } // if
 
     schema.trace.warning("thought you wanted a row property called \"%s\", but it does not exist".format(elem))
@@ -169,6 +179,6 @@ object SchemaTest extends App {
   db.person(10).setName("Michael")
 
   println("age of oid %d = %s".format(10, db.person(10).getAge))
-  println("name of oid %d = %s".format(10, db.person(10).getName))
+  println("name of oid %d = %s".format(10, db.table("person")(10).get("name")))
 
 } // SchemaTest
