@@ -27,12 +27,16 @@ class Database (val name: String) {
   /**
    * This database's TransactionManager as an Actor
    */
+//  val tm = system.actorOf(Props(new TransactionManager() with SGC), name = "TransactionManager")
   val tm = system.actorOf(Props(new TransactionManager() with SGC), name = "TransactionManager")
 
   /**
    * Logger for this database
    */
   val trace = Logging(system, this)
+
+  // go ahead and log some stuff
+  trace.info("%s started".format(this))
 
   /**
    * Creates a Transaction for this database based on an implementation of the

@@ -251,13 +251,7 @@ class TransactionImpl (db: Database) extends Transaction {
     trace.warning("T%d going to sleep for a while".format(tid))
     Thread sleep Transaction.getRandomInt(5000)
 
-    // TODO reexecute the body
-    // execute   
-
-    // kill the actor
-    // TODO TypedActor.context.stop(TypedActor.context.self)
-
-    val child: Transaction = TypedActor(TypedActor.context).typedActorOf(TypedProps(classOf[Transaction], this), "t%d-child".format(tid))
+    val child: Transaction = TypedActor(TypedActor.context).typedActorOf(TypedProps(classOf[Transaction], this), "Transaction-%d-child".format(tid))
     child.execute
 
     TypedActor.context.stop(TypedActor.context.self)
@@ -279,7 +273,7 @@ class TransactionImpl (db: Database) extends Transaction {
   } // touch
 
   // implementation of toString
-  override def toString = "T%d".format(tid)
+  override def toString = "Transaction-%d".format(tid)
 
 } // Transaction class
 
@@ -292,13 +286,7 @@ object TypedTransactionTestSGC extends App {
   // Setup the database
   val db = new Database("MyTestDB")
 
-  // Setup the Transaction ActorSystem
-  implicit val tsys = db.system
-
-  def txn (impl: Transaction, name: String) (implicit tsys: ActorSystem) = 
-    TypedActor(tsys).typedActorOf(TypedProps(classOf[Transaction], impl), name)
-
-  for (i <- 1 to 10) {
+  for (i <- 1 to 100) {
 
     val timpl = new TransactionImpl(db) {
       override def body () {
@@ -310,9 +298,7 @@ object TypedTransactionTestSGC extends App {
       } // body
     } // timpl
 
-    // The following line turns the TransactionImpl into a TypedActor
-    // val t: Transaction = TypedActor(tsys).typedActorOf(TypedProps(classOf[Transaction], timpl), "t%d".format(i-1))
-    val t: Transaction = txn(timpl, "t%d".format(i-1))
+    val t: Transaction = db.makeTransaction(timpl, "Transaction-%d".format(i-1))
 
     Thread sleep rand.nextInt(100)
 
