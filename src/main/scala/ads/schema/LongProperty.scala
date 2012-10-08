@@ -5,7 +5,7 @@ import java.nio.ByteBuffer
 import ads.Database
 
 case class LongProperty (name: String, default: Long = 0L, required: Boolean = false, index: Boolean = false, validator: Long => Boolean = (e: Long) => true) 
-                        (implicit schema: Schema) extends Property [Long] (name, default, required, index, validator) (schema) {
+                        extends Property [Long] (name, default, required, index, validator) {
 
   def width = Property.LONG_BYTES_WIDTH
 

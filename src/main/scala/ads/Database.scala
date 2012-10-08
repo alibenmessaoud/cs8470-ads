@@ -1,9 +1,12 @@
 package ads
 
-import ads.concurrency._
+import scala.collection.mutable.{ Map, HashMap }
 
 import akka.actor.{ Actor, ActorContext, ActorSystem, Props, TypedActor, TypedProps }
 import akka.event.{ Logging, LogSource }
+
+import ads.concurrency._
+import ads.schema.{ Schema, SchemaRow }
 
 /**
  * Companion object for Database class
@@ -17,7 +20,17 @@ object Database {
 
 } // Database
 
-class Database (val name: String) {
+class Database (val name: String) extends Dynamic {
+
+  /**
+   * The table schemas associated with this database
+   */
+  val schemas: Map[String, Schema] = new HashMap[String, Schema]()
+
+  def registerSchema (schema: Schema): Unit = {
+    schemas += schema.getName -> schema
+    trace.info("registered %s".format(schema))
+  } // registerScheme
 
   /**
    * This Database's ActorSystem.
@@ -57,5 +70,22 @@ class Database (val name: String) {
    */
   def makeAndExecTransaction (impl: Transaction, name: String) = 
     makeTransaction(impl, name).execute
+
+  /**
+   * Allows us to grab table schemas as if they were methods
+   */
+  def applyDynamic (methodName: String) (args: Any*) : SchemaRow = {
+
+    // if there is a table schema by that name then return it
+    if (schemas.contains(methodName)) return schemas(methodName)(args(0).asInstanceOf[Int])
+
+    trace.warning("thought you wanted a table called \"%s\", but it does not exist".format(methodName))
+
+    // operation doesn't exist
+    throw new UnsupportedOperationException
+
+  } // selectDynamic
+
+  override def toString = "Database(\"%s\")".format(name)
 
 } // Database

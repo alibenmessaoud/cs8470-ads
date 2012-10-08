@@ -18,8 +18,7 @@ object Property {
  
 } // Property
 
-abstract class Property [T] (name: String, default: T, required: Boolean = false, index: Boolean = false, validator: T => Boolean = (e: T) => true) 
-                            (implicit schema: Schema) {
+abstract class Property [T] (name: String, default: T, required: Boolean = false, index: Boolean = false, validator: T => Boolean = (e: T) => true) {
 
   /**
    * Holds the current value of the Property
@@ -56,6 +55,8 @@ abstract class Property [T] (name: String, default: T, required: Boolean = false
     false
   } // set
 
+  def setFromAny (value: Any): Boolean = set(value.asInstanceOf[T])
+
   /**
    * Returns the byte array representation for this property's value
    *
@@ -71,6 +72,7 @@ abstract class Property [T] (name: String, default: T, required: Boolean = false
    */
   def setFromByteArray [T] (bytes: Array[Byte]): Boolean
 
+  def getDefault = default
   def getName = name
   def isRequired = required
 
