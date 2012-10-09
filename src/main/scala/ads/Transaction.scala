@@ -236,6 +236,7 @@ class TransactionImpl (db: Database) extends Transaction {
   def commit () = {
     trace.info("T%d commit()".format(tid))
     db.tm ! CommitMessage(this)
+    TypedActor(TypedActor.context.system).poisonPill(this)
   } // commit
 
   // implementation of Transaction rollback()
@@ -288,8 +289,14 @@ object TypedTransactionTestSGC extends App {
     register(StringProperty("name", 32))
   } // PersonSchema
 
+  class StudentSchema () extends Schema ("student", db) {
+    register(LongProperty("810"))
+    register(StringProperty("name", 32))
+  } // StudentSchema
+
   // register the schema
   db.registerSchema(new PersonSchema())
+  db.registerSchema(new StudentSchema())
 
   for (i <- 1 to 1000) {
 
@@ -304,12 +311,16 @@ object TypedTransactionTestSGC extends App {
 	write("person", oid, "name", "bob")
 	write("person", oid, "age", age + 1)
 
+        val sName = read("student", oid, "name").get.asInstanceOf[String]
+
+        write("student", oid, "name", "michael")
+
       } // body
     } // timpl
 
     val t: Transaction = db.makeTransaction(timpl, "Transaction-%d".format(i-1))
 
-    Thread sleep (10 + rand.nextInt(35))
+    Thread sleep (15 + rand.nextInt(50))
 
     // execute the transactiono
     t.execute

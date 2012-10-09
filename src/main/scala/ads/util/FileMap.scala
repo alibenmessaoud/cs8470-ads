@@ -30,7 +30,7 @@ class FileMap (val name: String, val filename: String, val schema: Schema) exten
   /**
    * The page size
    */
-  val PAGE_SIZE = 10
+  val PAGE_SIZE = 100
 
   val datFile = new RandomAccessFile(filename, "rw")
   val cache   = new HashMap[Int, Array[Property[_]]]() with SynchronizedMap[Int, Array[Property[_]]]
