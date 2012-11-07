@@ -5,7 +5,7 @@ import java.nio.ByteBuffer
 import ads.Database
 
 case class IntProperty (name: String, default: Int = 0, required: Boolean = false, index: Boolean = false, validator: Int => Boolean = (e: Int) => true) 
-                       (implicit schema: Schema) extends Property [Int] (name, default, required, index, validator) (schema) {
+                       extends Property [Int] (name, default, required, index, validator) {
 
   def width = Property.INT_BYTES_WIDTH
 

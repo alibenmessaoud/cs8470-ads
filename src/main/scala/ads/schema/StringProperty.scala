@@ -8,7 +8,7 @@ import java.nio.charset.Charset
 import ads.Database
 
 case class StringProperty (name: String, maxLength: Int = 32, default: String = "", required: Boolean = false, index: Boolean = false, validator: String => Boolean = (e: String) => true) 
-                          (implicit schema: Schema) extends Property [String] (name, default, required, index, validator) (schema) {
+                          extends Property [String] (name, default, required, index, validator) {
 
   private val encoding = "UTF-8"
 

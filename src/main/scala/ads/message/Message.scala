@@ -45,7 +45,7 @@ case class ReadResponse (value: Any, postpone: Boolean = false, denied: Boolean 
  * @param t A Transaction object.
  * @param oid An object identifier.
  */
-case class ReadMessage (t: Transaction, oid: Int) extends Message ()
+case class ReadMessage (t: Transaction, table: String, oid: Int, prop: String) extends Message ()
 
 /**
  * A message indicating that a Transaction requests to write a value into
@@ -57,7 +57,7 @@ case class ReadMessage (t: Transaction, oid: Int) extends Message ()
  * @param oid An object identifier.
  * @param value The value that is to be written.
  */
-case class WriteMessage (t: Transaction, oid: Int, value: Any) extends Message ()
+case class WriteMessage (t: Transaction, table: String, oid: Int, prop: String, value: Any) extends Message ()
 
 /**
  * A message indicating that a Transaction requests to commit itself to the
