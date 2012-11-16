@@ -49,6 +49,10 @@ class ARIMA (y: VectorD, t: VectorD)
         z
     } // ar
 
+    /** Returns the backwards differenc of the input vector
+     *  @param f input vector
+     *  @param h the lag
+     */
     def backwardDifference (f: VectorD, h: Int): VectorD = {
         val vec = new VectorD (f.dim - h) 
         for (i <- h until f.dim) {
@@ -63,41 +67,44 @@ class ARIMA (y: VectorD, t: VectorD)
     def train ()
     {
 
-        /* Stage 1: (from Wikipedia)
-         * Model identification and model selection: making sure that the variables 
-         * are stationary, identifying seasonality in the dependent series (seasonally 
-         * differencing it if necessary), and using plots of the autocorrelation and partial 
-         * autocorrelation functions of the dependent time series to decide which (if any) 
-         * autoregressive or moving average component should be used in the model.
-         */
+         val threshold = 10.0E-5
+         var iter      = 0       
+  
+         var yt: VectorD         = null
+         var r: SimpleRegression = null
 
-         //Detect Stationarity
-          //Unit root tests? Dickie-Fuller test?
+         // Box-Jenkins using the Dickey–Fuller test
+         // @see http://en.wikipedia.org/wiki/Box-Jenkins
+         // @see http://en.wikipedia.org/wiki/Dickey%E2%80%93Fuller_test
+         do {
 
-         // the first difference operator \nambla y_t
-         //               
+             // increase iter
+             iter += 1
 
-         // the test is:
-         //     \nambla y_t = \delta y_{t-1} + u_t
-         //     check the difference
-         //     if difference is = u_t then a unit root exists
+             // get our backwards difference
+             yt     = backwardDifference(y, iter)
+             
+             // pad our backwards difference for regression
+             val padded = new VectorD(Array.fill(iter)(1.0)) ++ yt
 
-         val yt     = backwardDifference(y, 1)
-         val padded = yt.oneAt(0, 1) ++ yt
-         val x      = new MatrixD (t.dim, 2)
+             // build our time matrix
+             val x      = new MatrixD (t.dim, 2)
+             for (i <- 0 until t.dim) {
+                 x(i, 0) = 1.0
+                 x(i, 1) = t(i)
+	     } // for
 
-         for (i <- 0 until t.dim) {
-             x(i, 0) = 1.0
-             x(i, 1) = t(i)
-	 } // for
+             // regression on x and padded yt
+             r = new SimpleRegression(x, padded)
+             r.train
 
-         println("x.dim1 = %d, yt.dim = %d, y.dim = %d, t.dim = %d".format(x.dim1, yt.dim, y.dim, t.dim))         
+         } while (r.fit._2 > threshold && iter < 3)
 
-         val r = new SimpleRegression(x, padded)
-         r.train
-         val fit = r.fit
+         
 
-         println(fit)
+         println("iter = %d".format(iter))
+
+         
 
           //var r = new Regression(t, y)
           //r.train
