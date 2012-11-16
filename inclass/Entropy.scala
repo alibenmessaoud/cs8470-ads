@@ -32,8 +32,9 @@ object EntropyTest extends App
   val e_outlook = new VectorD(Entropy.getEntropy(p0), Entropy.getEntropy(p1), Entropy.getEntropy(p2))
   val weights = new VectorD(5./14, 5./14, 4./14)
 
-  //println(Entropy.getAvgEntropy(new VectorD(.811, .918, 1), new VectorD(4./14, 6./14, 4./14)))
   println(Entropy.getAvgEntropy(e_outlook, weights))
+  println(Entropy.getEntropy(new VectorD(1./3, 2./3)))
+  //println(Entropy.getAvgEntropy(new VectorD(.811, .918, 1), new VectorD(4./14, 6./14, 4./14)))
 
 }
 

@@ -70,6 +70,7 @@ class LockTable {
 
   /**
    * Unlock/release the lock on data object oid.
+   *  TODO: cycle through mailbox and activate all waiting readers
    * @param tid  the transaction id
    * @param oid  the data object id
    */

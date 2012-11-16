@@ -55,6 +55,66 @@ class ARIMA (y: VectorD, t: VectorD)
     def train ()
     {
         // FIX: to be implemented
+        /* Stage 1: (from Wikipedia)
+         * Model identification and model selection: making sure that the variables 
+         * are stationary, identifying seasonality in the dependent series (seasonally 
+         * differencing it if necessary), and using plots of the autocorrelation and partial 
+         * autocorrelation functions of the dependent time series to decide which (if any) 
+         * autoregressive or moving average component should be used in the model.
+         */
+
+         //Detect Stationarity
+          //Unit root tests? Dickie-Fuller test?
+          //var r = new Regression(t, y)
+          //r.train
+          //var fit = r.fit
+
+         //if fit != 0 Perform First-order differencing
+
+         if(false//if the data is non-stationary, linear)
+         {
+           firstOrderDiff(y)
+         }
+         //Perform Second-order differencing
+         else if(false//if the data is non-stationary, quadratic)
+         {
+           secondOrderDiff(y)
+         }
+         
+         //Disregard Seasonality
+         //(*Diregard*) Detect Seasonality
+         
+         // Find AR order --> p
+         // Find MA order --> q
+
+        /* Stage 2: (from Wikipedia)
+         * Parameter estimation using computation algorithms to arrive at coefficients which 
+         * best fit the selected ARIMA model. The most common methods use maximum likelihood 
+         * estimation or non-linear least-squares estimation.
+         */
+
+         //This is a non-linear optimisation problem, need to search for the max of the likelihood surface
+
+         //Guess at initial values: Yule-Walker Estimation (pure autoregressive) 
+         //or for q>0 use Hannan-Rissanan estimation
+
+
+        /* Stage 3: (from Wikipedia)
+         * Model checking by testing whether the estimated model conforms to the specifications 
+         * of a stationary univariate process. In particular, the residuals should be independent 
+         * of each other and constant in mean and variance over time. (Plotting the mean and 
+         * variance of residuals over time and performing a Ljung-Box test or plotting 
+         * autocorrelation and partial autocorrelation of the residuals are helpful to identify 
+         * misspecification.) If the estimation is inadequate, we have to return to step one 
+         * and attempt to build a better model.
+         */
+
+         //calculate a vector of residuals (diff between model and data points)
+         //generate white noise (Gaussian distributed) use Scalation random pkg to do this
+         //if the residuals are random (i.e. if they have no autocorrelation) then the fit is good
+         //TODO: we may not even have to generate white noise here??
+
+
     } // train
 
     //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
