@@ -49,12 +49,20 @@ class ARIMA (y: VectorD, t: VectorD)
         z
     } // ar
 
+    def backwardDifference (f: VectorD, h: Int): VectorD = {
+        val vec = new VectorD (f.dim - h) 
+        for (i <- h until f.dim) {
+            vec(i - h) = f(i) - f(i - h)
+	} // for
+        vec
+    } // backwardDifference
+
     //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
     /** Fit an ARIMA model to historical times series data.
      */
     def train ()
     {
-        // FIX: to be implemented
+
         /* Stage 1: (from Wikipedia)
          * Model identification and model selection: making sure that the variables 
          * are stationary, identifying seasonality in the dependent series (seasonally 
@@ -65,12 +73,36 @@ class ARIMA (y: VectorD, t: VectorD)
 
          //Detect Stationarity
           //Unit root tests? Dickie-Fuller test?
+
+         // the first difference operator \nambla y_t
+         //               
+
+         // the test is:
+         //     \nambla y_t = \delta y_{t-1} + u_t
+         //     check the difference
+         //     if difference is = u_t then a unit root exists
+
+         val yt     = backwardDifference(y, 1)
+         val padded = yt.oneAt(0, 1) ++ yt
+         val x      = new MatrixD (padded.dim, 1)
+
+         for (i <- 0 until padded.dim) x(i, 0) = padded(i)
+
+         println("x.dim1 = %d, yt.dim = %d, y.dim = %d, t.dim = %d".format(x.dim1, yt.dim, y.dim, t.dim))         
+
+         val r = new Regression(x, t)
+         r.train
+         val fit = r.fit
+
+         println(fit)
+
           //var r = new Regression(t, y)
           //r.train
           //var fit = r.fit
 
          //if fit != 0 Perform First-order differencing
 
+         /**
          if(false//if the data is non-stationary, linear)
          {
            firstOrderDiff(y)
@@ -80,6 +112,8 @@ class ARIMA (y: VectorD, t: VectorD)
          {
            secondOrderDiff(y)
          }
+	 *
+	 */
          
          //Disregard Seasonality
          //(*Diregard*) Detect Seasonality
@@ -158,6 +192,8 @@ object ARIMATest extends App
     } // for
 
     val ts = new ARIMA (y, t)
+
+    ts.train
 
     val z = ts.ma (5)
     new Plot (t, y, z, "Plot of y, z vs. t")

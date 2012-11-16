@@ -298,12 +298,12 @@ object TypedTransactionTestSGC extends App {
   db.registerSchema(new PersonSchema())
   db.registerSchema(new StudentSchema())
 
-  for (i <- 1 to 1000) {
+  for (i <- 1 to 10000) {
 
     val timpl = new TransactionImpl(db) {
       override def body () {
 
-	val oid  = rand.nextInt(100)
+	val oid  = rand.nextInt(1000)
 
 	val name = read("person", oid, "name").get.asInstanceOf[String]
 	val age  = read("person", oid, "age").get.asInstanceOf[Int]
@@ -313,14 +313,15 @@ object TypedTransactionTestSGC extends App {
 
         val sName = read("student", oid, "name").get.asInstanceOf[String]
 
-        write("student", oid, "name", "michael")
+        write("student", oid, "name", name)
 
       } // body
     } // timpl
 
     val t: Transaction = db.makeTransaction(timpl, "Transaction-%d".format(i-1))
 
-    Thread sleep (15 + rand.nextInt(50))
+    //Thread sleep (20 + rand.nextInt(30))
+    Thread sleep 50
 
     // execute the transactiono
     t.execute
