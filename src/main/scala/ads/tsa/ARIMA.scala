@@ -84,13 +84,16 @@ class ARIMA (y: VectorD, t: VectorD)
 
          val yt     = backwardDifference(y, 1)
          val padded = yt.oneAt(0, 1) ++ yt
-         val x      = new MatrixD (padded.dim, 1)
+         val x      = new MatrixD (t.dim, 2)
 
-         for (i <- 0 until padded.dim) x(i, 0) = padded(i)
+         for (i <- 0 until t.dim) {
+             x(i, 0) = 1.0
+             x(i, 1) = t(i)
+	 } // for
 
          println("x.dim1 = %d, yt.dim = %d, y.dim = %d, t.dim = %d".format(x.dim1, yt.dim, y.dim, t.dim))         
 
-         val r = new Regression(x, t)
+         val r = new SimpleRegression(x, padded)
          r.train
          val fit = r.fit
 
