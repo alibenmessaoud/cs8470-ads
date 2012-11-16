@@ -106,30 +106,13 @@ class ARIMA (y: VectorD, t: VectorD)
 
          
 
-          //var r = new Regression(t, y)
-          //r.train
-          //var fit = r.fit
-
-         //if fit != 0 Perform First-order differencing
-
-         /**
-         if(false//if the data is non-stationary, linear)
-         {
-           firstOrderDiff(y)
-         }
-         //Perform Second-order differencing
-         else if(false//if the data is non-stationary, quadratic)
-         {
-           secondOrderDiff(y)
-         }
-	 *
-	 */
-         
-         //Disregard Seasonality
-         //(*Diregard*) Detect Seasonality
-         
          // Find AR order --> p
+              //for p = 1, acf(yt) "should have an exponentially decreasing appearance"
+              //for p > 1, pacf(yt) should become 0 at lag p+1
+
          // Find MA order --> q
+              // let i = the lag where acf(yt) becomes 0
+              // then q = i-1
 
         /* Stage 2: (from Wikipedia)
          * Parameter estimation using computation algorithms to arrive at coefficients which 
