@@ -10,5 +10,7 @@ libraryDependencies += "org.scalatest" %% "scalatest" % "1.8" % "test"
 
 libraryDependencies += "com.typesafe.akka" % "akka-actor" % "2.0.3"
 
+libraryDependencies += "org.scala-lang" % "scala-swing" % "2.9.2"
+
 scalacOptions ++= Seq("-unchecked", "-deprecation", "-Xexperimental")
 
