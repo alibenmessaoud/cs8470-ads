@@ -5,6 +5,7 @@ import scalation.linalgebra.{MatrixD, VectorD}
 import scalation.plot.Plot
 import scalation.random.Random
 import scalation.util.Error
+import scalation.stat.StatVector
 
 //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 /** This class provide basic time series analysis capabilities for
@@ -114,6 +115,22 @@ class ARIMA (y: VectorD, t: VectorD)
               // let i = the lag where acf(yt) becomes 0
               // then q = i-1
 
+         plotACF(yt)
+         //Interpreting the autocorrelation function
+              //Case: Exponential, decaying to zero -> 
+                //AR, use PACF to determin order
+              //Case: Alternating +/-, decaying to zero ->
+                //AR, use PACF to determin order
+              //Case: One or more spikes, the rest at zero ->
+                //MA, order determined wjere plot becomes 0
+              //Case: Decay, starting after a few lags
+                //Mixed AR/MA
+              //Case: All zero or close to 0
+                //Data is random
+              //Case: No decay to zero
+                //Data is not stationary
+
+
         /* Stage 2: (from Wikipedia)
          * Parameter estimation using computation algorithms to arrive at coefficients which 
          * best fit the selected ARIMA model. The most common methods use maximum likelihood 
@@ -167,6 +184,26 @@ class ARIMA (y: VectorD, t: VectorD)
         throw new UnsupportedOperationException ()
     } // predict
 
+    //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+    /** Plot the autocorrelation functin of a passed-in vector of data.
+     *  @param t the data vector
+     */
+    def plotACF(t: VectorD) 
+    {
+      val st = new StatVector(t)
+      val acf = new VectorD(t.dim)
+      val lag_axis = new VectorD(t.dim)
+      val zero = new VectorD(t.dim)
+      for(i <- 0 until t.dim)
+      {
+        zero(i) = 0
+        lag_axis(i) = i
+        //println("autocorrelation at %d = %f\n".format( i, st.acorr(i)))
+        acf(i) = st.acorr(i)
+      }
+      new Plot (lag_axis, acf, zero, "Plot of autocorrelation function")
+    }
+
 } // ARIMA class
 
 
@@ -189,10 +226,10 @@ object ARIMATest extends App
     ts.train
 
     val z = ts.ma (5)
-    new Plot (t, y, z, "Plot of y, z vs. t")
+    //new Plot (t, y, z, "Plot of y, z vs. t")
 
     val v = ts.ar (new VectorD (.9, .7))
-    new Plot (t, y, v, "Plot of y, v vs. t")
+    //new Plot (t, y, v, "Plot of y, v vs. t")
 
 } // ARIMATest object
 
