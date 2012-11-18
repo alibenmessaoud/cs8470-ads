@@ -7,7 +7,6 @@ import scalation.random.Random
 import scalation.util.Error
 import scalation.stat.StatVector
 
-//::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 /** This class provide basic time series analysis capabilities for
  *  Auto-Regressive (AR), Integrated (I) and Moving Average (MA) models.
  *  In an ARIMA(p, d, q) model, p, d and q refer to the order of the
@@ -16,12 +15,11 @@ import scalation.stat.StatVector
  *  @param y  the input vector
  *  @param t  the time vector
  */
-class ARIMA (y: VectorD, t: VectorD)
-      extends Predictor with Error
-{
-    private val n = y.dim        // size of the input vector
+class ARIMA (y: VectorD, t: VectorD) extends Predictor with Error {
 
-    //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+    // size of the input vector
+    private val n = y.dim 
+
     /** Return a vector that is the Moving Average (MA) of the given vector.
      *  @param k  the number of points to average
      */
@@ -33,7 +31,6 @@ class ARIMA (y: VectorD, t: VectorD)
         z
     } // ma
 
-    //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
     /** Return a vector that is the Auto-Regressive (AR) predictions of the last k
      *  points.
      *  @param rho  the vector of auto-correlations
@@ -54,13 +51,13 @@ class ARIMA (y: VectorD, t: VectorD)
      *  @param f input vector
      *  @param h the lag
      */
-    def backwardDifference (f: VectorD, h: Int): VectorD = {
+    def bdiff (f: VectorD, h: Int): VectorD = {
         val vec = new VectorD (f.dim - h) 
         for (i <- h until f.dim) {
             vec(i - h) = f(i) - f(i - h)
 	} // for
         vec
-    } // backwardDifference
+    } // bdiff
 
     //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
     /** Fit an ARIMA model to historical times series data.
@@ -68,7 +65,7 @@ class ARIMA (y: VectorD, t: VectorD)
     def train ()
     {
 
-         val threshold = 10.0E-5
+         val threshold = 5.0E-5
          var iter      = 0       
   
          var yt: VectorD         = null
@@ -83,13 +80,13 @@ class ARIMA (y: VectorD, t: VectorD)
              iter += 1
 
              // get our backwards difference
-             yt     = backwardDifference(y, iter)
-             
+             yt = bdiff(y, iter)
+            
              // pad our backwards difference for regression
              val padded = new VectorD(Array.fill(iter)(1.0)) ++ yt
 
              // build our time matrix
-             val x      = new MatrixD (t.dim, 2)
+             val x = new MatrixD (t.dim, 2)
              for (i <- 0 until t.dim) {
                  x(i, 0) = 1.0
                  x(i, 1) = t(i)
@@ -99,13 +96,12 @@ class ARIMA (y: VectorD, t: VectorD)
              r = new SimpleRegression(x, padded)
              r.train
 
+             println("made it here! iter = %d".format(iter))
+
          } while (r.fit._2 > threshold && iter < 3)
 
-         
-
          println("iter = %d".format(iter))
-
-         
+       
 
          // Find AR order --> p
               //for p = 1, acf(yt) "should have an exponentially decreasing appearance"
@@ -232,4 +228,68 @@ object ARIMATest extends App
     //new Plot (t, y, v, "Plot of y, v vs. t")
 
 } // ARIMATest object
+
+//:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+/** Object to test SimpleRegression class:  y = b dot x = (b0, b1) dot (1., x1).
+ *  @see http://www.analyzemath.com/statistics/linear_regression.html
+ */
+object SimpleRegressionTest extends App
+{
+    // 5 data points: constant term, x1 coordinate
+    val x = new MatrixD ((5, 2), 1., 0.,           // 5-by-2 matrix
+                                 1., 1.,
+                                 1., 2.,
+                                 1., 3.,
+                                 1., 4.)
+    val y = new VectorD (2., 3., 5., 4., 6.)
+
+    println ("x = " + x)
+    println ("y = " + y)
+
+    val rg = new SimpleRegression (x, y)
+    rg.train ()
+    println ("fit = " + rg.fit)
+
+    val z  = new VectorD (1., 5.)           // predict y for one point
+    val yp = rg.predict (z)
+    println ("predict (" + z + ") = " + yp)
+
+    val yyp = rg.predict (x)                // predict y for several points
+    println ("predict (" + x + ") = " + yyp)
+
+    new Plot (x.col(1), y, yyp)
+
+} // SimpleRegressionTest object
+
+
+//:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+/** Object to test SimpleRegression class:  y = b dot x = b0 + b1*x1.
+ *  @see http://mathbits.com/mathbits/tisection/Statistics2/linear.htm
+ */
+object SimpleRegressionTest2 extends App
+{
+    // 20 data points: just x1 coordinate
+    val x1 = new VectorD (  4.,   9.,  10.,  14.,   4.,   7.,  12.,  22.,   1.,   3.,
+                            8.,  11.,   5.,   6.,  10.,  11.,  16.,  13.,  13.,  10.)
+    val y  = new VectorD (390., 580., 650., 730., 410., 530., 600., 790., 350., 400.,
+                          590., 640., 450., 520., 690., 690., 770., 700., 730., 640.)
+
+    println ("x1 = " + x1)
+    println ("y  = " + y)
+
+    val x  = MatrixD.form_cw (1., x1)       // form matrix x from vector x1
+    val rg = new SimpleRegression (x, y)
+    rg.train ()
+    println ("fit = " + rg.fit)
+
+    val z  = new VectorD (1., 15.)          // predict y for one point
+    val yp = rg.predict (z)
+    println ("predict (" + z + ") = " + yp)
+
+    val yyp = rg.predict (x)                // predict y for several points
+    println ("predict (" + x + ") = " + yyp)
+    
+    new Plot (x1, y, yyp)
+
+} // SimpleRegressionTest2 object
 
