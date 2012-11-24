@@ -1,0 +1,152 @@
+% File: OntologyMatchingWithMarkovChains.tex
+%	Author: Terrance Medina
+%
+\documentclass[a4paper]{article}
+\usepackage{fullpage}
+\title{
+}
+\author{
+}
+\begin{document}
+\normalsize{
+\begin{flushleft}
+CSCI 8370
+\newline
+Student Name: \textbf{Terrance Medina, Michael Cotterell}
+\newline
+\noindent
+Paper Title: 
+\textbf{
+				Working Title
+}
+\newline
+\end{flushleft}
+
+
+\noindent \textbf{Abstract}
+\newline
+Ontology Alignment -- problem importance
+
+Need for a way to determine convergence.
+
+How does a Markov chain perform analytically?
+\newline
+
+\noindent \textbf{Overview}
+
+%Knowledge bases
+A knowledge base is a kind of database that is designed 
+for decision support systems and expert systems. It specifically allows
+machines to perform deductive reasoning over its elements.
+For example, given the instance data ``John is a farmer'' and ``Farmers
+wear overalls'', a knowledge base reasoner could deduce the new information
+that ``John wears overalls''.
+
+%KB representation
+Knowledge bases (KBs) consist of entities and
+relations between those entites. They are often represented as sets of
+triples, that is, a set of two entities and a relationship between those
+entities. For example, the triple ${\{teachers, lesson\_plans, write\}}$
+defines the relationship that teachers write lesson\_plans.
+
+%Ontologies
+Ontologies describe the relationships between elements in a knowledge base.
+Similar to the notion of schemas in relational databases, ontologies specify
+the structural relationships amongst the entities and classes of the ontology.
+
+%Heterogeneous Data Problem
+Frequently, queries must be performed across multiple knowledge bases. This is the
+case when departments in a large enterprise maintain their own knowledge bases,
+but must also share information with other departments. It is also a fundamental
+requirement of the semantic web; users perform queries against the web,
+and those queries must be performed against knowledge bases that may belong to 
+entities on opposite sides of the globe. This leads us to the problem of heterogeneous
+data. When knowledge bases are maintained by different organizations, the ontologies
+used to describe them will usually be different. They will use different names
+to describe similar or identical concepts, for instance, one ontology may keep track
+of `cars' while another keeps track of `automobiles' and still another keeps track of 
+`autoProducts'. In fact the list could go on and on.
+
+%Ontology Alignnment
+Ontology Alignment is the process of equating two heterogeneous ontologies by
+finding valid correspondences between their sets of elements. 
+%
+For instance, an alignment between an auto parts manufacturer and an auto dealership
+might tell us with 85\% certainty that ``anti\_lock\_brakes'' and ``ABS'' represent
+the same thing.
+
+%Importance of Ontology Alignment
+This is important because it allows a query management system to translate the terminology
+of a user's query into the terminology used by many different ontologies and thereby
+to query heterogeneous knowledge bases.
+\textbf{Why do we need fully automated alignment?}
+\newline
+
+\noindent \textbf{Background}
+
+%Markov Processes
+A Markov Process is a mathematical model that represents a system as a set of states
+and a set of probabilistic transitions between those states. Most importantly, Markov 
+processes adhere to the Markov Property, that is, a system's next state depends only
+on its current state, and not on any of its previous states. In that sense, Markov
+processes are called ``memoryless''.
+
+%Hidden Markov Models
+A Hidden Markov Model (HMM) is simply a Markov process whose states and transitions
+are unobservable.
+\newline
+
+\noindent \textbf{Previous Work}
+
+Although the problem of fully-automated ontology alignment is far from being solved,
+there has been much work accomplished around fundamental techniques for element
+matching and aggregation of those matching techniques. One class of approaches
+attempts to find element matches based on the relative similarity or dissimilarity
+of the actual labels giving to those elements. Some examples of these string-matching 
+techniques are the Jaro-Winkler measure, the Levenshtein Distance and latent semantic 
+indexing.
+%
+While useful in many situations, string-based matching techniques suffer from a common 
+shortcoming; similar real-world objects often have very dissimilar names. The words
+``car'' and ``autombile'' provide a good example.
+
+Another class of techniques makes use of outside resources as aids in the search for
+good matches between elements. Such outside resources include dictionaries or taxonomies
+such as the WordNet taxonomy. These classes of techniques attempt to produce correspondences
+between elements that may likely refer to the same real-world objects, but that have very
+dissimilar names, such as ``car'' and ``automobile''. Some examples of these semantic 
+approaches include Information-theoretic similarity.
+%
+The use of outside taxonomies can greatly improve the quality of matching results,
+but such outside resources are not always readily available.
+
+Yet a third class of matching techniques attempts to exploit the structure of the ontology
+itself. For example, Similarity Flooding takes a directed graph representation of an 
+ontology and uses neighbor relations between the elements to find matches correspondences
+between them. The idea is that if two elements in heterogeneous ontologies are very similar,
+then their neighboring elements should also be very similar.
+%
+%Convergence Properties
+Similarity flooding has been useful as a foundation is several other structure-based
+matching techniques such as anchor flooding \textbf{**others??*} but suffers from 
+a few limitations. First, it requires that the edges of the edge-labeled graph 
+representation have identically named labels. It can also be difficult to predict
+wether or not the fixpoint calculation will converge.
+\newline
+
+
+\noindent \textbf{Approach}
+\newline
+Our approach is to model the network flow graph as a hidden markov model, which allows us to
+
+\newline
+
+\noindent \textbf{Evaluation}
+\newline
+TODO
+\newline
+
+
+\end{document}
+
+}
