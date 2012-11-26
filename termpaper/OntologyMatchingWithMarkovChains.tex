@@ -1,38 +1,48 @@
 % File: OntologyMatchingWithMarkovChains.tex
-%	Author: Terrance Medina
+%	Author: Terrance Medina and Michael Cotterell
 %
-\documentclass[a4paper]{article}
-\usepackage{fullpage}
-\title{
-}
-\author{
-}
+%\documentclass[a4paper]{article}
+%\documentclass[10pt, conference, compsocconf]{IEEEtran}
+\documentclass[letterpaper,twocolumn,10pt]{article}
+\usepackage[latin1]{inputenc}
+\usepackage[english]{babel}
+\usepackage{scs}
+\usepackage{graphicx}
+%\usepackage{citesort}
+%\usepackage{amssymb,amsmath}
+%
+% By default LaTeX is quite picky with float placement,
+% relax a bit in order to keep this document within 2 pages
+%
+\renewcommand{\topfraction}{0.95}
+\renewcommand{\bottomfraction}{0.95}
+\renewcommand{\textfraction}{0.05}
+\renewcommand{\floatpagefraction}{0.35}
+%\usepackage{fullpage}
 \begin{document}
-\normalsize{
-\begin{flushleft}
-CSCI 8370
-\newline
-Student Name: \textbf{Terrance Medina, Michael Cotterell}
-\newline
-\noindent
-Paper Title: 
-\textbf{
-				Working Title
+
+\title{Working title: Using Markov Chains for Ontology Alignment}
+
+\author{Michael E. Cotterell,
+				Terrance Medina
+The University of Georgia\\
+Athens, GA\\
+Email: mepcott@cs.uga.edu, medinat@cs.uga.edu
 }
-\newline
-\end{flushleft}
 
+\maketitle
 
-\noindent \textbf{Abstract}
-\newline
+\begin{abstract}
 Ontology Alignment -- problem importance
 
 Need for a way to determine convergence.
 
 How does a Markov chain perform analytically?
-\newline
 
-\noindent \textbf{Overview}
+\end{abstract}
+
+
+\section{Overview}
 
 %Knowledge bases
 A knowledge base is a kind of database that is designed 
@@ -79,10 +89,9 @@ the same thing.
 This is important because it allows a query management system to translate the terminology
 of a user's query into the terminology used by many different ontologies and thereby
 to query heterogeneous knowledge bases.
-\textbf{Why do we need fully automated alignment?}
-\newline
+\subsection{Why do we need fully automated alignment?}
 
-\noindent \textbf{Background}
+\section{Background}
 
 %Markov Processes
 A Markov Process is a mathematical model that represents a system as a set of states
@@ -96,7 +105,7 @@ A Hidden Markov Model (HMM) is simply a Markov process whose states and transiti
 are unobservable.
 \newline
 
-\noindent \textbf{Previous Work}
+\section{Previous Work}
 
 Although the problem of fully-automated ontology alignment is far from being solved,
 there has been much work accomplished around fundamental techniques for element
@@ -135,18 +144,14 @@ wether or not the fixpoint calculation will converge.
 \newline
 
 
-\noindent \textbf{Approach}
-\newline
+\section{Approach}
 Our approach is to model the network flow graph as a hidden markov model, which allows us to
 
-\newline
 
-\noindent \textbf{Evaluation}
-\newline
+\section{Evaluation}
 TODO
-\newline
 
 
 \end{document}
 
-}
+
