@@ -1,0 +1,83 @@
+%
+% LaTeX package file to meet SCS conference formatting guidelines
+%
+
+\frenchspacing
+\usepackage{times}
+\usepackage{mathptm}
+\usepackage{indentfirst}
+
+\setcounter{secnumdepth}{2}
+\renewcommand{\thefigure}{\arabic{figure}}
+\renewcommand{\thesection}{\arabic{section}.}
+\renewcommand{\thesubsection}{\arabic{section}.\arabic{subsection}.}
+\renewcommand{\thesubsubsection}{\arabic{section}.\arabic{subsection}.\arabic{subsubsection}.}
+\pagestyle{empty}
+
+%
+% Page layout settings, letter and A4
+%
+\setlength{\textwidth}{7in}
+\setlength{\textheight}{8.75in}
+\setlength{\topmargin}{0mm}
+\setlength{\headsep}{0pt}
+\setlength{\headheight}{0pt}
+\setlength{\columnsep}{0.25in}
+\setlength{\columnwidth}{3.375in}
+
+\typeout{--   SCS proceedings style   --}
+\DeclareOption{a4paper}
+   {\setlength{\oddsidemargin}{-0.37in}% 1in - 0.37in = 0.63in
+    \typeout{SCS page size: A4}%
+    \typeout{WARNING: final proceedings is printed on letter paper!!}}
+\DeclareOption{letterpaper}
+   {\setlength{\oddsidemargin}{-0.25in}% 1in - 0.25in = 0.75in
+    \typeout{SCS page size: letter}}
+\ProvidesPackage{scs}
+          [2007/02/09 v0.01  SCS conference stye]
+\ProcessOptions
+\typeout{----------------------------------}
+
+%
+% \section commands
+%
+\makeatletter
+\renewcommand{\@makecaption}[2]{{\textbf{#1.}\hskip1.5ex #2}}
+\renewcommand\section{\@startsection{section}{1}{0pt}%
+    {-3.5ex \@plus -1ex \@minus -.2ex}%
+    {1pt}%
+    {\fontsize{12}{12pt}\bf\MakeUppercase}}
+\renewcommand\subsection{\@startsection{subsection}{2}{0pt}%
+    {-3.25ex\@plus -1ex \@minus -.2ex}%
+    {1pt}%
+    {\fontsize{12}{12pt}\bf}}
+\renewcommand\subsubsection{\@startsection{subsubsection}{2}{\parindent}%
+    {-3.25ex\@plus -1ex \@minus -.2ex}%
+    {1pt}%
+    {\bf}}
+\makeatother
+%
+% \maketitle command
+%
+\makeatletter
+\def\maketitle{%
+  \twocolumn[%
+    	\begin{@twocolumnfalse}%
+		\begin{center}%
+		{\Large\bf 	\@title\par}\vspace*{10pt}%
+		{\normalsize\bf \@author\par}%
+		\end{center}%
+	\end{@twocolumnfalse}%
+  \vspace*{8pt}%
+  ]%
+  %\vfill%
+  %\null%
+}
+\makeatother
+
+%
+% \keywords command, and
+% abstract environment
+%
+\def\keywords#1{\noindent{\bf Keywords:} #1\\}
+\renewenvironment{abstract}{\noindent{\large\bf Abstract}\\}{}
