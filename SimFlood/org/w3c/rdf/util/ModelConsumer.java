@@ -20,6 +20,9 @@ public class ModelConsumer implements RDFConsumer {
     nodeFactory = model.getNodeFactory();
   }
 
+	public ModelConsumer() throws ModelException {
+	}
+
   /**
    * start is called when parsing of data is started
    */

@@ -93,6 +93,8 @@ import org.xml.sax.Parser;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
+import javax.xml.parsers.SAXParser;
+
 import org.xml.sax.helpers.*;
 
 import java.net.URL;
@@ -1036,9 +1038,9 @@ public class SiRPAC implements EntityResolver, DTDHandler, DocumentHandler,
      */
     boolean bHasData = false;
     Data dataNode = null;
-    Enumeration enum = e.children();
-    while (enum.hasMoreElements()) {
-      Element e2 = (Element)enum.nextElement();
+    Enumeration enumer = e.children();
+    while (enumer.hasMoreElements()) {
+      Element e2 = (Element)enumer.nextElement();
       if (e2 instanceof Data) {
         bHasData = true;
         dataNode = (Data)e2;

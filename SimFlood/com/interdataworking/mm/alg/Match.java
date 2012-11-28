@@ -5,6 +5,10 @@ import java.io.*;
 import org.w3c.rdf.model.*;
 import com.interdataworking.*;
 import org.w3c.rdf.util.*;
+import org.w3c.rdf.implementation.syntax.sirpac.SiRPAC;
+import org.xml.sax.InputSource;
+import org.w3c.rdf.syntax.RDFConsumer;
+import org.w3c.rdf.util.SFConsumer;
 
 /**
  * This is an implementation of the Similarity Flooding algorithm
@@ -828,6 +832,30 @@ public class Match implements UntypedGateway {
     }
   }
 
+	static void OAEIStandardRun(String ontAfile, String ontBfile) throws Exception
+	{
+    System.err.println("\nThis is runs the Similarity Flooding algorithm on the OAEI data set.");
+    System.err.println("====================================================================");
+		System.err.print("Matching: ");
+		System.err.print(ontAfile+" | ");
+		System.err.println(ontBfile);
+
+    RDFFactory rf = new RDFFactoryImpl();
+    NodeFactory nf = rf.getNodeFactory();
+
+    Model A = rf.createModel();
+
+		//TODO
+		//get rdf file locations from arglist
+		//parse owl2 files and build rdf graphs
+			//use org.w3c.rdf.implementation.syntax.sirpac.sirpac
+			//new InputSource(
+			SiRPAC parser = new SiRPAC("org.xml.sax.Parser");
+			//SiRPAC parser = new SiRPAC("javax.xml.parsers.SAXParser");
+			parser.setRDFSource(new InputSource("onto.rdf"));
+			SFConsumer sfc = new SFConsumer(A);
+			parser.parse(new InputSource("onto.rdf"), (RDFConsumer)sfc);
+	}
   static void ICDE02Example() throws Exception {
 
     System.err.println("\nThis is a simple example used in the ICDE'02 paper.");
@@ -967,13 +995,21 @@ public class Match implements UntypedGateway {
 
   public static void main(String[] args) throws Exception {
 
+		if(args.length < 2)
+		{
+						System.out.println("ERROR: Need to supply ontologies to match!");
+						return;
+		}
+		OAEIStandardRun(args[0], args[1]);
+		/*
     switch(args.length) {
       
     case 0:
 
-      ICDE02Example();
-      orderedNodesExample(10);
-      sequenceExample("GATTACA", "GTAACATCAGAGATTTTGAGACAC");
+      //ICDE02Example();
+      //orderedNodesExample(10);
+      //sequenceExample("GATTACA", "GTAACATCAGAGATTTTGAGACAC");
+			OAEIStandardRun();
       break;
 
     case 1:
@@ -983,5 +1019,6 @@ public class Match implements UntypedGateway {
 
     case 2: sequenceExample(args[0], args[1]); break;
     }
+		*/
   }
 }
