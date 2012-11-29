@@ -37,7 +37,8 @@ public class Match implements UntypedGateway
   public boolean[] formula = FORMULA_TTT;
 
   // default way of computing the propagation coefficients to be used
-  public int FLOW_GRAPH_TYPE = FG_AVG;
+  //public int FLOW_GRAPH_TYPE = FG_AVG;
+  public int FLOW_GRAPH_TYPE = FG_STOCHASTIC;
 	public String GRAPH_TYPE = null;
 
   // various iteration formulas
@@ -542,6 +543,7 @@ public class Match implements UntypedGateway
       cardMapOPRight = new HashMap ();
       cardMapPRight = new HashMap ();
 
+			//Find the number of outgoing edges for each node (cardinality)
       computeCardMaps (m1, cardMapSPLeft, cardMapOPLeft, cardMapPLeft,
 		       ignorePredicates);
       computeCardMaps (m2, cardMapSPRight, cardMapOPRight, cardMapPRight,
@@ -553,20 +555,24 @@ public class Match implements UntypedGateway
 
     List stmtPairs = new ArrayList ();
 
+		//foreach statement in Model1
     for (Enumeration en1 = m1.elements (); en1.hasMoreElements();)
     {
 
 			Statement st1 = (Statement) en1.nextElement ();
 
+			//disregard if subject or object are triples
 			if (st1.subject ()instanceof Statement ||
 	    		st1.object ()instanceof Statement)
 	    		continue;
 
+			//foreach statement in Model2
 			for (Enumeration en2 = m2.elements (); en2.hasMoreElements();)
 	  	{
 
 	    	Statement st2 = (Statement) en2.nextElement ();
 
+				//disregard if subject or object are triples
 	    	if (st2.subject ()instanceof Statement ||
 					st2.object ()instanceof Statement)
 	        continue;
@@ -581,12 +587,12 @@ public class Match implements UntypedGateway
 	    double ps = 0.0;	//predicateSim(st1.predicate(), st2.predicate());
 	    //      System.err.println("-- " + st1 + " -- " + st2);
 			
-			// TODO: checks equality of edge labels?
+		//NEW method checks the lexical similarity of edge labels
 		if(GRAPH_TYPE.equals("NEW"))
 		{
 			ps = gamma(st1.predicate(), st2.predicate());
-			System.out.printf("%s | %s | %s \n", st1.subject().getLocalName(), st1.predicate().getLocalName(), st1.object().getLabel());
-			System.out.printf("%s | %s | %s \n", st2.subject().getLocalName(), st2.predicate().getLocalName(), st2.object().getLabel());
+			//System.out.printf("%s | %s | %s \n", st1.subject().getLocalName(), st1.predicate().getLocalName(), st1.object().getLabel());
+			//System.out.printf("%s | %s | %s \n", st2.subject().getLocalName(), st2.predicate().getLocalName(), st2.object().getLabel());
 			System.out.printf("Predicate sim = %.2f\n", ps);
 		}
 
@@ -602,6 +608,8 @@ public class Match implements UntypedGateway
 	    if (ps > 0)//TODO > 'lil-gamma
 	      {
 		//      System.err.println("--- ps=" + ps + " from " + EQUAL_PRED_COEFF + ", " + TRY_ALL_ARCS + ", " + OTHER_PRED_COEFF);
+		//      NOTE we can get access to ps through
+		//      this.predSim = ps
 		StmtPair p = new StmtPair (st1, st2, ps,
 					   getCard (cardMapSPLeft,
 						    st1.subject (),
@@ -651,18 +659,25 @@ public class Match implements UntypedGateway
 			sourcePair =
 			  get (outgoing, st1.object (), st2.subject ());
 			sourcePair.sim += 1.0;
-		      }
+		      }//end TRY_ALL_ARCS
 
 //          MapPair targetPair = get(incoming, st1.object(), st2.object());
 //          targetPair.sim += 1.0;
-		  }//end Ignore Block
+		  }//end if FLOW_GRAPH_TYPE
 
-		if (DEBUG)
+		if (DEBUG){
 		    System.err.println ("" + p);
-		stmtPairs.add (p);
-	      }
-	  }
-      }
+		}
+
+
+
+					//Add statementPair to the List of StatementPairs
+					stmtPairs.add (p);
+
+
+	      }//end if valid similarity
+	    }//end foreach element of m2
+    }//end foreach element of m1
 
     if (FLOW_GRAPH_TYPE == FG_STOCHASTIC)
       {
@@ -696,7 +711,7 @@ public class Match implements UntypedGateway
 
 	Iterator it = stmtPairs.iterator ();
 	while (it.hasNext ())
-	  {
+	{
 
 	    StmtPair p = (StmtPair) it.next ();
 	    p.osos =
@@ -737,13 +752,15 @@ public class Match implements UntypedGateway
 	PGNode ss = getNode (pgnodes, st1.subject (), st2.subject ());
 	PGNode oo = getNode (pgnodes, st1.object (), st2.object ());
 
+	//PGArc(src, dest, forward_weight, backward_weight)
+	
 	pgarcs.
 	  add (new
 	       PGArc (ss, oo, p.soso * UPDATE_GUESS_WEIGHT,
 		      p.osos * UPDATE_GUESS_WEIGHT));
 
 	if (!DIRECTED_GRAPH)
-	  {
+	{
 
 	    PGNode so = getNode (pgnodes, st1.subject (), st2.object ());
 	    PGNode os = getNode (pgnodes, st1.object (), st2.subject ());
@@ -752,11 +769,14 @@ public class Match implements UntypedGateway
 	      add (new
 		   PGArc (so, os, p.soos * UPDATE_GUESS_WEIGHT,
 			  p.osso * UPDATE_GUESS_WEIGHT));
-	  }
+	}
       }
   }//end constructPropogationGraph
 
 
+	/* Lookup the node (r1,r2) in the table.
+	 * If not there, add it.
+	 */
   PGNode getNode (Map table, RDFNode r1, RDFNode r2)
   {
 
@@ -784,27 +804,32 @@ public class Match implements UntypedGateway
 			boolean ignorePredicates) throws ModelException
   {
 
+		//foreach element in the model
     for (Enumeration en = m.elements (); en.hasMoreElements ();)
-      {
+    {
+			Statement st = (Statement) en.nextElement ();
 
-	Statement st = (Statement) en.nextElement ();
+			//if subjects or objects are triples, disregard them
+			if (st.subject ()instanceof Statement ||
+	    	st.object ()instanceof Statement)
+	    	continue;
 
-	if (st.subject ()instanceof Statement ||
-	    st.object ()instanceof Statement)
-	    continue;
+			//are we using predicates?
+			Resource pred = ignorePredicates ? null : st.predicate ();
+			MapPair p = get (cardMapSP, st.subject (), pred);
+	  	p.sim += 1.0;
 
-	Resource pred = ignorePredicates ? null : st.predicate ();
-	MapPair p = get (cardMapSP, st.subject (), pred);
-	  p.sim += 1.0;
+	  	p = get (cardMapOP, st.object (), pred);
+	  	p.sim += 1.0;
 
-	  p = get (cardMapOP, st.object (), pred);
-	  p.sim += 1.0;
-
-	  p = get (cardMapP, null, pred);
-	  p.sim += 1.0;
-      }
+	  	p = get (cardMapP, null, pred);
+	  	p.sim += 1.0;
+    }
   }
 
+	/* Lookup the PGNode (r1,r2) in the given HashMap.
+	 * If it is not there, add it.
+	 */
   MapPair get (Map table, RDFNode r1, RDFNode r2)
   {
 
@@ -936,7 +961,7 @@ public class Match implements UntypedGateway
 	      this.soos = c * predSim / (spLeft + opRight);
 	      this.osso = c * predSim / (opLeft + spRight);
 	    //      System.err.println("--- soso=" + soso + " from predSim=" + predSim + ", spLeft="+ spLeft + ", spRight=" + spRight);
-	      break;
+	    break;
 	  }
 	  case Match.FG_PRODUCT:
 	  {
