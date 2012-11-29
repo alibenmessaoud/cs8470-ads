@@ -1,4 +1,7 @@
 all:
+	javac -cp .:./OWL/owlapi-bin.jar $(find . -name "*.java")
+
+match:
 	javac -cp .:./OWL/owlapi-bin.jar \
 		./org/w3c/rdf/util/SFConsumer.java \
 		./com/interdataworking/mm/alg/Match.java \
