@@ -40,7 +40,7 @@ public class Match implements UntypedGateway
   // default way of computing the propagation coefficients to be used
   //public int FLOW_GRAPH_TYPE = FG_AVG;
   public int FLOW_GRAPH_TYPE = FG_STOCHASTIC;
-	public String GRAPH_TYPE = null;
+	public static String GRAPH_TYPE = null;
 
   // various iteration formulas
 
@@ -1232,6 +1232,14 @@ public class Match implements UntypedGateway
 
 	static void OAEIStandardRun(String ontAfile, String ontBfile, String graphType) throws Exception
 	{
+    Match sf = new Match();
+
+    // Two lines below are used to get the same setting as in the example of the ICDE'02 paper.
+    // (In general, this formula won't converge! So better stick to the default values instead)
+    sf.formula = FORMULA_FFT;
+    sf.FLOW_GRAPH_TYPE = FG_PRODUCT;
+		sf.GRAPH_TYPE = graphType;
+
     System.err.println("\nThis is the Similarity Flooding algorithm on the OAEI data set.");
     System.err.println("====================================================================");
 		System.err.print("Matching: ");
@@ -1254,20 +1262,24 @@ public class Match implements UntypedGateway
 		{
 			for(String key_B: resources_B.keySet())
 			{
-    		initMap.add(new MapPair(resources_A.get(key_A), 
+				double dist = computeDistance(key_A, key_B);
+				double initSim = 0;
+				if(dist==0)initSim = 1.0;
+				else initSim = 1.0/dist;
+				if(GRAPH_TYPE.equals("NEW")){
+    			initMap.add(new MapPair(resources_A.get(key_A), 
 																resources_B.get(key_B), 
-																1.0/*TODO: Levenshtein*/));
+																initSim));
+				}
+				if(GRAPH_TYPE.equals("ORIGINAL")){
+    			initMap.add(new MapPair(resources_A.get(key_A), 
+																resources_B.get(key_B), 
+																1.0));
+				}
 			}
 			
 		}
 
-    Match sf = new Match();
-
-    // Two lines below are used to get the same setting as in the example of the ICDE'02 paper.
-    // (In general, this formula won't converge! So better stick to the default values instead)
-    sf.formula = FORMULA_FFT;
-    sf.FLOW_GRAPH_TYPE = FG_PRODUCT;
-		sf.GRAPH_TYPE = graphType;
 
     MapPair[] result = sf.getMatch(ontology_A, ontology_B, initMap);
     dump(result);
