@@ -119,8 +119,8 @@ public class Match implements UntypedGateway {
       Model initialMap = (Model)input.get(2);
       sigma0 = MapPair.toMapPairs(initialMap);
       if(sigma0.size() == 0)
-	sigma0 = null;
-    }
+				sigma0 = null;
+   	}
 
     PGNode[] finalList = getMatch(m1, m2, sigma0);
 
@@ -851,33 +851,19 @@ public class Match implements UntypedGateway {
 			catch(Exception e){System.err.println(e.getMessage());return "ERR";}
 	}
 
-	private static Model makeRDFGraph(String ontologyFile)
+	private static Model makeRDFGraph(String ontologyFile, Map<String, Resource> resource) throws Exception
 	{
-
-	}
-	static void OAEIStandardRun(String ontAfile, String ontBfile) throws Exception
-	{
-    System.err.println("\nThis is runs the Similarity Flooding algorithm on the OAEI data set.");
-    System.err.println("====================================================================");
-		System.err.print("Matching: ");
-		System.err.print(ontAfile+" | ");
-		System.err.println(ontBfile);
-
     RDFFactory rf = new RDFFactoryImpl();
     NodeFactory nf = rf.getNodeFactory();
 
     Model ontology_A = rf.createModel();
 
-		Map<String, Resource> resources = new HashMap<String, Resource>();
+		HashMap<String, Resource> resources = (HashMap<String, Resource>)resource;
 
-		//TODO
-		//get rdf file locations from arglist
-		//parse owl2 files and build rdf graphs
-			//use OWL
-			OWLOntologyManager ontMgr = OWLManager.createOWLOntologyManager();
-			//IRI iri = IRI.create("onto.rdf");
-			File oFile = new File("onto.rdf");
-			OWLOntology basic_onto = ontMgr.loadOntologyFromOntologyDocument(oFile);
+		
+		OWLOntologyManager ontMgr = OWLManager.createOWLOntologyManager();
+		File oFile = new File("onto.rdf");
+		OWLOntology basic_onto = ontMgr.loadOntologyFromOntologyDocument(oFile);
 
 			//GET DOMAINS AND RANGES
 			Set<OWLObjectProperty> objPropSig = basic_onto.getObjectPropertiesInSignature(false);
@@ -886,7 +872,12 @@ public class Match implements UntypedGateway {
 				Set<OWLClassExpression> objPropDomains = objProp.getDomains(basic_onto);
 				Set<OWLClassExpression> objPropRanges = objProp.getRanges(basic_onto);
 
-				System.out.printf("%s: domains = %d; ranges = %d\n", prettyID(objProp.toStringID()), objPropDomains.size(), objPropRanges.size());
+				if(DEBUG){
+					System.out.printf("%s: domains = %d; ranges = %d\n", 
+													prettyID(objProp.toStringID()), 
+													objPropDomains.size(), 
+													objPropRanges.size());
+				}
 				Resource p = nf.createResource(prettyID(objProp.toStringID()));
 
 				for(OWLClassExpression domain:objPropDomains)
@@ -921,7 +912,7 @@ public class Match implements UntypedGateway {
 
 			}
 
-			//GET "hasA" RELATIONS
+			//GET "isA" RELATIONS
 			Set<OWLClass> classes = basic_onto.getClassesInSignature(false);
 			Resource isA = nf.createResource("isA");
 			for(OWLClass owlClass: classes)
@@ -955,6 +946,49 @@ public class Match implements UntypedGateway {
 						
 					}//if notAnonymous	
 			}
+			return ontology_A;
+	}
+
+	static void OAEIStandardRun(String ontAfile, String ontBfile) throws Exception
+	{
+    System.err.println("\nThis is the Similarity Flooding algorithm on the OAEI data set.");
+    System.err.println("====================================================================");
+		System.err.print("Matching: ");
+		System.err.print(ontAfile+" | ");
+		System.err.println(ontBfile);
+		System.err.println();
+
+
+		//Create resource HashMaps to store RDF entities for lookup
+		Map<String, Resource> resources_A = new HashMap<String, Resource>();
+		Map<String, Resource> resources_B = new HashMap<String, Resource>();
+
+		//Build RDF Models from ontologies
+    Model ontology_A = makeRDFGraph("onto.rdf", resources_A);
+    Model ontology_B = makeRDFGraph("onto_synonym.rdf", resources_B);
+
+    // create an initial mapping which is just a cross-product with 1's as weights
+    List initMap = new ArrayList();
+		for(String key_A: resources_A.keySet())
+		{
+			for(String key_B: resources_B.keySet())
+			{
+    		initMap.add(new MapPair(resources_A.get(key_A), 
+																resources_B.get(key_B), 
+																1.0/*TODO: Levenshtein*/));
+			}
+			
+		}
+
+    Match sf = new Match();
+
+    // Two lines below are used to get the same setting as in the example of the ICDE'02 paper.
+    // (In general, this formula won't converge! So better stick to the default values instead)
+    sf.formula = FORMULA_FFT;
+    sf.FLOW_GRAPH_TYPE = FG_PRODUCT;
+
+    MapPair[] result = sf.getMatch(ontology_A, ontology_B, initMap);
+    dump(result);
 
 	}
   static void ICDE02Example() throws Exception {
@@ -1102,6 +1136,7 @@ public class Match implements UntypedGateway {
 						return;
 		}
 		OAEIStandardRun(args[0], args[1]);
+    //ICDE02Example();
 		/*
     switch(args.length) {
       
