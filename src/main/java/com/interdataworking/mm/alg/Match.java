@@ -32,6 +32,7 @@ public class Match implements UntypedGateway
 
   public static boolean DEBUG = false;
   public static final int DEBUG_MAX_ITERATIONS = 0;
+	public static int pgNodeCount = 0;
 
   // default formula to be used: {ADD_SIGMA0_BEFORE=t, ADD_SIGMA0_AFTER=t, ADD_SIGMAN_AFTER=t}
   public boolean[] formula = FORMULA_TTT;
@@ -508,6 +509,17 @@ public class Match implements UntypedGateway
   }
 
 
+	void addToOutboundWeights(int pgNodeID, double weight)
+	{
+			ArrayList<Double> weights = outboundWeights.get(pgNodeID);
+			if(weights == null)
+			{
+				weights = new ArrayList<Double>();
+				outboundWeights.put(pgNodeID, weights);
+			}
+			weights.add(weight);
+	}
+
 	double gamma(Resource st1, Resource st2)
 	{
 		String l1 =null, l2 = null;
@@ -522,10 +534,16 @@ public class Match implements UntypedGateway
 
 		System.out.printf("Check Predicate sim on %s | %s\n", l1, l2);
 		double d = computeDistance(l1, l2);
+		return d;
+		/*
 		if(d == 0) return 1.0;
 		if(d == 1) return 0.75;
 		else return 1.0/d;
+		*/
 	}
+
+		//outboundWeights: maps PGNodes to a list of weights on all outbound edges
+		Map<Integer, ArrayList > outboundWeights = new HashMap<Integer, ArrayList >();
 
   void constructPropagationGraph (boolean ignorePredicates) throws
     ModelException
@@ -742,6 +760,7 @@ public class Match implements UntypedGateway
 //     pgnodes = new HashMap();
 //     pgarcs = new ArrayList();
 
+		//foreach statement in stmtPairs
     for (Iterator it = stmtPairs.iterator (); it.hasNext ();)
       {
 
@@ -752,8 +771,26 @@ public class Match implements UntypedGateway
 	PGNode ss = getNode (pgnodes, st1.subject (), st2.subject ());
 	PGNode oo = getNode (pgnodes, st1.object (), st2.object ());
 
+	// add source PGNode (by id), edge similarity (p.predSim) to outboundWeights data structure
+	addToOutboundWeights(ss.id, p.predSim);
+
+	//TODO get all StmtPairs s.t. ss is the destination Node
+
 	//PGArc(src, dest, forward_weight, backward_weight)
-	
+	if(GRAPH_TYPE.equals("NEW"))
+	{
+	pgarcs.
+	  add (new
+	       PGArc (ss, oo, 
+						getEdgeWeight(p.predSim, ss.id),
+						getEdgeWeight(p.predSim, oo.id)
+					)
+		);
+
+	}
+
+	if(GRAPH_TYPE.equals("ORIGINAL"))
+	{
 	pgarcs.
 	  add (new
 	       PGArc (ss, oo, p.soso * UPDATE_GUESS_WEIGHT,
@@ -770,9 +807,35 @@ public class Match implements UntypedGateway
 		   PGArc (so, os, p.soos * UPDATE_GUESS_WEIGHT,
 			  p.osso * UPDATE_GUESS_WEIGHT));
 	}
-      }
+	}//end if GRAPHTYPE==ORIGINAL
+      }//end foreach Statement in stmtPairs
   }//end constructPropogationGraph
 
+	private double getEdgeWeight(double thisWeight, int srcNodeID)
+	{
+		ArrayList<Double> weights = outboundWeights.get(srcNodeID);
+		double sumOfWeights = 0;
+		double sumOfComplements = 0;
+		if(weights != null){
+		System.out.print("numEdges = "+weights.size());
+		System.out.print("this weight = "+thisWeight);
+			for(Double w: weights) sumOfWeights += w;
+			System.out.print("; sumOfWeights = "+sumOfWeights);
+			for(Double w: weights)
+			{
+						sumOfComplements += (sumOfWeights - w);
+			}
+			System.out.print("; SumOfComplements = "+sumOfComplements);
+		if(sumOfComplements == 0 && weights.size() == 1){
+						return 1.0;
+		}
+		double ew =  (sumOfWeights - thisWeight)/sumOfComplements;
+			System.out.println("; Calculated edge weight "+ ew);
+		return (sumOfWeights - thisWeight)/sumOfComplements;
+		}
+		System.out.println();
+		return 0;
+	}
 
 	/* Lookup the node (r1,r2) in the table.
 	 * If not there, add it.
@@ -881,7 +944,7 @@ public class Match implements UntypedGateway
    */
   class PGNode extends MapPair
   {
-
+		int id;
     double sim0;
     // double sim; corresponds to simN, defined in MapPair
     double simN1;		// N+1
@@ -891,6 +954,7 @@ public class Match implements UntypedGateway
     {
 
       super (r1, r2);
+			this.id = pgNodeCount++;
     }
 
     public String toString ()
@@ -1396,30 +1460,29 @@ public class Match implements UntypedGateway
 	/*Taken from rosettacode.org*/
 		 
 		  public static int computeDistance(String s1, String s2) {
-							    s1 = s1.toLowerCase();
-									    s2 = s2.toLowerCase();
+			    s1 = s1.toLowerCase();
+			    s2 = s2.toLowerCase();
 											 
-											    int[] costs = new int[s2.length() + 1];
-													    for (int i = 0; i <= s1.length(); i++) {
-																			      int lastValue = i;
-																						      for (int j = 0; j <= s2.length(); j++) {
-																													        if (i == 0)
-																																					          costs[j] = j;
-																																	        else {
-																																									          if (j > 0) {
-																																																		            int newValue = costs[j - 1];
-																																																								            if (s1.charAt(i - 1) != s2.charAt(j - 1))
-																																																																		              newValue = Math.min(Math.min(newValue, lastValue), costs[j]) + 1;
-																																																														            costs[j - 1] = lastValue;
-																																																																				            lastValue = newValue;
-																																																																										          }
-																																														        }
-																																					      }
-																									      if (i > 0)
-																																        costs[s2.length()] = lastValue;
-																												    }
-															    return costs[s2.length()];
-																	  }
-			 
+			    int[] costs = new int[s2.length() + 1];
+			    for (int i = 0; i <= s1.length(); i++) {
+   	      int lastValue = i;
+		      for (int j = 0; j <= s2.length(); j++) {
+			        if (i == 0)
+			          costs[j] = j;
+			        else {
+			          if (j > 0) {
+			            int newValue = costs[j - 1];
+					            if (s1.charAt(i - 1) != s2.charAt(j - 1))
+						              newValue = Math.min(Math.min(newValue, lastValue), costs[j]) + 1;
+							            costs[j - 1] = lastValue;
+	   					            lastValue = newValue;
+						          }
+				        }
+			      }
+			      if (i > 0)
+			        costs[s2.length()] = lastValue;
+			    }
+		      return costs[s2.length()];
+		  }
 				 
 }
