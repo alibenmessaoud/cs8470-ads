@@ -8,6 +8,8 @@
 \usepackage[english]{babel}
 \usepackage{scs}
 \usepackage{graphicx}
+\usepackage{amsmath,amsfonts,amssymb,amsthm}
+\usepackage{epsfig,epstopdf}
 %\usepackage{citesort}
 %\usepackage{amssymb,amsmath}
 %
@@ -21,7 +23,9 @@
 %\usepackage{fullpage}
 \begin{document}
 
-\title{Working title: Using Markov Chains for Ontology Alignment}
+\newtheorem{defn}{Definition}
+
+\title{A Markov Model for Ontology Alignment}
 
 \author{Michael E. Cotterell and Terrance Medina \\
 Department of Computer Science \\
@@ -150,7 +154,32 @@ wether or not the fixpoint calculation will converge.
 
 
 \section{Approach}
-Our approach is to model the network flow graph as a hidden markov model, which allows us to
+Testing
+
+\begin{defn}
+Let $\gamma$ be some threshold. Edge confidence $\Gamma \left( \alpha, \beta \right)$ is the similarity score between the labels of two edges $\alpha$ and $\beta$ if that similarity is greater than $\gamma$, otherwise $0$. That is,
+$$ \Gamma \left( \alpha, \beta \right) = \left\{
+   	 \begin{array}{ll}
+       \sigma \left( \alpha, \beta \right) & : \vert \sigma \left( \alpha, \beta \right) \vert \geq \gamma \\
+       0                                   & : \mathrm{otherwise}
+     \end{array}
+   \right.$$
+\end{defn}
+
+\begin{defn}
+Let $x$ and $y$ be terms in a single ontology. The label set $\Lambda \left( x, y \right)$ is the set of all labels between hierarchical properties and object properties where $x$ and $y$ are the domain and range of a property, respectively.
+\end{defn}
+
+$$ \qquad\operatorname{\sigma}(\alpha_i, \beta_j) = \begin{cases}
+  0 &: i=j=0 \\
+  i &: j = 0 \text{ and } i > 0 \\
+  j &: i = 0 \text{ and } j > 0 \\
+  \min \begin{cases}
+          \operatorname{\sigma}(\alpha_{i-1}, \beta_j) + 1 \\
+          \operatorname{\sigma}(\alpha_i, \beta_{j-1}) + 1 \\
+          \operatorname{\sigma}(\alpha_{i-1}, \beta_{j-1}) + [\alpha_i \neq \beta_j]
+       \end{cases} &: \text{ else}
+\end{cases} $$
 
 \section{Evaluation}
 TODO
