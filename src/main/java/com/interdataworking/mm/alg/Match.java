@@ -532,7 +532,7 @@ public class Match implements UntypedGateway
 			System.out.println(e.getMessage());
 		}
 
-		System.out.printf("Check Predicate sim on %s | %s\n", l1, l2);
+		//System.out.printf("Check Predicate sim on %s | %s\n", l1, l2);
 		double d = computeDistance(l1, l2);
 		return d;
 		/*
@@ -611,7 +611,7 @@ public class Match implements UntypedGateway
 			ps = gamma(st1.predicate(), st2.predicate());
 			//System.out.printf("%s | %s | %s \n", st1.subject().getLocalName(), st1.predicate().getLocalName(), st1.object().getLabel());
 			//System.out.printf("%s | %s | %s \n", st2.subject().getLocalName(), st2.predicate().getLocalName(), st2.object().getLabel());
-			System.out.printf("Predicate sim = %.2f\n", ps);
+			//System.out.printf("Predicate sim = %.2f\n", ps);
 		}
 
 		if(GRAPH_TYPE.equals("ORIGINAL"))
@@ -817,23 +817,23 @@ public class Match implements UntypedGateway
 		double sumOfWeights = 0;
 		double sumOfComplements = 0;
 		if(weights != null){
-		System.out.print("numEdges = "+weights.size());
-		System.out.print("this weight = "+thisWeight);
+		//System.out.print("numEdges = "+weights.size());
+		//System.out.print("this weight = "+thisWeight);
 			for(Double w: weights) sumOfWeights += w;
-			System.out.print("; sumOfWeights = "+sumOfWeights);
+			//System.out.print("; sumOfWeights = "+sumOfWeights);
 			for(Double w: weights)
 			{
 						sumOfComplements += (sumOfWeights - w);
 			}
-			System.out.print("; SumOfComplements = "+sumOfComplements);
+			//System.out.print("; SumOfComplements = "+sumOfComplements);
 		if(sumOfComplements == 0 && weights.size() == 1){
 						return 1.0;
 		}
 		double ew =  (sumOfWeights - thisWeight)/sumOfComplements;
-			System.out.println("; Calculated edge weight "+ ew);
+			//System.out.println("; Calculated edge weight "+ ew);
 		return (sumOfWeights - thisWeight)/sumOfComplements;
 		}
-		System.out.println();
+		//System.out.println();
 		return 0;
 	}
 
