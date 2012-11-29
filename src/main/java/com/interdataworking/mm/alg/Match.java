@@ -38,6 +38,7 @@ public class Match implements UntypedGateway
 
   // default way of computing the propagation coefficients to be used
   public int FLOW_GRAPH_TYPE = FG_AVG;
+	public String GRAPH_TYPE = null;
 
   // various iteration formulas
 
@@ -506,6 +507,25 @@ public class Match implements UntypedGateway
   }
 
 
+	double gamma(Resource st1, Resource st2)
+	{
+		String l1 =null, l2 = null;
+		try{
+			l1 = st1.getLocalName();
+			l2 = st2.getLocalName();
+		}
+		catch(Exception e)
+		{
+			System.out.println(e.getMessage());
+		}
+
+		System.out.printf("Check Predicate sim on %s | %s\n", l1, l2);
+		double d = computeDistance(l1, l2);
+		if(d == 0) return 1.0;
+		if(d == 1) return 0.75;
+		else return 1.0/d;
+	}
+
   void constructPropagationGraph (boolean ignorePredicates) throws
     ModelException
   {
@@ -533,22 +553,22 @@ public class Match implements UntypedGateway
 
     List stmtPairs = new ArrayList ();
 
-    for (Enumeration en1 = m1.elements (); en1.hasMoreElements ();)
-      {
+    for (Enumeration en1 = m1.elements (); en1.hasMoreElements();)
+    {
 
-	Statement st1 = (Statement) en1.nextElement ();
+			Statement st1 = (Statement) en1.nextElement ();
 
-	if (st1.subject ()instanceof Statement ||
-	    st1.object ()instanceof Statement)
-	    continue;
+			if (st1.subject ()instanceof Statement ||
+	    		st1.object ()instanceof Statement)
+	    		continue;
 
-	for (Enumeration en2 = m2.elements (); en2.hasMoreElements ();)
-	  {
+			for (Enumeration en2 = m2.elements (); en2.hasMoreElements();)
+	  	{
 
-	    Statement st2 = (Statement) en2.nextElement ();
+	    	Statement st2 = (Statement) en2.nextElement ();
 
-	    if (st2.subject ()instanceof Statement ||
-		st2.object ()instanceof Statement)
+	    	if (st2.subject ()instanceof Statement ||
+					st2.object ()instanceof Statement)
 	        continue;
 
 //      if(tryAll) {
@@ -560,13 +580,26 @@ public class Match implements UntypedGateway
 
 	    double ps = 0.0;	//predicateSim(st1.predicate(), st2.predicate());
 	    //      System.err.println("-- " + st1 + " -- " + st2);
+			
+			// TODO: checks equality of edge labels?
+		if(GRAPH_TYPE.equals("NEW"))
+		{
+			ps = gamma(st1.predicate(), st2.predicate());
+			System.out.printf("%s | %s | %s \n", st1.subject().getLocalName(), st1.predicate().getLocalName(), st1.object().getLabel());
+			System.out.printf("%s | %s | %s \n", st2.subject().getLocalName(), st2.predicate().getLocalName(), st2.object().getLabel());
+			System.out.printf("Predicate sim = %.2f\n", ps);
+		}
+
+		if(GRAPH_TYPE.equals("ORIGINAL"))
+		{
 	    if (st1.predicate ().equals (st2.predicate ()))
 	        ps = EQUAL_PRED_COEFF;
 	    else if (TRY_ALL_ARCS)
 	        ps = OTHER_PRED_COEFF;
+		}
 
 
-	    if (ps > 0)
+	    if (ps > 0)//TODO > 'lil-gamma
 	      {
 		//      System.err.println("--- ps=" + ps + " from " + EQUAL_PRED_COEFF + ", " + TRY_ALL_ARCS + ", " + OTHER_PRED_COEFF);
 		StmtPair p = new StmtPair (st1, st2, ps,
@@ -622,7 +655,7 @@ public class Match implements UntypedGateway
 
 //          MapPair targetPair = get(incoming, st1.object(), st2.object());
 //          targetPair.sim += 1.0;
-		  }
+		  }//end Ignore Block
 
 		if (DEBUG)
 		    System.err.println ("" + p);
@@ -657,7 +690,7 @@ public class Match implements UntypedGateway
 	    if (DEBUG)
 	      System.err.println ("Adjusted: " + p);
 	  }
-      }
+      }//end if FG_STOCHASTIC
     else if (FLOW_GRAPH_TYPE == FG_INCOMING)
       {
 
@@ -684,7 +717,7 @@ public class Match implements UntypedGateway
 	    if (DEBUG)
 	      System.err.println ("Adjusted: " + p);
 	  }
-      }
+      }//end if FG_INCOMING
 
     // we don't need cardMaps any more, free memory
     cardMapSPLeft = cardMapOPLeft = cardMapSPRight = cardMapOPRight =
@@ -721,7 +754,7 @@ public class Match implements UntypedGateway
 			  p.osso * UPDATE_GUESS_WEIGHT));
 	  }
       }
-  }
+  }//end constructPropogationGraph
 
 
   PGNode getNode (Map table, RDFNode r1, RDFNode r2)
@@ -1108,7 +1141,7 @@ public class Match implements UntypedGateway
 			return ontology_A;
 	}
 
-	static void OAEIStandardRun(String ontAfile, String ontBfile) throws Exception
+	static void OAEIStandardRun(String ontAfile, String ontBfile, String graphType) throws Exception
 	{
     System.err.println("\nThis is the Similarity Flooding algorithm on the OAEI data set.");
     System.err.println("====================================================================");
@@ -1145,6 +1178,7 @@ public class Match implements UntypedGateway
     // (In general, this formula won't converge! So better stick to the default values instead)
     sf.formula = FORMULA_FFT;
     sf.FLOW_GRAPH_TYPE = FG_PRODUCT;
+		sf.GRAPH_TYPE = graphType;
 
     MapPair[] result = sf.getMatch(ontology_A, ontology_B, initMap);
     dump(result);
@@ -1307,12 +1341,12 @@ public class Match implements UntypedGateway
   public static void main (String[]args) throws Exception
   {
 
-		if(args.length < 2)
+		if(args.length < 3)
 		{
 						System.out.println("ERROR: Need to supply ontologies to match!");
 						return;
 		}
-		OAEIStandardRun(args[0], args[1]);
+		OAEIStandardRun(args[0], args[1], args[2]);
     //ICDE02Example();
 		/*
     switch(args.length) {
@@ -1334,4 +1368,33 @@ public class Match implements UntypedGateway
        }
      */
   }
+	/*Taken from rosettacode.org*/
+		 
+		  public static int computeDistance(String s1, String s2) {
+							    s1 = s1.toLowerCase();
+									    s2 = s2.toLowerCase();
+											 
+											    int[] costs = new int[s2.length() + 1];
+													    for (int i = 0; i <= s1.length(); i++) {
+																			      int lastValue = i;
+																						      for (int j = 0; j <= s2.length(); j++) {
+																													        if (i == 0)
+																																					          costs[j] = j;
+																																	        else {
+																																									          if (j > 0) {
+																																																		            int newValue = costs[j - 1];
+																																																								            if (s1.charAt(i - 1) != s2.charAt(j - 1))
+																																																																		              newValue = Math.min(Math.min(newValue, lastValue), costs[j]) + 1;
+																																																														            costs[j - 1] = lastValue;
+																																																																				            lastValue = newValue;
+																																																																										          }
+																																														        }
+																																					      }
+																									      if (i > 0)
+																																        costs[s2.length()] = lastValue;
+																												    }
+															    return costs[s2.length()];
+																	  }
+			 
+				 
 }

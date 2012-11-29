@@ -560,6 +560,7 @@ public class Match implements UntypedGateway
 
 	    double ps = 0.0;	//predicateSim(st1.predicate(), st2.predicate());
 	    //      System.err.println("-- " + st1 + " -- " + st2);
+			//TODO: This checks for edge equality, modify to check for fuzzy equality
 	    if (st1.predicate ().equals (st2.predicate ()))
 	        ps = EQUAL_PRED_COEFF;
 	    else if (TRY_ALL_ARCS)
