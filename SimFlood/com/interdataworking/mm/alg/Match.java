@@ -10,15 +10,26 @@ import org.xml.sax.InputSource;
 import org.w3c.rdf.syntax.RDFConsumer;
 import org.w3c.rdf.util.SFConsumer;
 
+//OWL
+import org.semanticweb.owlapi.model.*;
+import org.semanticweb.owlapi.apibinding.OWLManager;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+import java.net.URL;
+
 /**
  * This is an implementation of the Similarity Flooding algorithm
  * described in the ICDE'02 paper.
  *
  **/
 
+
 public class Match implements UntypedGateway {
 
-  public boolean DEBUG = false;
+
+  public static boolean DEBUG = false;
   public static final int DEBUG_MAX_ITERATIONS = 0;
 
   // default formula to be used: {ADD_SIGMA0_BEFORE=t, ADD_SIGMA0_AFTER=t, ADD_SIGMAN_AFTER=t}
@@ -832,6 +843,18 @@ public class Match implements UntypedGateway {
     }
   }
 
+	private static String prettyID(String ugly)
+	{
+			try{
+				return (new URL(ugly)).getRef();
+			}
+			catch(Exception e){System.err.println(e.getMessage());return "ERR";}
+	}
+
+	private static Model makeRDFGraph(String ontologyFile)
+	{
+
+	}
 	static void OAEIStandardRun(String ontAfile, String ontBfile) throws Exception
 	{
     System.err.println("\nThis is runs the Similarity Flooding algorithm on the OAEI data set.");
@@ -843,18 +866,96 @@ public class Match implements UntypedGateway {
     RDFFactory rf = new RDFFactoryImpl();
     NodeFactory nf = rf.getNodeFactory();
 
-    Model A = rf.createModel();
+    Model ontology_A = rf.createModel();
+
+		Map<String, Resource> resources = new HashMap<String, Resource>();
 
 		//TODO
 		//get rdf file locations from arglist
 		//parse owl2 files and build rdf graphs
-			//use org.w3c.rdf.implementation.syntax.sirpac.sirpac
-			//new InputSource(
-			SiRPAC parser = new SiRPAC("org.xml.sax.Parser");
-			//SiRPAC parser = new SiRPAC("javax.xml.parsers.SAXParser");
-			parser.setRDFSource(new InputSource("onto.rdf"));
-			SFConsumer sfc = new SFConsumer(A);
-			parser.parse(new InputSource("onto.rdf"), (RDFConsumer)sfc);
+			//use OWL
+			OWLOntologyManager ontMgr = OWLManager.createOWLOntologyManager();
+			//IRI iri = IRI.create("onto.rdf");
+			File oFile = new File("onto.rdf");
+			OWLOntology basic_onto = ontMgr.loadOntologyFromOntologyDocument(oFile);
+
+			//GET DOMAINS AND RANGES
+			Set<OWLObjectProperty> objPropSig = basic_onto.getObjectPropertiesInSignature(false);
+			for(OWLObjectProperty objProp:objPropSig)
+			{
+				Set<OWLClassExpression> objPropDomains = objProp.getDomains(basic_onto);
+				Set<OWLClassExpression> objPropRanges = objProp.getRanges(basic_onto);
+
+				System.out.printf("%s: domains = %d; ranges = %d\n", prettyID(objProp.toStringID()), objPropDomains.size(), objPropRanges.size());
+				Resource p = nf.createResource(prettyID(objProp.toStringID()));
+
+				for(OWLClassExpression domain:objPropDomains)
+				{
+					if(!domain.isAnonymous())
+					{
+						String domainName = prettyID(domain.asOWLClass().getIRI().toString());
+						if(domainName != null && !resources.keySet().contains(domainName))
+						{ 
+							resources.put(domainName, nf.createResource(domainName));
+						}
+						for(OWLClassExpression range:objPropRanges)
+						{
+							String rangeName = prettyID(range.asOWLClass().getIRI().toString());
+							if(rangeName != null && !resources.keySet().contains(rangeName))
+							{ 
+								resources.put(rangeName, nf.createResource(rangeName));
+							}
+							if(domainName != null && rangeName != null)
+							{
+	    					ontology_A.add(nf.createStatement(resources.get(domainName), p, resources.get(rangeName)));
+							}
+							if(DEBUG == true)
+							{
+								System.out.printf("%s | %s | %s\n", prettyID(domain.asOWLClass().getIRI().toString()), 
+																prettyID(objProp.toStringID()), 
+																range.asOWLClass().getIRI().toString() );
+							}
+						}
+					}
+				}
+
+			}
+
+			//GET "hasA" RELATIONS
+			Set<OWLClass> classes = basic_onto.getClassesInSignature(false);
+			Resource isA = nf.createResource("isA");
+			for(OWLClass owlClass: classes)
+			{
+					if(!owlClass.isAnonymous())
+					{
+						String className = prettyID(owlClass.getIRI().toString());
+						if(className!= null && !resources.keySet().contains(className))
+						{ 
+							resources.put(className, nf.createResource(className));
+						}
+						Set<OWLClassExpression> subclasses = owlClass.getSubClasses(basic_onto);
+						for(OWLClassExpression owlSubclass: subclasses)
+						{
+							String subclassName = prettyID(owlSubclass.asOWLClass().getIRI().toString());
+							if(subclassName != null && !resources.keySet().contains(subclassName))
+							{ 
+								resources.put(subclassName, nf.createResource(subclassName));
+							}
+		
+								if(className != null && subclassName != null)
+								{
+		    					ontology_A.add(nf.createStatement(resources.get(subclassName), isA, resources.get(className)));
+								}
+								if(DEBUG == true)
+								{
+										System.out.printf("%s isA %s\n", prettyID(owlSubclass.asOWLClass().getIRI().toString()), 
+																											prettyID(owlClass.getIRI().toString())); 
+								}
+						}
+						
+					}//if notAnonymous	
+			}
+
 	}
   static void ICDE02Example() throws Exception {
 
