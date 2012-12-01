@@ -1,0 +1,89 @@
+% encodage utf8 
+%%%%%%%%%%%%%%%%%%%%%%  english readme %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+readme-tkz-base.txt V1.16c 01/06/2011
+
+Purpose
+------- 
+
+The tkz-base package is the base of a set of packages, designed to give math teachers (and students) easy access at the programmation of drawings with TikZ.  I therefore hope that my  packages provide  ideal tools for  teachers wanting to offer their students fine documents of maths.
+
+The tkz-base package   is built on top of PGF and its associated front-end, TikZ and is a (La)TeX-friendly drawing package. The aim is to provide some useful macros  to help  others packages to build  drawings like graph of functions, or constructions in elementary plane geometry but also graphic representations of data in statistics. 
+
+Licence
+-------
+
+This program can be redistributed and/or modified under the terms
+of the LaTeX Project Public License Distributed from CTAN
+archives in directory macros/latex/base/lppl.txt. 
+
+Features
+--------
+ -- needs etex and fp.sty;
+ -- allows to use TikZ; 
+ -- works with utf8, pdflatex;
+ -- works with  the chain dvi->dvips->ps2pdf;
+ -- not ready to TeX and ConText (I need more time and ideas). 
+
+Installation  
+------------
+
+If you want to just test it quickly or if you need to install it by yourself, save the files (below) in a directory, which is part of your 
+local TeX tree.
+
+tkz-base.sty uses a lot of files. The package is inside a folder that contains others files :   
+
+_ tkz-base.cfg  .................. configuration file
+_ tkz-base.sty  .................. the head file
+_ tkz-obj-marks.tex  ..............adds marks and tools for marks
+_ tkz-obj-points.tex ............. adds points and tools for points
+_ tkz-obj-segments.tex ........... adds segments and tools for segments
+_ tkz-tools-arith.tex ............ some useful tool for integers 
+_ tkz-tools-base.tex  ............ the main file
+_ tkz-tools-math.tex  ............ mathematic tools
+_ tkz-tools-misc.tex ............. misc tools
+_ tkz-tools-utilities.tex  
+
+How to use it
+-------------
+
+\usepackage{tkz-base}  loads TikZ, so if you need to use some options for xcolor.sty, you need to launch xcolor before tkz-base.
+
+The main macro is \tkzInit to define a Cartesian coordinate system or rectangular coordinate system. This system is in two dimensions and defined by a pair of perpendicular axes. The user needs only to define the single unit of length for both axes.
+
+\tkzAxeX, \tkzDrawX,  \tkzLabelX  are macros for axes.
+\tkzDefPoint \tkzDrawPoint \tkzLabelPoint are macros for points. 
+But other objects have specific macros like segments.
+
+tkz-base provides some useful tools for packages like tkz-euclide and tkz-fct.
+
+Extension
+---------
+tkz-base can use some objects like points and segments, but it is possible to use some objects created for tkz-euclide. Thus to use the macros associated with the polygons, just put in the preamble: 
+
+\usetkzobj{polygons}.
+
+Examples
+--------
+All  examples of documentation will be on my sites:
+  http://altermundus.fr  ou   http://altermundus.com
+
+Documentation
+-------------
+ tkz-base-screen.pdf is in french actually but a lot of examples  are given in the documentation.
+Documentation for printing will be ready soon.
+
+Compatibility
+-------------
+This new package is not compatible  with older packages tkz-base, tkz-2d and  especially tkz-arith.  
+
+History
+-------
+-- 1.16 correction of bugs
+-- 1.13 first version
+
+ Alain Matthes
+ 5 rue de Valence
+ Paris 75005  
+ 
+ al (dot) ma (at) mac (dot) com   

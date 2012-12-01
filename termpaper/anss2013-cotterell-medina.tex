@@ -1,7 +1,7 @@
 % File: anss2013-cotterell-medina.tex
 % Author: Terrance Medina and Michael Cotterell
 %
-\documentclass[letterpaper,twocolumn,11pt]{article}
+\documentclass[letterpaper,twocolumn,12pt]{article}
 \usepackage[utf8]{inputenc}
 \usepackage[english]{babel}
 \usepackage{scs}
@@ -9,13 +9,17 @@
 \usepackage{amsmath,amsfonts,amssymb,amsthm}
 \usepackage{epsfig,epstopdf}
 \usepackage{hyperref}
+\usepackage{tkz-graph}
 %\usepackage{citesort}
+
+\usetikzlibrary{arrows}
 
 \renewcommand{\topfraction}{0.95}
 \renewcommand{\bottomfraction}{0.95}
 \renewcommand{\textfraction}{0.05}
 \renewcommand{\floatpagefraction}{0.35}
-%\usepackage{fullpage}
+
+
 \begin{document}
 
 \newtheorem{defn}{Definition}
@@ -175,16 +179,69 @@ $$ \Gamma \left( \alpha, \beta \right) = \left\{
 Let $x$ and $y$ be terms in a single ontology. The label set $\Lambda \left( x, y \right)$ is the set of all labels between hierarchical properties and object properties where $x$ and $y$ are the domain and range of a property, respectively.
 \end{defn}
 
-$$ \qquad\operatorname{\sigma}(\alpha_i, \beta_j) = \begin{cases}
-  0 &: i=j=0 \\
-  i &: j = 0 \text{ and } i > 0 \\
-  j &: i = 0 \text{ and } j > 0 \\
-  \min \begin{cases}
-          \operatorname{\sigma}(\alpha_{i-1}, \beta_j) + 1 \\
-          \operatorname{\sigma}(\alpha_i, \beta_{j-1}) + 1 \\
-          \operatorname{\sigma}(\alpha_{i-1}, \beta_{j-1}) + [\alpha_i \neq \beta_j]
-       \end{cases} &: \text{ else}
-\end{cases} $$
+\begin{figure*}
+\centering
+\begin{equation*}
+\sigma 
+\left( \alpha_i, \beta_j \right) = \left\{
+	\begin{array}{ll}
+   	 	0 &: i=j=0 \\
+		i &: j = 0 \text{ and } i > 0 \\
+		j &: i = 0 \text{ and } j > 0 \\
+		\min 
+			\left\{ 
+			\begin{array}{l}
+				\sigma \left( \alpha_{i-1}, \beta_j \right) + 1 \\
+          		\sigma \left( \alpha_i, \beta_{j-1} \right) + 1 \\
+          		\sigma \left( \alpha_{i-1}, \beta_{j-1} \right) + [\alpha_i \neq \beta_j]
+			\end{array} \right. &: \text{else}
+     \end{array}
+\right.
+\end{equation*}
+\caption{Levenshtein Edit Distance}
+\end{figure*}
+
+\subsection{Unnormalized Pairwise Markov Chain}
+TODO
+
+\begin{figure*}
+\centering
+\SetVertexNormal[
+	Shape = circle,
+    % FillColor = orange,
+    LineWidth = 1pt
+]
+\SetUpEdge[
+	lw = 1.5pt,
+    color = orange,
+    labelcolor = white
+]
+\begin{tikzpicture}
+   \Vertex[x=0, y=0]{A}
+   \Vertex[x=2, y=2]{B}
+   \Vertex[x=4, y=0]{C}
+   
+   \Vertex[x=6, y=0]{D}
+   \Vertex[x=8, y=2]{E}
+   \Vertex[x=10, y=0]{F}
+%   \tikzset{EdgeStyle/.append style = {bend left}}
+   \tikzset{EdgeStyle/.style={->}}
+   \Edge[label = $m$](A)(B)
+   \Edge[label = $n$](B)(C)
+   \Edge[label = $o$](C)(A)
+   
+   \Edge[label = $m'$](D)(E)
+   \Edge[label = $n'$](E)(F)
+   \tikzset{EdgeStyle/.append style = {bend left}}
+   \Edge[label = $o'$](F)(D)
+   \tikzset{EdgeStyle/.append style = {bend left}}
+   \Edge[label = $p$](D)(F)  
+\end{tikzpicture}
+\caption{Example Input Ontologies with Object Properties}
+\end{figure*}
+
+\subsection{Normalized Pairwise Markov Chain}
+TODO
 
 \section{Evaluation}
 TODO
