@@ -1,10 +1,8 @@
-% File: OntologyMatchingWithMarkovChains.tex
-%	Author: Terrance Medina and Michael Cotterell
+% File: anss2013-cotterell-medina.tex
+% Author: Terrance Medina and Michael Cotterell
 %
-%\documentclass[a4paper]{article}
-%\documentclass[10pt, conference, compsocconf]{IEEEtran}
-\documentclass[letterpaper,twocolumn,10pt]{article}
-\usepackage[latin1]{inputenc}
+\documentclass[letterpaper,twocolumn,11pt]{article}
+\usepackage[utf8]{inputenc}
 \usepackage[english]{babel}
 \usepackage{scs}
 \usepackage{graphicx}
@@ -12,11 +10,7 @@
 \usepackage{epsfig,epstopdf}
 \usepackage{hyperref}
 %\usepackage{citesort}
-%\usepackage{amssymb,amsmath}
-%
-% By default LaTeX is quite picky with float placement,
-% relax a bit in order to keep this document within 2 pages
-%
+
 \renewcommand{\topfraction}{0.95}
 \renewcommand{\bottomfraction}{0.95}
 \renewcommand{\textfraction}{0.05}
@@ -56,6 +50,9 @@ How does a Markov chain perform analytically?
 \item Information-Theoretic~\cite{lin:1998:information}.
 \item Hungarian algorithm~\cite{kuhn:1955:hungarian}.
 \item Ontology Matching book~\cite{euzenat:2007:ontology}.
+\item ScalaTion~\cite{miller:2010:scalation}.
+\item BCNN book~\cite{bcnn:2010:simulation}.
+\item Scala spec~\cite{odersky:2011:spec}.
 \end{itemize}
 
 %Knowledge bases
@@ -110,7 +107,7 @@ convergence analysis.
 
 \subsection{Why do we need fully automated alignment?}
 
-\section{Background}
+\subsection{Background}
 
 %Markov Processes
 A Markov Process is a mathematical model that represents a system as a set of states
@@ -122,9 +119,8 @@ processes are called ``memoryless''.
 %Hidden Markov Models
 A Hidden Markov Model (HMM) is simply a Markov process whose states and transitions
 are unobservable.
-\newline
 
-\section{Previous Work}
+\section{Related Work}
 
 Although the problem of fully-automated ontology alignment is far from being solved,
 there has been much work accomplished around fundamental techniques for element
@@ -162,7 +158,6 @@ representation have identically named labels. It can also be difficult to predic
 wether or not the fixpoint calculation will converge.
 \newline
 
-
 \section{Approach}
 Testing
 
@@ -192,6 +187,9 @@ $$ \qquad\operatorname{\sigma}(\alpha_i, \beta_j) = \begin{cases}
 \end{cases} $$
 
 \section{Evaluation}
+TODO
+
+\section{Results}
 TODO
 
 \section{Conclusions \& Future Work}
