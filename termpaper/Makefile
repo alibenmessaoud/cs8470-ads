@@ -9,6 +9,9 @@ compile:
 evince: compile
 	evince *.pdf &
 
+emacs: 
+	emacs *.tex &
+
 clean:
 	rm -f *.log 
 	rm -f *.aux 
