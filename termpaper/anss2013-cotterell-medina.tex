@@ -163,7 +163,8 @@ wether or not the fixpoint calculation will converge.
 \newline
 
 \section{Approach \& Implementation}
-Testing
+
+The following sections outline and present the details about the model as well as many of the implementation details.
 
 \subsection{Levenshtein Edit Distance}
 
@@ -199,14 +200,26 @@ Let $x$ and $y$ be terms in a single ontology. The label set $\Lambda \left( x, 
 Let $\gamma$ be some threshold. Edge confidence $\Gamma \left( \alpha, \beta \right)$ is the similarity score between the labels of two edges $\alpha$ and $\beta$ if that similarity is greater than $\gamma$, otherwise $0$. That is,
 $$ \Gamma \left( \alpha, \beta \right) = \left\{
    	 \begin{array}{ll}
-       \sigma \left( \alpha, \beta \right) & : \vert \sigma \left( \alpha, \beta \right) \vert \geq \gamma \\
-       0                                   & : \mathrm{otherwise}
+           \frac{1}{\sigma \left( \alpha, \beta \right)} & : \vert \sigma \left( \alpha, \beta \right) \vert \geq \gamma \\
+           0                                             & : \mathrm{otherwise}
      \end{array}
    \right.$$
 \end{defn}
 
 \subsection{Unnormalized Pairwise Markov Chain}
-TODO
+
+Consider the input ontologies presented in Figure~\ref{fig:input}.
+
+\begin{defn}
+An {\bf Unnormalized Pairwise Markov Chain} is a not-necessarily stochastic Markov Chain that satisfies the following property.
+For every pairwise grouping of ontological terms between the two input ontologies, there exists a transition in the UPMC
+$$ (x, y) \rightarrow (x', y') $$
+with probability $\Gamma(\Lambda(x, y), \Lambda(x', y'))$ if and only if
+\begin{itemize}
+\item there exists an edge from $x$ to $x'$, and
+\item there exists an edge from $y$ to $y'$.
+\end{itemize}
+\end{defn}
 
 \begin{figure*}
 \centering
@@ -242,7 +255,30 @@ TODO
    \Edge[label = $p$](D)(F)  
 \end{tikzpicture}
 \caption{Example Input Ontologies with Object Properties}
+\label{fig:input}
 \end{figure*}
+
+\begin{figure*}
+\centering
+\SetVertexNormal[
+	Shape = circle,
+    % FillColor = orange,
+    LineWidth = 1pt
+]
+\SetUpEdge[
+	lw = 1pt,
+    color = orange,
+    labelcolor = white
+]
+\begin{tikzpicture}
+   \Vertex[x=0, y=4]{AD}   \Vertex[x=2, y=4]{BD}   \Vertex[x=4, y=4]{CD}
+   \Vertex[x=0, y=2]{AE}   \Vertex[x=2, y=2]{BE}   \Vertex[x=4, y=2]{CE}
+   \Vertex[x=0, y=0]{AF}   \Vertex[x=2, y=0]{BF}   \Vertex[x=4, y=0]{CF}
+\end{tikzpicture}
+\caption{Example an Unnormalized Pairwise Markov Chain}
+\label{fig:upmc}
+\end{figure*}
+
 
 \subsection{Normalized Pairwise Markov Chain}
 TODO
