@@ -19,7 +19,6 @@
 \renewcommand{\textfraction}{0.05}
 \renewcommand{\floatpagefraction}{0.35}
 
-
 \begin{document}
 
 \newtheorem{defn}{Definition}
@@ -182,7 +181,7 @@ Let $x$ and $y$ be terms in a single ontology. The label set $\Lambda \left( x, 
 \begin{figure*}
 \centering
 \begin{equation*}
-\sigma 
+\mathcal{L} 
 \left( \alpha_i, \beta_j \right) = \left\{
 	\begin{array}{ll}
    	 	0 &: i=j=0 \\
@@ -191,9 +190,9 @@ Let $x$ and $y$ be terms in a single ontology. The label set $\Lambda \left( x, 
 		\min 
 			\left\{ 
 			\begin{array}{l}
-				\sigma \left( \alpha_{i-1}, \beta_j \right) + 1 \\
-          		\sigma \left( \alpha_i, \beta_{j-1} \right) + 1 \\
-          		\sigma \left( \alpha_{i-1}, \beta_{j-1} \right) + [\alpha_i \neq \beta_j]
+				\mathcal{L} \left( \alpha_{i-1}, \beta_j \right) + 1 \\
+          		        \mathcal{L} \left( \alpha_i, \beta_{j-1} \right) + 1 \\
+          		        \mathcal{L} \left( \alpha_{i-1}, \beta_{j-1} \right) + [\alpha_i \neq \beta_j]
 			\end{array} \right. &: \text{else}
      \end{array}
 \right.

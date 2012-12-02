@@ -1,8 +1,13 @@
-all:
+all: compile
+
+compile:
 	pdflatex -synctex=1 -interaction=nonstopmode *.tex
 	bibtex *.aux
 	pdflatex -synctex=1 -interaction=nonstopmode *.tex
 	pdflatex -synctex=1 -interaction=nonstopmode *.tex
+
+evince: compile
+	evince *.pdf
 
 clean:
 	rm -f *.log 
