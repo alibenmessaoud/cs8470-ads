@@ -7,7 +7,7 @@ compile:
 	pdflatex -synctex=1 -interaction=nonstopmode *.tex
 
 evince: compile
-	evince *.pdf
+	evince *.pdf &
 
 clean:
 	rm -f *.log 
