@@ -12,6 +12,9 @@ evince: compile
 emacs: 
 	emacs *.tex &
 
+emacsnw: 
+	emacs -nw *.tex
+
 clean:
 	rm -f *.log 
 	rm -f *.aux 
