@@ -279,21 +279,40 @@ g & h & 0 & a & a & a & a & a & 0 \end{array} \right)
 TODO
 
 \begin{defn}
-a {\bf Normalized Pairwise Markov Chain (NPMC)} is defined as the Markov Chain generated from a UPMC by normalizing the row sums of the matrix such that they sum to one. Let $P$ be the $1$-step probability transition matrix for an UPMC. Then,
+\label{def:npmc}
+a {\bf Normalized Pairwise Markov Chain (NPMC)} is defined as the Markov Chain generated from a UPMC by normalizing the row sums of the matrix such that they sum to one. Let $P$ be the $1$-step probability transition matrix for an UPMC. First, determine the sum of the current recipricol row sums.
 
-\begin{itemize}
-\item testing
-\end{itemize}
+$$ M_i = \sum \frac{1}{P_i} $$
 
+\noindent Then, add the repricol row sums to each value in the matrix, storing each value in a temporary matrix $T$.
+
+$$ T_{i,j} = -\frac{1}{P_{i,j}} + M_i $$
+
+\noindent Normalize each value by dividing each value in $T$ by its row sum.
+
+$$ P_{i,j} = \frac{T_{i,j}}{\sum T_i} $$
 \end{defn}
+
+\noindent The matrix that results from applying the transformation described in Definition~\ref{def:npmc} is \textit{row stochastic} (its rows sum to one).
+When viewed as the $1$-step probability transition matrix for a Markov Chain, it is easy to see that the weights on the outgoing edges for each state sum to one.
+After the transformation, a NPMC represents a Markov Chain where each pair of ontological terms has a certain probability of being related to other pairs in the chain in proportion to the edge confidences that were calculated earlier.
 
 \subsection{Iterative Approach}
 
-Talk about how we can use the iterative approach to solve for the stationary distribution.
+Once approach to finding the stationary distribution of the NPMC is to compute the limiting probabilistic state $\lim_{k \to \infty} \pi P^k$ in an iterative fashion. 
+Let $\epsilon$ be some threshold.
+
+$$ A = \pi^t : \pi^t P \pm \epsilon = \pi^{t-1} $$
+
+\noindent The values for the initial similarity distribution $\pi^0$ are taken from the non-structural similarity scores for the ontological terms corresponding to each state.
 
 \subsection{Steady-State Approach}
 
-Talk about how we can directly solve for the stationary distribution under certain circumstances.
+Another approach to finding the stationary distribution of the NPMC is to compute the limiting probabilistic state $\lim_{k \to \infty} \pi P^k$ directly.
+This can be done by solving a left eigenvalue problem: 
+$$ \pi = \pi P \Rightarrow \pi (P - I) = 0$$
+where the eigenvalue is $1$. 
+Simply solve for $\pi$ by computing the left nullspace of the $P - I$ matrix (appropriately sliced) and then normalizing $\pi$ so that $\vert\vert \pi \vert\vert = 1$.
 
 \subsection{Refining Results}
 
