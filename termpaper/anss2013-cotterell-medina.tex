@@ -186,6 +186,10 @@ The following sections outline and present the details about the model as well a
 
 \subsection{Levenshtein Edit Distance}
 
+The Levenshtein distance is a string similarity metric for measuring the difference between two character sequences. 
+The distance between two sequences is equal to the number of single-character operations required to transform one sequence into the other. 
+The single-character operations are insertion, deletion, and substitution.
+
 \begin{defn}
 Let $x$ and $y$ be terms in a single ontology. The label set $\Lambda \left( x, y \right)$ is the set of all labels between hierarchical properties and object properties where $x$ and $y$ are the domain and range of a property, respectively.
 \end{defn}
@@ -212,7 +216,24 @@ Let $x$ and $y$ be terms in a single ontology. The label set $\Lambda \left( x, 
 \caption{Levenshtein Edit Distance}
 \end{figure*}
 
+\begin{figure*}
+\centering
+\begin{equation*}
+\sigma
+\left( \alpha_i, \beta_j \right) = \left\{
+\begin{array}{ll}
+  1           &: \mathcal{L} \left( \alpha_i, \beta_j \right) = 0 \\
+  \frac{3}{4} &: \mathcal{L} \left( \alpha_i, \beta_j \right) = 1 \\
+  \frac{1}{\mathcal{L} \left( \alpha_i, \beta_j \right)} &: \text{otherwise} \\
+\end{array}
+\right.
+\end{equation*}
+\caption{Edit Similarity Distance}
+\end{figure*}
+
 \subsection{Edge Confidence}
+
+A simple metric for edge similarity is described below.
 
 \begin{defn}
 Let $\gamma$ be some threshold. Edge confidence $\Gamma \left( \alpha, \beta \right)$ is the similarity score between the labels of two edges $\alpha$ and $\beta$ if that similarity is greater than $\gamma$, otherwise $0$. That is,
@@ -335,8 +356,9 @@ $$ A = \pi^t : \pi^t P \pm \epsilon = \pi^{t-1} $$
 Another approach to finding the stationary distribution of the NPMC is to compute the limiting probabilistic state $\lim_{k \to \infty} \pi P^k$ directly.
 This can be done by solving a left eigenvalue problem: 
 $$ \pi = \pi P \Rightarrow \pi (P - I) = 0$$
-where the eigenvalue is $1$. 
+where the eigenvalue is $1$ and $I$ is the identity matrix. 
 Simply solve for $\pi$ by computing the left nullspace of the $P - I$ matrix (appropriately sliced) and then normalizing $\pi$ so that $\vert\vert \pi \vert\vert = 1$.
+In order to accomplish this in an easy fashion, the ScalaTion library was used~\cite{miller:2010:scalation}.
 
 \subsection{Refining Results}
 
