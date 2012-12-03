@@ -14,6 +14,8 @@
 
 \usetikzlibrary{arrows}
 
+\renewcommand\thesection{\arabic{section}}
+
 \renewcommand{\topfraction}{0.95}
 \renewcommand{\bottomfraction}{0.95}
 \renewcommand{\textfraction}{0.05}
@@ -57,6 +59,16 @@ How does a Markov chain perform analytically?
 \item BCNN book~\cite{bcnn:2010:simulation}.
 \item Scala spec~\cite{odersky:2011:spec}.
 \end{itemize}
+
+An ontology alignment may be informally described as a set of correspondences between semantically related terms in two heterogeneous input ontologies. 
+Each correspondence is qualified with a confidence level, $[0,1]$.
+Alignment is useful in data integration tasks dealing with what is sometimes referred to as the semantic heterogeneity problem. 
+It helps in the automation of various important tasks, most important of which is schema merging, enabling the knowledge and data expressed in the input ontologies to interoperate.
+
+The rest of this paper is organized as follows: the remainder of this section will cover some of the background material related to the Semantic Web and ontologies, the cases for fully automated alignment, and some of the background material on the statistical methods used in this paper; Section~\ref{sec:approach} outlines the approach and implementation details; the evaluation and benchmarks are explained in Section~\ref{sec:eval}; results are presented in Section~\ref{sec:results}; and, conclusions and possible future work are outlined in Section~\ref{sec:conclusions}.
+
+\subsection{Semantic Web and Ontologies}
+\label{subsec:semanticweb}
 
 %Knowledge bases
 A knowledge base is a kind of database that is designed 
@@ -109,8 +121,12 @@ We present a novel representation for ontology alignment that allows for improve
 convergence analysis.
 
 \subsection{Why do we need fully automated alignment?}
+\label{subsec:automated}
 
-\subsection{Background}
+TODO
+
+\subsection{Statistical \& Simulation Background}
+\label{subsec:stat}
 
 %Markov Processes
 A Markov Process is a mathematical model that represents a system as a set of states
@@ -162,6 +178,7 @@ wether or not the fixpoint calculation will converge.
 \newline
 
 \section{Approach \& Implementation}
+\label{sec:approach}
 
 The following sections outline and present the details about the model as well as many of the implementation details.
 
@@ -330,6 +347,7 @@ In order to accomplish this task, the Hungarian algorithm is used~\cite{kuhn:195
 Talk about the implementation here..
 
 \section{Evaluation}
+\label{sec:eval}
 
 In order to evaluate the model presented in this paper, the bibliographic ontology benchmark provided by the Ontology Alignment Evaluation Initiative (OAEI) was used.
 This benchmark test library consists of data sets that are built from the bibliographic reference ontology.
@@ -338,9 +356,13 @@ Each test includes a reference alignment in order to facilitate the calculation 
 Our initial comparison is the alignment between the bibliographic ontology and an ontology that contains synonyms.
 
 \section{Results}
+\label{sec:results}
+
 TODO
 
 \section{Conclusions \& Future Work}
+\label{sec:conclusions}
+
 TODO
 
 %ACKNOWLEDGMENTS are optional
