@@ -19,6 +19,10 @@ import java.util.Map;
 import java.util.Set;
 import java.net.URL;
 
+import java.nio.file.*;
+//import java.nio.file.Path;
+//import java.nio.file.Paths;
+
 /**
  * This is an implementation of the Similarity Flooding algorithm
  * described in the ICDE'02 paper.
@@ -961,8 +965,8 @@ public class Match implements UntypedGateway
     {
 
       return "[" + getLeft () + "," + getRight () + ": sim=" + sim +
-	", init=" + sim0 + ", N=" + simN + ", N1=" + simN1 +
-	(inverse ? ", inverse" : "") + "]";
+	", init=" + sim0;// + ", N=" + simN + ", N1=" + simN1 +
+	//(inverse ? ", inverse" : "") + "]";
     }
   }
 
@@ -1132,7 +1136,7 @@ public class Match implements UntypedGateway
     }
   }
 
-	private static Model makeRDFGraph(String ontologyFile, Map<String, Resource> resource) throws Exception
+	private static Model makeRDFGraph(File ontologyFile, Map<String, Resource> resource) throws Exception
 	{
     RDFFactory rf = new RDFFactoryImpl();
     NodeFactory nf = rf.getNodeFactory();
@@ -1143,7 +1147,8 @@ public class Match implements UntypedGateway
 
 		
 		OWLOntologyManager ontMgr = OWLManager.createOWLOntologyManager();
-		File oFile = new File(ontologyFile);
+		//File oFile = new File(ontologyFile);
+		File oFile = ontologyFile;
 		OWLOntology basic_onto = ontMgr.loadOntologyFromOntologyDocument(oFile);
 
 			//GET DOMAINS AND RANGES
@@ -1229,8 +1234,24 @@ public class Match implements UntypedGateway
 			}
 			return ontology_A;
 	}
+	public static File saveFile(URL origin) throws IOException
+	{
+		InputStream is = origin.openStream();
+		File out = File.createTempFile("alignment_buf", ".tmp"); 
+		OutputStream os = new FileOutputStream(out);
+		byte[] b = new byte[2048];
+		int length;
+		while((length=is.read(b))!= -1)
+		{
+			os.write(b,0,length);
+		}
+		is.close();
+		os.close();
+		return out;
+	}
 
-	static void OAEIStandardRun(String ontAfile, String ontBfile, String graphType) throws Exception
+
+	public static String OAEIStandardRun(URL ontAfile, URL ontBfile, String graphType) throws Exception
 	{
     Match sf = new Match();
 
@@ -1243,8 +1264,8 @@ public class Match implements UntypedGateway
     System.err.println("\nThis is the Similarity Flooding algorithm on the OAEI data set.");
     System.err.println("====================================================================");
 		System.err.print("Matching: ");
-		System.err.print(ontAfile+" | ");
-		System.err.println(ontBfile);
+		System.err.print(ontAfile.getFile()+" | ");
+		System.err.println(ontBfile.getFile());
 		System.err.println();
 
 
@@ -1253,8 +1274,8 @@ public class Match implements UntypedGateway
 		Map<String, Resource> resources_B = new HashMap<String, Resource>();
 
 		//Build RDF Models from ontologies
-    Model ontology_A = makeRDFGraph(ontAfile, resources_A);
-    Model ontology_B = makeRDFGraph(ontBfile, resources_B);
+    Model ontology_A = makeRDFGraph(saveFile(ontAfile), resources_A);
+    Model ontology_B = makeRDFGraph(saveFile(ontBfile), resources_B);
 
     // create an initial mapping which is just a cross-product with 1's as weights
     List initMap = new ArrayList();
@@ -1283,9 +1304,49 @@ public class Match implements UntypedGateway
 
     MapPair[] result = sf.getMatch(ontology_A, ontology_B, initMap);
     dump(result);
-
-
+		return genOutString(result, getMax(result));
   }
+	static double getMax(MapPair[] result)
+	{
+					double max = 0;
+					for(MapPair r:result)
+					{
+						if(r.sim > max && r.sim != 1){
+										max = r.sim;
+						}
+					}
+					return max;
+	}
+
+	static String genOutString(MapPair[] result, double max)
+	{
+		String s = "";
+		//Write Intro
+			s += "<?xml version='1.0' encoding='utf-8'?>\n";
+		s+="<rdf:RDF xmlns='http://knowledgeweb.semanticweb.org/heterogeneity/alignment' ";
+		s+="	 xmlns:rdf='http://www.w3.org/1999/02/22-rdf-syntax-ns#' ";
+		s+="	 xmlns:xsd='http://www.w3.org/2001/XMLSchema#'>";
+		s+="<Alignment>\n";
+		s+="<xml>yes</xml>\n";
+		s+="<level>0</level>\n";
+		s+="<type>??</type>\n";
+
+		//Write each correspondence
+    for(MapPair mp:result)
+		{
+		  s+="<map>\n<Cell>\n<entity1 rdf:resource=\""+mp.getLeft()+"\"/>"+
+								 "<entity2 rdf:resource=\""+mp.getRight()+"\"/>"+
+								 "<measure rdf:datatype='xsd:float'>"+mp.sim/max+"</measure>"+
+								 "<relation>=</relation>\n"+
+								 "</Cell>\n</map>\n";
+		}
+	
+		//Write outro
+		s+="</Alignment>";
+		s+="</rdf:RDF>";
+		return s;
+	}
+
   static void ICDE02Example () throws Exception
   {
 
@@ -1439,6 +1500,7 @@ public class Match implements UntypedGateway
       dump (f);
   }
 
+	/*
   public static void main (String[]args) throws Exception
   {
 
@@ -1447,7 +1509,33 @@ public class Match implements UntypedGateway
 						System.out.println("ERROR: Need to supply ontologies to match!");
 						return;
 		}
-		OAEIStandardRun(args[0], args[1], args[2]);
+		*/
+		/*
+		String s = OAEIStandardRun(args[0], args[1], args[2]);
+
+		try{
+			Path path = Paths.get("./testRDFoutput.rdf");
+			PrintWriter outfile = new PrintWriter("testRDFoutput.rdf");
+			outfile.println(s);
+			outfile.close();
+		}
+		catch(Exception e)
+		{
+			System.err.println(e.getMessage());
+		}
+		*/
+		/*
+				try{
+					File alignmentFile = Files.createFile(path);
+					FileWriter fw = new FileWriter(alignmentFile);
+					fw.write(s);
+					fw.flush();
+					fw.close();
+				}
+				catch (IOException e) {
+					throw new ToolBridgeException("cannot create file for resulting alignment", e);
+				}
+				*/
     //ICDE02Example();
 		/*
     switch(args.length) {
@@ -1468,7 +1556,7 @@ public class Match implements UntypedGateway
        case 2: sequenceExample(args[0], args[1]); break;
        }
      */
-  }
+  //}
 	/*Taken from rosettacode.org*/
 		 
 		  public static int computeDistance(String s1, String s2) {

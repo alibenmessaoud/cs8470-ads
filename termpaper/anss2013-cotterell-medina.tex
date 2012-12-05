@@ -62,12 +62,23 @@ How does a Markov chain perform analytically?
 \item Linear Algebra textbook~\cite{goodaire:2003:linalgebra}.
 \end{itemize}
 
-An ontology alignment may be informally described as a set of correspondences between semantically related terms in two heterogeneous input ontologies. 
+An ontology alignment may be informally described as a set of correspondences 
+between semantically related terms in two heterogeneous input ontologies. 
 Each correspondence is qualified with a confidence level, $[0,1]$.
-Alignment is useful in data integration tasks dealing with what is sometimes referred to as the semantic heterogeneity problem. 
-It helps in the automation of various important tasks, most important of which is schema merging, enabling the knowledge and data expressed in the input ontologies to interoperate. \\
+Alignment is useful in data integration tasks dealing with what is sometimes 
+referred to as the semantic heterogeneity problem. 
+It helps in the automation of various important tasks, most important of which 
+is schema merging, enabling the knowledge and data expressed in the input 
+ontologies to interoperate. \\
 
-\noindent The rest of this paper is organized as follows: the remainder of this section will cover some of the background material related to the Semantic Web and ontologies, the cases for fully automated alignment, and some of the background material on the statistical methods used in this paper; Section~\ref{sec:approach} outlines the approach and implementation details; the evaluation and benchmarks are explained in Section~\ref{sec:eval}; results are presented in Section~\ref{sec:results}; and, conclusions and possible future work are outlined in Section~\ref{sec:conclusions}.
+\noindent The rest of this paper is organized as follows: 
+the remainder of this section will cover some of the background material related 
+to the Semantic Web and ontologies, the cases for fully automated alignment, 
+and some of the background material on the statistical methods used in this paper; 
+Section~\ref{sec:approach} outlines the approach and implementation details; 
+the evaluation and benchmarks are explained in Section~\ref{sec:eval}; 
+results are presented in Section~\ref{sec:results}; and, 
+conclusions and possible future work are outlined in Section~\ref{sec:conclusions}.
 
 \subsection{Semantic Web and Ontologies}
 \label{subsec:semanticweb}
@@ -138,8 +149,9 @@ on its current state, and not on any of its previous states. In that sense, Mark
 processes are called ``memoryless''.
 
 %Hidden Markov Models
-A Hidden Markov Model (HMM) is simply a Markov process whose states and transitions
-are unobservable.
+% NOT REALLY USING THESE
+%A Hidden Markov Model (HMM) is simply a Markov process whose states and transitions
+%are unobservable or only partially observable.
 
 \section{Related Work}
 
@@ -172,22 +184,31 @@ between them. The idea is that if two elements in heterogeneous ontologies are v
 then their neighboring elements should also be very similar.
 %
 %Convergence Properties
-Similarity flooding has been useful as a foundation is several other structure-based
-matching techniques such as anchor flooding \textbf{**others??*} but suffers from 
+Similarity flooding has been useful as a foundation in other structure-based
+matching techniques such as anchor flooding 
+%\textbf{**others??*} 
+but suffers from 
 a few limitations. First, it requires that the edges of the edge-labeled graph 
-representation have identically named labels. It can also be difficult to predict
+representation have identically named labels. In the case that corresponding edge labels
+do not have exactly the same name, but mean the same thing (for example ``hasA'' and ``has\_a'')
+that information is completely lost to the flooding algorithm. It can also be difficult to predict
 wether or not the fixpoint calculation will converge.
 \newline
 
 \section{Approach \& Implementation}
+%%%%%%%%%%% APPROACH & IMPLEMENTATION  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \label{sec:approach}
 
-The following sections outline and present the details about the model as well as many of the implementation details.
+The following sections outline and present the details about the model as well as 
+many of the implementation details.
 
 \subsection{Levenshtein Edit Distance}
+%%%%%%%%%%% LEVENSHTEIN DISTANCE  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-The Levenshtein distance is a string similarity metric for measuring the difference between two character sequences. 
-The distance between two sequences is equal to the number of single-character operations required to transform one sequence into the other. 
+The Levenshtein distance is a string similarity metric for measuring the difference 
+between two character sequences. 
+The distance between two sequences is equal to the number of single-character 
+operations required to transform one sequence into the other. 
 The single-character operations are insertion, deletion, and substitution.
 
 \begin{defn}
@@ -232,8 +253,10 @@ Let $x$ and $y$ be terms in a single ontology. The label set $\Lambda \left( x, 
 \end{figure*}
 
 \subsection{Edge Confidence}
+%%%%%%%%%%% EDGE CONFIDENCE %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 A simple metric for edge similarity is described below.
+\textbf{TODO:} Provide an intuitive explanation of this.
 
 \begin{defn}
 Let $\gamma$ be some threshold. Edge confidence $\Gamma \left( \alpha, \beta \right)$ is the similarity score between the labels of two edges $\alpha$ and $\beta$ if that similarity is greater than $\gamma$, otherwise $0$. That is,
@@ -246,6 +269,8 @@ $$ \Gamma \left( \alpha, \beta \right) = \left\{
 \end{defn}
 
 \subsection{Unnormalized Pairwise Markov Chain}
+%%%%%%%%%%% UPMC %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\textbf{TODO:} Provide an intuitive explanation of this.
 
 Consider the input ontologies presented in Figure~\ref{fig:input}.
 
@@ -260,9 +285,11 @@ with probability $\Gamma(\Lambda(x, y), \Lambda(x', y'))$ if and only if
 \end{itemize}
 \end{defn}
 
-The creation of a UPMC creates a directed graph between pairs of concepts that relate pairs based on their structural similarity.
+The creation of a UPMC creates a directed graph between pairs of concepts that relate 
+pairs based on their structural similarity.
 The idea is that a pair of concepts are more likely to be similar if they are structurally similar.
-Each pair of ontological terms is connceted to other pairs of ontological terms via directed edges that are proportional to similarity of the edges that exist in the input ontologies. 
+Each pair of ontological terms is connceted to other pairs of ontological terms via directed 
+edges that are proportional to similarity of the edges that exist in the input ontologies. 
 
 \begin{figure*}
 \centering
