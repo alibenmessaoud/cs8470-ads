@@ -141,6 +141,16 @@ public class Match implements UntypedGateway
     return l;
   }
 
+	public void computeEdgeWeights(PGArc[] arcs)
+	{
+			for(PGArc arc: arcs)
+			{
+				arc.fw = lookupEdgeWeight(arc.src, arc.dest);
+				arc.bw = lookupEdgeWeight(arc.dest, arc.src);
+			}
+		
+	}
+
   public PGNode[] getMatch (Model m1, Model m2,
 			    List sigma0) throws ModelException
   {
@@ -153,22 +163,22 @@ public class Match implements UntypedGateway
     if (sigma0 == null)
       initSigma0 ();
     else
-      {
-	// set initial values from sigma0
-	for (Iterator it = sigma0.iterator (); it.hasNext ();)
-	  {
-
-	    MapPair p = (MapPair) it.next ();
-	    PGNode n = (PGNode) pgnodes.get (p);
-	    if (n == null)
-	      {
-		n = new PGNode (p.getLeft (), p.getRight ());
-		pgnodes.put (n, n);
-	      }
-	    n.sim0 = (p.sim == p.NULL_SIM ? 1 : p.sim);
-	    n.inverse = p.inverse;	// make sure chosen direction remains unchanged
-	  }
-      }
+    {
+			// set initial values from sigma0
+			for (Iterator it = sigma0.iterator (); it.hasNext ();)
+		  {
+	
+		    MapPair p = (MapPair) it.next ();
+		    PGNode n = (PGNode) pgnodes.get (p);
+		    if (n == null)
+		    {
+					n = new PGNode (p.getLeft (), p.getRight ());
+					pgnodes.put (n, n);
+		    }
+		    n.sim0 = (p.sim == p.NULL_SIM ? 1 : p.sim);
+		    n.inverse = p.inverse;	// make sure chosen direction remains unchanged
+		  }
+    }
 
     // must go AFTER cardMaps
     boolean ignorePredicates = TRY_ALL_ARCS;	// || (FLOW_GRAPH_TYPE == FG_STOCHASTIC);
@@ -182,23 +192,23 @@ public class Match implements UntypedGateway
     long startTime = System.currentTimeMillis ();
 
     if (TEST)
-      {
-	//      System.err.println("Pairwise connectivity graph contains " + stmtPairs.size() + " arcs");
-	System.err.println ("Propagation graph contains " + pgarcs.size () +
+    {
+			//      System.err.println("Pairwise connectivity graph contains " + stmtPairs.size() + " arcs");
+			System.err.println ("Propagation graph contains " + pgarcs.size () +
 			    " bidirectional arcs and " + pgnodes.size () +
 			    " nodes");
-	if (DEBUG)
-	  {
-//      System.err.println("============ Arcs: ==============");
-//      dump(pgarcs);
-//      System.err.println("============ Nodes: =============");
-//      dump(pgnodes.values());
-	    System.err.println ("EQUAL_PRED_COEFF = " + EQUAL_PRED_COEFF +
-				"\n" + "OTHER_PRED_COEFF = " +
-				OTHER_PRED_COEFF + "\n" + "TRY_ALL_ARCS = " +
-				TRY_ALL_ARCS);
-	  }
-      }
+			if (DEBUG)
+	  	{
+				//      System.err.println("============ Arcs: ==============");
+				//      dump(pgarcs);
+				//      System.err.println("============ Nodes: =============");
+				//      dump(pgnodes.values());
+	    	System.err.println ("EQUAL_PRED_COEFF = " + EQUAL_PRED_COEFF +
+					"\n" + "OTHER_PRED_COEFF = " +
+					OTHER_PRED_COEFF + "\n" + "TRY_ALL_ARCS = " +
+					TRY_ALL_ARCS);
+	  	}
+    }
 
     // create arrays for efficiency
 
@@ -213,6 +223,14 @@ public class Match implements UntypedGateway
     pgnodes.values ().toArray (nodes);
     pgnodes = null;		// free memory
 
+		if(GRAPH_TYPE.equals("NEW")){
+				normalizeEdgeWeights();
+				computeEdgeWeights(arcs);
+		}
+		//false = print ugly version
+		printPG(arcs, true);
+
+
     if (TEST)
       System.err.print ("Iterating over (" +
 			m1.size () + " arcs, " +
@@ -225,56 +243,56 @@ public class Match implements UntypedGateway
 
     // initialize sigmaN1 := sigma0;
     for (int i = 0; i < nodes.length; i++)
-      {
-	//      nodes[i].simN1 = rnd.nextDouble();
-	//      nodes[i].sim0 /= 1000;
-	nodes[i].simN1 = nodes[i].sim0;
-      }
+    {
+			//      nodes[i].simN1 = rnd.nextDouble();
+			//      nodes[i].sim0 /= 1000;
+			nodes[i].simN1 = nodes[i].sim0;
+    }
     normalizeN1 (nodes);
 
 
+		//ITERATION FOR SIMILARITY CONVERGENCE
     for (int iteration = 0; iteration < iterationNum; iteration++)
-      {
+    {
 
-	if (DEBUG && iteration < DEBUG_MAX_ITERATIONS)
-	  {
-	    System.err.println ("\nIteration: " + iteration);
-	    //      debugMap(sigmaN);
-	  }
+			if (DEBUG && iteration < DEBUG_MAX_ITERATIONS)
+	  	{
+	    	System.err.println ("\nIteration: " + iteration);
+	    	//      debugMap(sigmaN);
+	  	}
 
-	applyFormula (arcs, nodes, iteration);
+			applyFormula (arcs, nodes, iteration);
 
-	System.err.print (".");
+			System.err.print (".");
 
-	normalizeN1 (nodes);
+			normalizeN1 (nodes);
 
-	if (DEBUG && iteration < DEBUG_MAX_ITERATIONS)
-	  {
-	    System.err.println ("\nAfter norm: " + iteration);
-	    dump (Arrays.asList (nodes));
-	  }
+			if (DEBUG && iteration < DEBUG_MAX_ITERATIONS)
+	  	{
+	    	System.err.println ("\nAfter norm: " + iteration);
+	    	dump (Arrays.asList (nodes));
+	  	}
 
-	double diff = distance (nodes);
+			double diff = distance (nodes);
 
 //       double maxN1 = maxN1(nodes);
 //       double diff = distanceF(nodes, maxN, maxN1);
 //       maxN = maxN1;
 
-	if (TEST)
-	  {
-	    if (DEBUG && iteration < DEBUG_MAX_ITERATIONS)
-	      System.err.println ("------------------");
-	    System.err.print ("(" + iteration + ":" + diff + ")");
-	  }
+			if (TEST)
+	  	{
+	    	if (DEBUG && iteration < DEBUG_MAX_ITERATIONS)
+	      	System.err.println ("------------------");
+	    	System.err.print ("(" + iteration + ":" + diff + ")");
+	  	}
 
-	if (iteration >= MIN_ITERATION_NUM && diff <= RESIDUAL_VECTOR_LENGTH)
-	  break;		// we are done!
-	if (System.currentTimeMillis () - startTime > TIMEOUT)
-	  break;
+			if (iteration >= MIN_ITERATION_NUM && diff <= RESIDUAL_VECTOR_LENGTH)
+	  		break;		// we are done!
+			if (System.currentTimeMillis () - startTime > TIMEOUT)
+	  		break;
 
-	// copy sigmaN+1 into sigmaN and repeat: done at top of loop
-      }
-    // RETURN
+			// copy sigmaN+1 into sigmaN and repeat: done at top of loop
+    } // END CONVERGENCE ITERATION
 
     if (TEST)
       System.err.println (". Time: " +
@@ -288,23 +306,125 @@ public class Match implements UntypedGateway
     return nodes;
   }
 
+	public double lookupEdgeWeight(PGNode src, PGNode dest)
+	{
+		return outboundWeights.get(src.id).get(dest.id);
+	}
+
+	public void normalizeEdgeWeights()
+	{
+		System.err.println("STARTING NORMALIZE EDGE WEIGHTS ...");
+		//foreach src in outboundWeights <-- HashMap
+		Collection< HashMap<Integer, Double> > sources = outboundWeights.values();
+		for(HashMap<Integer, Double> src: sources)
+		{
+			//weights = src.values() <-- ArrayList
+			Collection<Double> weights = (src.values());
+			//find sum of all values
+			double sum = 0;
+			for(Double w:weights) { sum += w; }
+			//foreach dest in src, value = complement
+			for(Integer dest: src.keySet())
+			{
+				src.put(dest, sum-(src.get(dest)));
+
+			}
+			double soc = 0;
+			//find sum of complements
+			for(Double w:weights) { soc += w; }
+			//foreach dest in src
+				//value = value/SoC
+			for(Integer dest:src.keySet()) { 
+				if(soc == 0)
+					src.put(dest, (Double)1.0);
+				else src.put(dest, (src.get(dest))/soc); 
+			}
+		}
+		System.err.println("NORMALIZED EDGE WEIGHTS");
+	}
+
+	public void printPG(PGArc[] arcs, boolean pretty)
+	{
+		try{
+			PrintWriter pw = new PrintWriter(GRAPH_TYPE+"_propagationGraph.txt");
+			Map<PGNode, Double> outEdgeSum = new HashMap<PGNode, Double>();
+
+			for(PGArc arc:arcs)
+			{
+				//Keep a tally of all outbound weights, they should sum to 1.0
+				if(!outEdgeSum.containsKey(arc.src))
+				{
+					outEdgeSum.put(arc.src, arc.fw);
+				}
+				else{
+					outEdgeSum.put(arc.src, outEdgeSum.get(arc.src)+arc.fw);
+				}
+				//prettified version (class Name only)
+				if(pretty){
+				pw.printf("%s\t--|%f|-->\t%s\n",
+												prettyID(arc.src.getLeft().toString())+"/"+prettyID(arc.src.getRight().toString()),
+												arc.fw,
+												prettyID(arc.dest.getLeft().toString())+"/"+prettyID(arc.dest.getRight().toString())
+									);
+	
+				pw.printf("%s\t<--|%f|--\t%s\n",
+												prettyID(arc.src.getLeft().toString())+"/"+prettyID(arc.src.getRight().toString()),
+												arc.bw,
+												prettyID(arc.dest.getLeft().toString())+"/"+prettyID(arc.dest.getRight().toString())
+									);
+				}
+				//ugly version (full URI)
+				else{
+				pw.printf("%s\t--|%f|-->\t%s\n",
+												(arc.src.getLeft().toString())+"/"+(arc.src.getRight().toString()),
+												arc.fw,
+												(arc.dest.getLeft().toString())+"/"+(arc.dest.getRight().toString())
+									);
+	
+				pw.printf("%s\t<--|%f|--\t%s\n",
+												(arc.src.getLeft().toString())+"/"+(arc.src.getRight().toString()),
+												arc.bw,
+												(arc.dest.getLeft().toString())+"/"+(arc.dest.getRight().toString())
+									);
+				}
+				pw.println();
+	
+			}
+			pw.println("Column sums:\n============================================================");
+			for(PGNode n:outEdgeSum.keySet())
+			{
+				//if((prettyID(n.getLeft().toString())).equals(prettyID(n.getRight().toString()))){
+				pw.printf("%s === %f\n",
+												prettyID(n.getLeft().toString())+"/"+ prettyID(n.getRight().toString()),
+												outEdgeSum.get(n)
+									);
+			//	}
+			}
+			
+			pw.close();
+		}
+		catch(Exception e){
+						System.out.println("IO ERROR: "+e);
+		}
+	}
   public void applyFormula (PGArc[]arcs, PGNode[]nodes, int iteration)
   {
 
     // special case for default formula
 
     if (formula == FORMULA_TFT)
-      {
+    {
 
-	for (int i = nodes.length; --i >= 0;)
-	  {
+			for (int i = nodes.length; --i >= 0;)
+	  	{
 
-	    PGNode n = nodes[i];
-	    n.sim = (n.simN = n.simN1) + n.sim0;
-	  }
-	propagateValues (arcs);
-	return;
-      }
+	    	PGNode n = nodes[i];
+	    	n.sim = (n.simN = n.simN1) + n.sim0;
+	  	}
+			//update node similarities with arc-weighted values
+			propagateValues (arcs);
+			return;
+  	}//END TFT
 
     // generic, for all formulas
 
@@ -313,35 +433,36 @@ public class Match implements UntypedGateway
     boolean add_sigmaN_after = formula[2];
 
     for (int i = nodes.length; --i >= 0;)
-      {
+    {
 
-	PGNode n = nodes[i];
-	// move simN1 values in simN and take current value from previous iteration
-	n.sim = n.simN = n.simN1;
+			PGNode n = nodes[i];
+			// move simN1 values in simN and take current value from previous iteration
+			n.sim = n.simN = n.simN1;
 
-	if (add_sigma0_before)
-	  n.sim += n.sim0;
+			if (add_sigma0_before)
+	  		n.sim += n.sim0;
 
-	// initialize simN1 for next iteration
-	if (!add_sigmaN_after)
-	  n.simN1 = 0;		// otherwise, n.simN1 = n.sim from above
+			// initialize simN1 for next iteration
+			if (!add_sigmaN_after)
+	  		n.simN1 = 0;		// otherwise, n.simN1 = n.sim from above
 
-	if (add_sigma0_after)
-	  n.simN1 += n.sim0;
-      }
+			if (add_sigma0_after)
+	  		n.simN1 += n.sim0;
+    }
 
 //     if(DEBUG && iteration < DEBUG_MAX_ITERATIONS) {
 //       System.err.println("\nBefore propagation: " + iteration);
 //       dump(nodes);
 //     }
 
+		//update node similarities with arc-weighted values
     propagateValues (arcs);
 
     if (DEBUG && iteration < DEBUG_MAX_ITERATIONS)
-      {
-	System.err.println ("\nAfter propagation: " + iteration);
-	dump (nodes);
-      }
+    {
+			System.err.println ("\nAfter propagation: " + iteration);
+			dump (nodes);
+    }
 
     /*
        if(add_sigma0_after || add_sigmaN_after) {
@@ -366,14 +487,13 @@ public class Match implements UntypedGateway
     // propagate values from previous iteration over propagation graph
 
     for (int i = arcs.length; --i >= 0;)
-      {
-
-	PGArc arc = arcs[i];
-	// forward
-	arc.dest.simN1 += arc.src.sim * arc.fw;
-	// backward
-	arc.src.simN1 += arc.dest.sim * arc.bw;
-      }
+    {
+			PGArc arc = arcs[i];
+			// forward
+			arc.dest.simN1 += arc.src.sim * arc.fw;
+			// backward
+			arc.src.simN1 += arc.dest.sim * arc.bw;
+    }
   }
 
   public double distance (PGNode[]nodes)
@@ -513,8 +633,13 @@ public class Match implements UntypedGateway
   }
 
 
-	void addToOutboundWeights(int pgNodeID, double weight)
+	void addToOutboundWeights(int src_pgNodeID, int dest_pgNodeID, double weight)
 	{
+			if(!outboundWeights.containsKey(src_pgNodeID)){
+		  	outboundWeights.put(src_pgNodeID, new HashMap<Integer, Double>());
+			}
+	  	outboundWeights.get(src_pgNodeID).put(dest_pgNodeID, weight);
+	/*
 			ArrayList<Double> weights = outboundWeights.get(pgNodeID);
 			if(weights == null)
 			{
@@ -522,6 +647,7 @@ public class Match implements UntypedGateway
 				outboundWeights.put(pgNodeID, weights);
 			}
 			weights.add(weight);
+			*/
 	}
 
 	double gamma(Resource st1, Resource st2)
@@ -538,24 +664,21 @@ public class Match implements UntypedGateway
 
 		//System.out.printf("Check Predicate sim on %s | %s\n", l1, l2);
 		double d = computeDistance(l1, l2);
-		return d;
-		/*
 		if(d == 0) return 1.0;
 		if(d == 1) return 0.75;
 		else return 1.0/d;
-		*/
 	}
 
 		//outboundWeights: maps PGNodes to a list of weights on all outbound edges
-		Map<Integer, ArrayList > outboundWeights = new HashMap<Integer, ArrayList >();
+		Map<Integer, HashMap<Integer, Double> > outboundWeights = new HashMap<Integer, HashMap<Integer, Double> >();
 
   void constructPropagationGraph (boolean ignorePredicates) throws
     ModelException
   {
 
     // SP -> count
-    Map cardMapSPLeft, cardMapOPLeft, cardMapPLeft, cardMapSPRight,
-      cardMapOPRight, cardMapPRight;
+    Map cardMapSPLeft, cardMapOPLeft, cardMapPLeft, 
+				cardMapSPRight, cardMapOPRight, cardMapPRight;
 
       cardMapSPLeft = new HashMap ();
       cardMapOPLeft = new HashMap ();
@@ -606,7 +729,7 @@ public class Match implements UntypedGateway
 //        sigma0.add(getNormalPair(st1.object(), st2.subject()));
 //      }
 
-	    double ps = 0.0;	//predicateSim(st1.predicate(), st2.predicate());
+	    double ps = -1.0;	//predicateSim(st1.predicate(), st2.predicate());
 	    //      System.err.println("-- " + st1 + " -- " + st2);
 			
 		//NEW method checks the lexical similarity of edge labels
@@ -627,12 +750,14 @@ public class Match implements UntypedGateway
 		}
 
 
-	    if (ps > 0)//TODO > 'lil-gamma
-	      {
+		double gammaThreshold = 0;
+		if(GRAPH_TYPE.equals("NEW")) gammaThreshold = 0.6;
+	  if (ps >= gammaThreshold)
+	  {
 		//      System.err.println("--- ps=" + ps + " from " + EQUAL_PRED_COEFF + ", " + TRY_ALL_ARCS + ", " + OTHER_PRED_COEFF);
 		//      NOTE we can get access to ps through
 		//      this.predSim = ps
-		StmtPair p = new StmtPair (st1, st2, ps,
+			StmtPair p = new StmtPair (st1, st2, ps,
 					   getCard (cardMapSPLeft,
 						    st1.subject (),
 						    ignorePredicates ? null :
@@ -776,19 +901,19 @@ public class Match implements UntypedGateway
 	PGNode oo = getNode (pgnodes, st1.object (), st2.object ());
 
 	// add source PGNode (by id), edge similarity (p.predSim) to outboundWeights data structure
-	addToOutboundWeights(ss.id, p.predSim);
+		//add forward weight to outboundWeights(src)
+	addToOutboundWeights(ss.id, oo.id, p.predSim);
+		//add backward weight to outboundWeights(dest)
+	addToOutboundWeights(oo.id, ss.id, p.predSim);
 
 	//TODO get all StmtPairs s.t. ss is the destination Node
 
 	//PGArc(src, dest, forward_weight, backward_weight)
 	if(GRAPH_TYPE.equals("NEW"))
 	{
-	pgarcs.
-	  add (new
-	       PGArc (ss, oo, 
-						getEdgeWeight(p.predSim, ss.id),
-						getEdgeWeight(p.predSim, oo.id)
-					)
+	pgarcs.add (new
+				 //0's are placeholders. We'll compute the proper weights once all arcs have been added
+	       PGArc (ss, oo, 0, 0 )
 		);
 
 	}
@@ -797,8 +922,9 @@ public class Match implements UntypedGateway
 	{
 	pgarcs.
 	  add (new
-	       PGArc (ss, oo, p.soso * UPDATE_GUESS_WEIGHT,
-		      p.osos * UPDATE_GUESS_WEIGHT));
+	       PGArc (ss, oo, 
+								 p.soso * UPDATE_GUESS_WEIGHT,
+		      			 p.osos * UPDATE_GUESS_WEIGHT));
 
 	if (!DIRECTED_GRAPH)
 	{
@@ -817,6 +943,7 @@ public class Match implements UntypedGateway
 
 	private double getEdgeWeight(double thisWeight, int srcNodeID)
 	{
+		/*
 		ArrayList<Double> weights = outboundWeights.get(srcNodeID);
 		double sumOfWeights = 0;
 		double sumOfComplements = 0;
@@ -838,6 +965,7 @@ public class Match implements UntypedGateway
 		return (sumOfWeights - thisWeight)/sumOfComplements;
 		}
 		//System.out.println();
+		*/
 		return 0;
 	}
 
@@ -976,7 +1104,7 @@ public class Match implements UntypedGateway
   class PGArc
   {
 
-    double fw, bw;		// coefficients on arcs
+    double fw, bw;		//edge weights: fw=forward_weight; bw=backward_weight 
     PGNode src, dest;
 
     public PGArc (PGNode n1, PGNode n2, double fw, double bw)
@@ -1164,20 +1292,23 @@ public class Match implements UntypedGateway
 													objPropDomains.size(), 
 													objPropRanges.size());
 				}
-				Resource p = nf.createResource(prettyID(objProp.toStringID()));
+				//Resource p = nf.createResource(prettyID(objProp.toStringID()));
+				Resource p = nf.createResource(objProp.toStringID());
 
 				for(OWLClassExpression domain:objPropDomains)
 				{
 					if(!domain.isAnonymous())
 					{
-						String domainName = prettyID(domain.asOWLClass().getIRI().toString());
+						//String domainName = prettyID(domain.asOWLClass().getIRI().toString());
+						String domainName = (domain.asOWLClass().getIRI().toString());
 						if(domainName != null && !resources.keySet().contains(domainName))
 						{ 
 							resources.put(domainName, nf.createResource(domainName));
 						}
 						for(OWLClassExpression range:objPropRanges)
 						{
-							String rangeName = prettyID(range.asOWLClass().getIRI().toString());
+							//String rangeName = prettyID(range.asOWLClass().getIRI().toString());
+							String rangeName = (range.asOWLClass().getIRI().toString());
 							if(rangeName != null && !resources.keySet().contains(rangeName))
 							{ 
 								resources.put(rangeName, nf.createResource(rangeName));
@@ -1205,7 +1336,8 @@ public class Match implements UntypedGateway
 			{
 					if(!owlClass.isAnonymous())
 					{
-						String className = prettyID(owlClass.getIRI().toString());
+						String className = (owlClass.getIRI().toString());
+						//String className = prettyID(owlClass.getIRI().toString());
 						if(className!= null && !resources.keySet().contains(className))
 						{ 
 							resources.put(className, nf.createResource(className));
@@ -1213,7 +1345,8 @@ public class Match implements UntypedGateway
 						Set<OWLClassExpression> subclasses = owlClass.getSubClasses(basic_onto);
 						for(OWLClassExpression owlSubclass: subclasses)
 						{
-							String subclassName = prettyID(owlSubclass.asOWLClass().getIRI().toString());
+							String subclassName = (owlSubclass.asOWLClass().getIRI().toString());
+							//String subclassName = prettyID(owlSubclass.asOWLClass().getIRI().toString());
 							if(subclassName != null && !resources.keySet().contains(subclassName))
 							{ 
 								resources.put(subclassName, nf.createResource(subclassName));
@@ -1263,10 +1396,10 @@ public class Match implements UntypedGateway
 
     System.err.println("\nThis is the Similarity Flooding algorithm on the OAEI data set.");
     System.err.println("====================================================================");
-		System.err.print("Matching: ");
-		System.err.print(ontAfile.getFile()+" | ");
-		System.err.println(ontBfile.getFile());
-		System.err.println();
+		//System.err.print("Matching: ");
+		//System.err.print(ontAfile.getFile()+" | ");
+		//System.err.println(ontBfile.getFile());
+		//System.err.println();
 
 
 		//Create resource HashMaps to store RDF entities for lookup
@@ -1285,12 +1418,13 @@ public class Match implements UntypedGateway
 			{
 				double dist = computeDistance(key_A, key_B);
 				double initSim = 0;
+				//TODO: make initSim = dist/maxDist
 				if(dist==0)initSim = 1.0;
 				else initSim = 1.0/dist;
 				if(GRAPH_TYPE.equals("NEW")){
     			initMap.add(new MapPair(resources_A.get(key_A), 
 																resources_B.get(key_B), 
-																initSim));
+																1.0));
 				}
 				if(GRAPH_TYPE.equals("ORIGINAL")){
     			initMap.add(new MapPair(resources_A.get(key_A), 
@@ -1303,7 +1437,7 @@ public class Match implements UntypedGateway
 
 
     MapPair[] result = sf.getMatch(ontology_A, ontology_B, initMap);
-    dump(result);
+    //dump(result);
 		return genOutString(result, getMax(result));
   }
 	static double getMax(MapPair[] result)
@@ -1311,10 +1445,11 @@ public class Match implements UntypedGateway
 					double max = 0;
 					for(MapPair r:result)
 					{
-						if(r.sim > max && r.sim != 1){
+						if(r.sim > max){// && r.sim != 1){
 										max = r.sim;
 						}
 					}
+					System.out.printf("Max similarity = %f\n", max);
 					return max;
 	}
 
@@ -1334,11 +1469,36 @@ public class Match implements UntypedGateway
 		//Write each correspondence
     for(MapPair mp:result)
 		{
-		  s+="<map>\n<Cell>\n<entity1 rdf:resource=\""+mp.getLeft()+"\"/>"+
+/*
+ //Check Levenshtein distance
+			if(computeDistance(mp.getLeft().toString(), mp.getRight().toString()) == 0){
+		  	s+="<map>\n<Cell>\n<entity1 rdf:resource=\""+mp.getLeft()+"\"/>"+
 								 "<entity2 rdf:resource=\""+mp.getRight()+"\"/>"+
-								 "<measure rdf:datatype='xsd:float'>"+mp.sim/max+"</measure>"+
+								 "<measure rdf:datatype='xsd:float'>"+"1.0"+"</measure>"+
 								 "<relation>=</relation>\n"+
 								 "</Cell>\n</map>\n";
+
+			}
+*/
+			if(mp.sim > 0.1){
+		  	s+="<map>\n<Cell>\n<entity1 rdf:resource=\""+mp.getLeft()+"\"/>"+
+								 "<entity2 rdf:resource=\""+mp.getRight()+"\"/>"+
+								 "<measure rdf:datatype='xsd:float'>"+"1.0"+"</measure>"+
+								 "<relation>=</relation>\n"+
+								 "</Cell>\n</map>\n";
+			}
+	/*
+	 //check string equality
+			if(mp.getLeft().equals(mp.getRight()))
+			{
+		  s+="<map>\n<Cell>\n<entity1 rdf:resource=\""+mp.getLeft()+"\"/>"+
+								 "<entity2 rdf:resource=\""+mp.getRight()+"\"/>"+
+								 "<measure rdf:datatype='xsd:float'>"+mp.sim+"</measure>"+
+								 "<relation>=</relation>\n"+
+								 "</Cell>\n</map>\n";
+			}
+		*/
+
 		}
 	
 		//Write outro
