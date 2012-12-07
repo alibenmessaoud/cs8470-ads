@@ -1,3 +1,6 @@
+set terminal epslatex color
+set output 'prec.eps'
+
 set title "Similarity Flooding vs Edge Confidence: Precision comparison\n OAEI Benchmark 1 suite"
 set xlabel "Test Number"
 set ylabel "Precision"
@@ -12,9 +15,10 @@ set xtics   ()
 
 set boxwidth 0.9
 
+
 f(x,y) = 2*((x*y)/(x+y))
 
 plot './suite_1_new/results.txt' using 3:xtic(1) ti 'Edge Conf', \
      './suite_1_old/results.txt' using 3:xtic(1) ti 'Sim Flood'
 
-
+set output
