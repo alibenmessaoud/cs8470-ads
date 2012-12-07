@@ -15,6 +15,9 @@ emacs:
 emacsnw: 
 	emacs -nw anss2013-cotterell-medina.tex
 
+pdf:
+	pdflatex testFig.tex
+
 clean:
 	rm -f anss2013-cotterell-medina.log 
 	rm -f anss2013-cotterell-medina.aux 
