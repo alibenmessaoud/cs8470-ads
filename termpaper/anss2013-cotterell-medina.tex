@@ -4,8 +4,9 @@
 \documentclass[letterpaper,twocolumn,12pt]{article}
 \usepackage[utf8]{inputenc}
 \usepackage[english]{babel}
-\usepackage{scs}
 \usepackage{graphicx}
+\usepackage{epsf}
+\usepackage{scs}
 \usepackage{amsmath,amsfonts,amssymb,amsthm}
 \usepackage{epsfig,epstopdf}
 \usepackage{hyperref}
@@ -416,6 +417,14 @@ In our evaluation, the SEALS Platform was used to easily compare the models pres
 
 \section{Results}
 \label{sec:results}
+
+\begin{figure*}
+%\centering
+%\resizebox{!}{0.35\textwidth}{\small{\input{fmeasure.tex}}}
+\input{allcompare_5000.tex}
+%\caption{Comparison of F-measure}
+%\label{fmeasure}
+\end{figure*}
 
 TODO
 

@@ -1,35 +1,35 @@
 all: compile
 
 compile:
-	pdflatex -synctex=1 -interaction=nonstopmode *.tex
-	bibtex *.aux
-	pdflatex -synctex=1 -interaction=nonstopmode *.tex
-	pdflatex -synctex=1 -interaction=nonstopmode *.tex
+	pdflatex -synctex=1 -interaction=nonstopmode anss2013-cotterell-medina.tex
+	bibtex anss2013-cotterell-medina.aux
+	pdflatex -synctex=1 -interaction=nonstopmode anss2013-cotterell-medina.tex
+	pdflatex -synctex=1 -interaction=nonstopmode anss2013-cotterell-medina.tex
 
 evince: compile
-	evince *.pdf &
+	evince anss2013-cotterell-medina.pdf &
 
 emacs: 
-	emacs *.tex &
+	emacs anss2013-cotterell-medina.tex &
 
 emacsnw: 
-	emacs -nw *.tex
+	emacs -nw anss2013-cotterell-medina.tex
 
 clean:
-	rm -f *.log 
-	rm -f *.aux 
-	rm -f *.dvi 
-	rm -f *.bbl 
-	rm -f *.blg 
-	rm -f *.ilg 
-	rm -f *.toc 
-	rm -f *.lof 
-	rm -f *.lot 
-	rm -f *.idx 
-	rm -f *.ind 
-	rm -f *.ps
-	rm -f *.pdf
-	rm -f *.synctex.gz
-	rm -f *.out
-	rm -f *~
+	rm -f anss2013-cotterell-medina.log 
+	rm -f anss2013-cotterell-medina.aux 
+	rm -f anss2013-cotterell-medina.dvi 
+	rm -f anss2013-cotterell-medina.bbl 
+	rm -f anss2013-cotterell-medina.blg 
+	rm -f anss2013-cotterell-medina.ilg 
+	rm -f anss2013-cotterell-medina.toc 
+	rm -f anss2013-cotterell-medina.lof 
+	rm -f anss2013-cotterell-medina.lot 
+	rm -f anss2013-cotterell-medina.idx 
+	rm -f anss2013-cotterell-medina.ind 
+	rm -f anss2013-cotterell-medina.ps
+	rm -f anss2013-cotterell-medina.pdf
+	rm -f anss2013-cotterell-medina.synctex.gz
+	rm -f anss2013-cotterell-medina.out
+	rm -f anss2013-cotterell-medina~
 
