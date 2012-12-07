@@ -228,7 +228,7 @@ public class Match implements UntypedGateway
 				computeEdgeWeights(arcs);
 		}
 		//false = print ugly version
-		printPG(arcs, true);
+		//printPG(arcs, true);
 
 
     if (TEST)

@@ -1,0 +1,46 @@
+<?xml version='1.0' encoding='utf-8'?>
+<rdf:RDF xmlns='http://knowledgeweb.semanticweb.org/heterogeneity/alignment' 	 xmlns:rdf='http://www.w3.org/1999/02/22-rdf-syntax-ns#' 	 xmlns:xsd='http://www.w3.org/2001/XMLSchema#'><Alignment>
+<xml>yes</xml>
+<level>0</level>
+<type>??</type>
+<map>
+<Cell>
+<entity1 rdf:resource="http://oaei.ontologymatching.org/2011/benchmarks/101/onto.rdf#Chapter"/><entity2 rdf:resource="http://oaei.ontologymatching.org/2011/benchmarks/101/onto.rdf#Chapter"/><measure rdf:datatype='xsd:float'>1.0</measure><relation>=</relation>
+</Cell>
+</map>
+<map>
+<Cell>
+<entity1 rdf:resource="http://oaei.ontologymatching.org/2011/benchmarks/101/onto.rdf#PersonList"/><entity2 rdf:resource="http://oaei.ontologymatching.org/2011/benchmarks/101/onto.rdf#PersonList"/><measure rdf:datatype='xsd:float'>1.0</measure><relation>=</relation>
+</Cell>
+</map>
+<map>
+<Cell>
+<entity1 rdf:resource="http://oaei.ontologymatching.org/2011/benchmarks/101/onto.rdf#PageRange"/><entity2 rdf:resource="http://oaei.ontologymatching.org/2011/benchmarks/101/onto.rdf#PageRange"/><measure rdf:datatype='xsd:float'>1.0</measure><relation>=</relation>
+</Cell>
+</map>
+<map>
+<Cell>
+<entity1 rdf:resource="http://oaei.ontologymatching.org/2011/benchmarks/101/onto.rdf#Part"/><entity2 rdf:resource="http://oaei.ontologymatching.org/2011/benchmarks/101/onto.rdf#Part"/><measure rdf:datatype='xsd:float'>1.0</measure><relation>=</relation>
+</Cell>
+</map>
+<map>
+<Cell>
+<entity1 rdf:resource="http://oaei.ontologymatching.org/2011/benchmarks/101/onto.rdf#Address"/><entity2 rdf:resource="http://oaei.ontologymatching.org/2011/benchmarks/101/onto.rdf#Address"/><measure rdf:datatype='xsd:float'>1.0</measure><relation>=</relation>
+</Cell>
+</map>
+<map>
+<Cell>
+<entity1 rdf:resource="http://oaei.ontologymatching.org/2011/benchmarks/101/onto.rdf#Reference"/><entity2 rdf:resource="http://oaei.ontologymatching.org/2011/benchmarks/101/onto.rdf#Reference"/><measure rdf:datatype='xsd:float'>1.0</measure><relation>=</relation>
+</Cell>
+</map>
+<map>
+<Cell>
+<entity1 rdf:resource="http://www.w3.org/2002/07/owl#Thing"/><entity2 rdf:resource="http://www.w3.org/2002/07/owl#Thing"/><measure rdf:datatype='xsd:float'>1.0</measure><relation>=</relation>
+</Cell>
+</map>
+<map>
+<Cell>
+<entity1 rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#List"/><entity2 rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#List"/><measure rdf:datatype='xsd:float'>1.0</measure><relation>=</relation>
+</Cell>
+</map>
+</Alignment></rdf:RDF>
