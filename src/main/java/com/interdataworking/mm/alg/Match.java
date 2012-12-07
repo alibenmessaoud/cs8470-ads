@@ -1480,7 +1480,7 @@ public class Match implements UntypedGateway
 
 			}
 */
-			if(mp.sim > 0.1){
+			if(mp.sim > 0.05){
 		  	s+="<map>\n<Cell>\n<entity1 rdf:resource=\""+mp.getLeft()+"\"/>"+
 								 "<entity2 rdf:resource=\""+mp.getRight()+"\"/>"+
 								 "<measure rdf:datatype='xsd:float'>"+"1.0"+"</measure>"+
