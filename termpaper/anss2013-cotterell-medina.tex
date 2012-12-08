@@ -6,6 +6,8 @@
 \usepackage[english]{babel}
 \usepackage{graphicx}
 \usepackage{epsf}
+\usepackage{rotating}
+\usepackage{afterpage}
 \usepackage{scs}
 \usepackage{amsmath,amsfonts,amssymb,amsthm}
 \usepackage{epsfig,epstopdf}
@@ -466,6 +468,29 @@ His curriculum vitae and list of publications are available at \url{http://micha
 \noindent \textbf{TERRANCE MEDINA} is a ... His email address is \href{mailto:medinat@uga.edu}{medinat@uga.edu}.
 
 
+
+
+\onecolumn
+\begin{sidewaysfigure}
+\centering
+\tiny{\input{prec.tex}}
+\caption{Comparison of Precision}
+\label{fig:precision}
+\end{sidewaysfigure}
+
+\begin{sidewaysfigure}
+\centering
+\tiny{\input{recall.tex}}
+\caption{Comparison of Recall}
+\label{fig:recall}
+\end{sidewaysfigure}
+
+\begin{sidewaysfigure}
+\centering
+\tiny{\input{fmeasure.tex}}
+\caption{Comparison of F-measure}
+\label{fig:fmeasure}
+\end{sidewaysfigure}
 
 
 \end{document}

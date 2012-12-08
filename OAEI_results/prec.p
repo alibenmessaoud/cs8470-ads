@@ -1,4 +1,4 @@
-set terminal epslatex color
+set terminal epslatex size 9,6.5 color
 set output 'prec.eps'
 
 set title "Similarity Flooding vs Edge Confidence: Precision comparison\n OAEI Benchmark 1 suite"
@@ -9,7 +9,7 @@ set style data histogram
 set style histogram cluster gap 1
 set style fill solid border -1
 
-set xtics border in scale 0,0 nomirror rotate by -45  offset character 0, 0, 0 autojustify
+set xtics border in scale 0,0 nomirror rotate by -90  offset character 0, 0.3, 0 autojustify
 set xtics  norangelimit font ",12"
 set xtics   ()
 

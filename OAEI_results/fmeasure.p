@@ -1,4 +1,4 @@
-set terminal epslatex color
+set terminal epslatex size 9,6.5 color
 set output 'fmeasure.eps'
 
 set title "Similarity Flooding vs Edge Confidence: F-measure comparison\n OAEI Benchmark 1 suite"
@@ -11,8 +11,8 @@ set style data histogram
 set style histogram cluster gap 1
 set style fill solid border -1
 
-set xtics border in scale 0,0 nomirror rotate by 90  offset character 0, -1.5, 0 autojustify
-set xtics  norangelimit font ",12"
+set xtics border in scale 0,0 nomirror rotate by -90  offset character 0, 0.3, 0 autojustify
+set xtics  norangelimit font ",10"
 set xtics   ()
 
 set boxwidth 0.9
