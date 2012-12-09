@@ -1,0 +1,205 @@
+% GNUPLOT: LaTeX picture with Postscript
+\begingroup
+  \makeatletter
+  \providecommand\color[2][]{%
+    \GenericError{(gnuplot) \space\space\space\@spaces}{%
+      Package color not loaded in conjunction with
+      terminal option `colourtext'%
+    }{See the gnuplot documentation for explanation.%
+    }{Either use 'blacktext' in gnuplot or load the package
+      color.sty in LaTeX.}%
+    \renewcommand\color[2][]{}%
+  }%
+  \providecommand\includegraphics[2][]{%
+    \GenericError{(gnuplot) \space\space\space\@spaces}{%
+      Package graphicx or graphics not loaded%
+    }{See the gnuplot documentation for explanation.%
+    }{The gnuplot epslatex terminal needs graphicx.sty or graphics.sty.}%
+    \renewcommand\includegraphics[2][]{}%
+  }%
+  \providecommand\rotatebox[2]{#2}%
+  \@ifundefined{ifGPcolor}{%
+    \newif\ifGPcolor
+    \GPcolortrue
+  }{}%
+  \@ifundefined{ifGPblacktext}{%
+    \newif\ifGPblacktext
+    \GPblacktexttrue
+  }{}%
+  % define a \g@addto@macro without @ in the name:
+  \let\gplgaddtomacro\g@addto@macro
+  % define empty templates for all commands taking text:
+  \gdef\gplbacktext{}%
+  \gdef\gplfronttext{}%
+  \makeatother
+  \ifGPblacktext
+    % no textcolor at all
+    \def\colorrgb#1{}%
+    \def\colorgray#1{}%
+  \else
+    % gray or color?
+    \ifGPcolor
+      \def\colorrgb#1{\color[rgb]{#1}}%
+      \def\colorgray#1{\color[gray]{#1}}%
+      \expandafter\def\csname LTw\endcsname{\color{white}}%
+      \expandafter\def\csname LTb\endcsname{\color{black}}%
+      \expandafter\def\csname LTa\endcsname{\color{black}}%
+      \expandafter\def\csname LT0\endcsname{\color[rgb]{1,0,0}}%
+      \expandafter\def\csname LT1\endcsname{\color[rgb]{0,1,0}}%
+      \expandafter\def\csname LT2\endcsname{\color[rgb]{0,0,1}}%
+      \expandafter\def\csname LT3\endcsname{\color[rgb]{1,0,1}}%
+      \expandafter\def\csname LT4\endcsname{\color[rgb]{0,1,1}}%
+      \expandafter\def\csname LT5\endcsname{\color[rgb]{1,1,0}}%
+      \expandafter\def\csname LT6\endcsname{\color[rgb]{0,0,0}}%
+      \expandafter\def\csname LT7\endcsname{\color[rgb]{1,0.3,0}}%
+      \expandafter\def\csname LT8\endcsname{\color[rgb]{0.5,0.5,0.5}}%
+    \else
+      % gray
+      \def\colorrgb#1{\color{black}}%
+      \def\colorgray#1{\color[gray]{#1}}%
+      \expandafter\def\csname LTw\endcsname{\color{white}}%
+      \expandafter\def\csname LTb\endcsname{\color{black}}%
+      \expandafter\def\csname LTa\endcsname{\color{black}}%
+      \expandafter\def\csname LT0\endcsname{\color{black}}%
+      \expandafter\def\csname LT1\endcsname{\color{black}}%
+      \expandafter\def\csname LT2\endcsname{\color{black}}%
+      \expandafter\def\csname LT3\endcsname{\color{black}}%
+      \expandafter\def\csname LT4\endcsname{\color{black}}%
+      \expandafter\def\csname LT5\endcsname{\color{black}}%
+      \expandafter\def\csname LT6\endcsname{\color{black}}%
+      \expandafter\def\csname LT7\endcsname{\color{black}}%
+      \expandafter\def\csname LT8\endcsname{\color{black}}%
+    \fi
+  \fi
+  \setlength{\unitlength}{0.0500bp}%
+  \begin{picture}(12960.00,9360.00)%
+    \gplgaddtomacro\gplbacktext{%
+      \csname LTb\endcsname%
+      \put(946,1144){\makebox(0,0)[r]{\strut{} 0}}%
+      \put(946,2611){\makebox(0,0)[r]{\strut{} 0.2}}%
+      \put(946,4078){\makebox(0,0)[r]{\strut{} 0.4}}%
+      \put(946,5545){\makebox(0,0)[r]{\strut{} 0.6}}%
+      \put(946,7012){\makebox(0,0)[r]{\strut{} 0.8}}%
+      \put(946,8479){\makebox(0,0)[r]{\strut{} 1}}%
+      \put(1185,1078){\rotatebox{-90}{\makebox(0,0)[l]{\strut{}101}}}%
+      \put(1293,1078){\rotatebox{-90}{\makebox(0,0)[l]{\strut{}103}}}%
+      \put(1400,1078){\rotatebox{-90}{\makebox(0,0)[l]{\strut{}104}}}%
+      \put(1507,1078){\rotatebox{-90}{\makebox(0,0)[l]{\strut{}201}}}%
+      \put(1615,1078){\rotatebox{-90}{\makebox(0,0)[l]{\strut{}201-2}}}%
+      \put(1722,1078){\rotatebox{-90}{\makebox(0,0)[l]{\strut{}201-4}}}%
+      \put(1829,1078){\rotatebox{-90}{\makebox(0,0)[l]{\strut{}201-6}}}%
+      \put(1937,1078){\rotatebox{-90}{\makebox(0,0)[l]{\strut{}201-8}}}%
+      \put(2044,1078){\rotatebox{-90}{\makebox(0,0)[l]{\strut{}202}}}%
+      \put(2151,1078){\rotatebox{-90}{\makebox(0,0)[l]{\strut{}202-2}}}%
+      \put(2259,1078){\rotatebox{-90}{\makebox(0,0)[l]{\strut{}202-4}}}%
+      \put(2366,1078){\rotatebox{-90}{\makebox(0,0)[l]{\strut{}202-6}}}%
+      \put(2473,1078){\rotatebox{-90}{\makebox(0,0)[l]{\strut{}202-8}}}%
+      \put(2581,1078){\rotatebox{-90}{\makebox(0,0)[l]{\strut{}203}}}%
+      \put(2688,1078){\rotatebox{-90}{\makebox(0,0)[l]{\strut{}204}}}%
+      \put(2795,1078){\rotatebox{-90}{\makebox(0,0)[l]{\strut{}205}}}%
+      \put(2903,1078){\rotatebox{-90}{\makebox(0,0)[l]{\strut{}206}}}%
+      \put(3010,1078){\rotatebox{-90}{\makebox(0,0)[l]{\strut{}207}}}%
+      \put(3117,1078){\rotatebox{-90}{\makebox(0,0)[l]{\strut{}208}}}%
+      \put(3225,1078){\rotatebox{-90}{\makebox(0,0)[l]{\strut{}209}}}%
+      \put(3332,1078){\rotatebox{-90}{\makebox(0,0)[l]{\strut{}210}}}%
+      \put(3439,1078){\rotatebox{-90}{\makebox(0,0)[l]{\strut{}221}}}%
+      \put(3547,1078){\rotatebox{-90}{\makebox(0,0)[l]{\strut{}222}}}%
+      \put(3654,1078){\rotatebox{-90}{\makebox(0,0)[l]{\strut{}223}}}%
+      \put(3761,1078){\rotatebox{-90}{\makebox(0,0)[l]{\strut{}224}}}%
+      \put(3869,1078){\rotatebox{-90}{\makebox(0,0)[l]{\strut{}225}}}%
+      \put(3976,1078){\rotatebox{-90}{\makebox(0,0)[l]{\strut{}228}}}%
+      \put(4083,1078){\rotatebox{-90}{\makebox(0,0)[l]{\strut{}230}}}%
+      \put(4191,1078){\rotatebox{-90}{\makebox(0,0)[l]{\strut{}231}}}%
+      \put(4298,1078){\rotatebox{-90}{\makebox(0,0)[l]{\strut{}232}}}%
+      \put(4405,1078){\rotatebox{-90}{\makebox(0,0)[l]{\strut{}233}}}%
+      \put(4513,1078){\rotatebox{-90}{\makebox(0,0)[l]{\strut{}236}}}%
+      \put(4620,1078){\rotatebox{-90}{\makebox(0,0)[l]{\strut{}237}}}%
+      \put(4727,1078){\rotatebox{-90}{\makebox(0,0)[l]{\strut{}238}}}%
+      \put(4835,1078){\rotatebox{-90}{\makebox(0,0)[l]{\strut{}239}}}%
+      \put(4942,1078){\rotatebox{-90}{\makebox(0,0)[l]{\strut{}240}}}%
+      \put(5049,1078){\rotatebox{-90}{\makebox(0,0)[l]{\strut{}241}}}%
+      \put(5157,1078){\rotatebox{-90}{\makebox(0,0)[l]{\strut{}246}}}%
+      \put(5264,1078){\rotatebox{-90}{\makebox(0,0)[l]{\strut{}247}}}%
+      \put(5371,1078){\rotatebox{-90}{\makebox(0,0)[l]{\strut{}248}}}%
+      \put(5479,1078){\rotatebox{-90}{\makebox(0,0)[l]{\strut{}248-2}}}%
+      \put(5586,1078){\rotatebox{-90}{\makebox(0,0)[l]{\strut{}248-4}}}%
+      \put(5693,1078){\rotatebox{-90}{\makebox(0,0)[l]{\strut{}248-6}}}%
+      \put(5801,1078){\rotatebox{-90}{\makebox(0,0)[l]{\strut{}248-8}}}%
+      \put(5908,1078){\rotatebox{-90}{\makebox(0,0)[l]{\strut{}249}}}%
+      \put(6015,1078){\rotatebox{-90}{\makebox(0,0)[l]{\strut{}249-2}}}%
+      \put(6123,1078){\rotatebox{-90}{\makebox(0,0)[l]{\strut{}249-4}}}%
+      \put(6230,1078){\rotatebox{-90}{\makebox(0,0)[l]{\strut{}249-6}}}%
+      \put(6337,1078){\rotatebox{-90}{\makebox(0,0)[l]{\strut{}249-8}}}%
+      \put(6445,1078){\rotatebox{-90}{\makebox(0,0)[l]{\strut{}250}}}%
+      \put(6552,1078){\rotatebox{-90}{\makebox(0,0)[l]{\strut{}250-2}}}%
+      \put(6659,1078){\rotatebox{-90}{\makebox(0,0)[l]{\strut{}250-4}}}%
+      \put(6767,1078){\rotatebox{-90}{\makebox(0,0)[l]{\strut{}250-6}}}%
+      \put(6874,1078){\rotatebox{-90}{\makebox(0,0)[l]{\strut{}250-8}}}%
+      \put(6982,1078){\rotatebox{-90}{\makebox(0,0)[l]{\strut{}251}}}%
+      \put(7089,1078){\rotatebox{-90}{\makebox(0,0)[l]{\strut{}251-2}}}%
+      \put(7196,1078){\rotatebox{-90}{\makebox(0,0)[l]{\strut{}251-4}}}%
+      \put(7304,1078){\rotatebox{-90}{\makebox(0,0)[l]{\strut{}251-6}}}%
+      \put(7411,1078){\rotatebox{-90}{\makebox(0,0)[l]{\strut{}251-8}}}%
+      \put(7518,1078){\rotatebox{-90}{\makebox(0,0)[l]{\strut{}252}}}%
+      \put(7626,1078){\rotatebox{-90}{\makebox(0,0)[l]{\strut{}252-2}}}%
+      \put(7733,1078){\rotatebox{-90}{\makebox(0,0)[l]{\strut{}252-4}}}%
+      \put(7840,1078){\rotatebox{-90}{\makebox(0,0)[l]{\strut{}252-6}}}%
+      \put(7948,1078){\rotatebox{-90}{\makebox(0,0)[l]{\strut{}252-8}}}%
+      \put(8055,1078){\rotatebox{-90}{\makebox(0,0)[l]{\strut{}253}}}%
+      \put(8162,1078){\rotatebox{-90}{\makebox(0,0)[l]{\strut{}253-2}}}%
+      \put(8270,1078){\rotatebox{-90}{\makebox(0,0)[l]{\strut{}253-4}}}%
+      \put(8377,1078){\rotatebox{-90}{\makebox(0,0)[l]{\strut{}253-6}}}%
+      \put(8484,1078){\rotatebox{-90}{\makebox(0,0)[l]{\strut{}253-8}}}%
+      \put(8592,1078){\rotatebox{-90}{\makebox(0,0)[l]{\strut{}254}}}%
+      \put(8699,1078){\rotatebox{-90}{\makebox(0,0)[l]{\strut{}254-2}}}%
+      \put(8806,1078){\rotatebox{-90}{\makebox(0,0)[l]{\strut{}254-4}}}%
+      \put(8914,1078){\rotatebox{-90}{\makebox(0,0)[l]{\strut{}254-6}}}%
+      \put(9021,1078){\rotatebox{-90}{\makebox(0,0)[l]{\strut{}254-8}}}%
+      \put(9128,1078){\rotatebox{-90}{\makebox(0,0)[l]{\strut{}257}}}%
+      \put(9236,1078){\rotatebox{-90}{\makebox(0,0)[l]{\strut{}257-2}}}%
+      \put(9343,1078){\rotatebox{-90}{\makebox(0,0)[l]{\strut{}257-4}}}%
+      \put(9450,1078){\rotatebox{-90}{\makebox(0,0)[l]{\strut{}257-6}}}%
+      \put(9558,1078){\rotatebox{-90}{\makebox(0,0)[l]{\strut{}257-8}}}%
+      \put(9665,1078){\rotatebox{-90}{\makebox(0,0)[l]{\strut{}258}}}%
+      \put(9772,1078){\rotatebox{-90}{\makebox(0,0)[l]{\strut{}258-2}}}%
+      \put(9880,1078){\rotatebox{-90}{\makebox(0,0)[l]{\strut{}258-4}}}%
+      \put(9987,1078){\rotatebox{-90}{\makebox(0,0)[l]{\strut{}258-6}}}%
+      \put(10094,1078){\rotatebox{-90}{\makebox(0,0)[l]{\strut{}258-8}}}%
+      \put(10202,1078){\rotatebox{-90}{\makebox(0,0)[l]{\strut{}259}}}%
+      \put(10309,1078){\rotatebox{-90}{\makebox(0,0)[l]{\strut{}259-2}}}%
+      \put(10416,1078){\rotatebox{-90}{\makebox(0,0)[l]{\strut{}259-4}}}%
+      \put(10524,1078){\rotatebox{-90}{\makebox(0,0)[l]{\strut{}259-6}}}%
+      \put(10631,1078){\rotatebox{-90}{\makebox(0,0)[l]{\strut{}259-8}}}%
+      \put(10738,1078){\rotatebox{-90}{\makebox(0,0)[l]{\strut{}260}}}%
+      \put(10846,1078){\rotatebox{-90}{\makebox(0,0)[l]{\strut{}260-2}}}%
+      \put(10953,1078){\rotatebox{-90}{\makebox(0,0)[l]{\strut{}260-4}}}%
+      \put(11060,1078){\rotatebox{-90}{\makebox(0,0)[l]{\strut{}260-6}}}%
+      \put(11168,1078){\rotatebox{-90}{\makebox(0,0)[l]{\strut{}260-8}}}%
+      \put(11275,1078){\rotatebox{-90}{\makebox(0,0)[l]{\strut{}261}}}%
+      \put(11382,1078){\rotatebox{-90}{\makebox(0,0)[l]{\strut{}261-2}}}%
+      \put(11490,1078){\rotatebox{-90}{\makebox(0,0)[l]{\strut{}261-4}}}%
+      \put(11597,1078){\rotatebox{-90}{\makebox(0,0)[l]{\strut{}261-6}}}%
+      \put(11704,1078){\rotatebox{-90}{\makebox(0,0)[l]{\strut{}261-8}}}%
+      \put(11812,1078){\rotatebox{-90}{\makebox(0,0)[l]{\strut{}262}}}%
+      \put(11919,1078){\rotatebox{-90}{\makebox(0,0)[l]{\strut{}262-2}}}%
+      \put(12026,1078){\rotatebox{-90}{\makebox(0,0)[l]{\strut{}262-4}}}%
+      \put(12134,1078){\rotatebox{-90}{\makebox(0,0)[l]{\strut{}262-6}}}%
+      \put(12241,1078){\rotatebox{-90}{\makebox(0,0)[l]{\strut{}262-8}}}%
+      \put(12348,1078){\rotatebox{-90}{\makebox(0,0)[l]{\strut{}265}}}%
+      \put(12456,1078){\rotatebox{-90}{\makebox(0,0)[l]{\strut{}266}}}%
+      \put(176,4811){\rotatebox{-270}{\makebox(0,0){\strut{}Precision}}}%
+      \put(6820,154){\makebox(0,0){\strut{}Test Number}}%
+      \put(6820,9029){\makebox(0,0){\strut{}Similarity Flooding vs Edge Confidence: Precision comparison}}%
+      \put(6820,8669){\makebox(0,0){\strut{} OAEI Benchmark 1 suite}}%
+    }%
+    \gplgaddtomacro\gplfronttext{%
+      \csname LTb\endcsname%
+      \put(11576,8306){\makebox(0,0)[r]{\strut{}Edge Conf}}%
+      \csname LTb\endcsname%
+      \put(11576,8086){\makebox(0,0)[r]{\strut{}Sim Flood}}%
+    }%
+    \gplbacktext
+    \put(0,0){\includegraphics{prec}}%
+    \gplfronttext
+  \end{picture}%
+\endgroup
