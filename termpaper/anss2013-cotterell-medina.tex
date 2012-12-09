@@ -66,6 +66,15 @@ How does a Markov chain perform analytically?
 \item F-measure ref~\cite{rijsbergen:1979:ir}.
 \end{itemize}
 
+As database technologies become increasingly diverse, the need to integrate those
+technologies has become ever more important. The heterogeneous data problem
+is used to describe the situation that occurs when multiple data sources
+with incompatible descriptions (schemas, ontologies etc.) must be integrated
+for use by a single application. This problem is often encountered in 
+the semantic web. A fundamental step in solving the heterogeneous data problem
+is the production of an alignment, that can tell the client how to equate
+the descriptions of two heterogeneous data sources.
+
 An ontology alignment may be informally described as a set of correspondences 
 between semantically related terms in two heterogeneous input ontologies. 
 Each correspondence is qualified with a confidence level, $[0,1]$.
@@ -74,6 +83,11 @@ referred to as the semantic heterogeneity problem.
 It helps in the automation of various important tasks, most important of which 
 is schema merging, enabling the knowledge and data expressed in the input 
 ontologies to interoperate. \\
+
+Ontology alignment algorithms are typically aggregations of multiple
+basic techniques, which may be classified as lexical, symantic, structural etc. \cite{euzenat:2007:ontology}
+In this paper, we consider the structural technique of
+Similarity Flooding and present an improvement to that technique.
 
 \noindent The rest of this paper is organized as follows: 
 the remainder of this section will cover some of the background material related 
@@ -465,7 +479,9 @@ His email address is \href{mailto:mepcott@uga.edu}{mepcott@uga.edu}.
 His curriculum vitae and list of publications are available at \url{http://michaelcotterell.com/}.
 
 \vspace{8 pt}
-\noindent \textbf{TERRANCE MEDINA} is a ... His email address is \href{mailto:medinat@uga.edu}{medinat@uga.edu}.
+\noindent \textbf{TERRANCE MEDINA} is a Master's student in Computer Science at the University of Georiga.  
+His research interests include Agent-based Modeling and Simulation, Computational Music and Robot Control Architectures.
+His email address is \href{mailto:medinat@uga.edu}{medinat@uga.edu}.
 
 
 
