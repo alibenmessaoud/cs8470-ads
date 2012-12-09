@@ -101,9 +101,10 @@ conclusions and possible future work are outlined in Section~\ref{sec:conclusion
 
 \subsection{Semantic Web and Ontologies}
 \label{subsec:semanticweb}
+First, we define some key terms around the Semantic Web and Ontology Alignment.
 
 %Knowledge bases
-A knowledge base is a kind of database that is designed 
+A \textit{knowledge base} is a kind of database that is designed 
 for decision support systems and expert systems. It specifically allows
 machines to perform deductive reasoning over its elements.
 For example, given the instance data ``John is a farmer'' and ``Farmers
@@ -111,14 +112,14 @@ wear overalls'', a knowledge base reasoner could deduce the new information
 that ``John wears overalls''.
 
 %KB representation
-Knowledge bases (KBs) consist of entities and
-relations between those entites. They are often represented as sets of
+Knowledge bases (KBs) consist of \textit{entities} and
+\textit{relations} between those entites. They are often represented as sets of
 triples, that is, a set of two entities and a relationship between those
 entities. For example, the triple ${\{teachers, lesson\_plans, write\}}$
 defines the relationship that teachers write lesson\_plans.
 
 %Ontologies
-Ontologies describe the relationships between elements in a knowledge base.
+\textit{Ontologies} describe the relationships between elements in a knowledge base.
 Similar to the notion of schemas in relational databases, ontologies specify
 the structural relationships amongst the entities and classes of the ontology.
 
@@ -136,7 +137,7 @@ of `cars' while another keeps track of `automobiles' and still another keeps tra
 `autoProducts'. In fact the list could go on and on.
 
 %Ontology Alignnment
-Ontology Alignment is the process of equating two heterogeneous ontologies by
+\textit{Ontology Alignment} is the process of equating two heterogeneous ontologies by
 finding valid correspondences between their sets of elements. 
 %
 For instance, an alignment between an auto parts manufacturer and an auto dealership
@@ -148,17 +149,32 @@ This is important because it allows a query management system to translate the t
 of a user's query into the terminology used by many different ontologies and thereby
 to query heterogeneous knowledge bases.
 
-%Contribution
-We present a novel representation for ontology alignment that allows for improved
-convergence analysis.
-
 \subsection{Why do we need fully automated alignment?}
 \label{subsec:automated}
+Fully-automated alignment techniques, that is, ontology alignment performed without
+any input or approval from a human user, represents the ideal scenario for many
+of the use cases already discussed. For example, in a Semantic Web query, the details
+of equating ontology elements across heterogeneous KBs should remain completely
+invisible to the user, who simply wants to know the showtimes of movies in his or her
+zip code, which star actors with a maximum Kevin-Bacon-Distance of three.
+On the other hand, in an Enterprise Integration context much of the information to
+be integrated is extremely domain specific and even organization specific, and possibly
+only known by a handful of organization veterans. In such a case, a fully-automated
+alignment process may not be entirely feasible.
 
-TODO
+In any case, fully-automated alignment is an as-yet-unobtained goal. In this paper
+we present an improvement to Similarity Flooding, a structural alignment technique. However,
+both the original algorithm and our improvement rely on comparison against an ideal
+alignment, produced by a human, for evaluation of the quality of the alignment. For our
+evaluation, we have used the SEALS automated testing platform, which subjects an algorithm
+to a battery of alignment test, and produces \textit{precision} and \textit{recall} scores
+based on a comparison of its results against an ideal alignment result.
+
 
 \subsection{Statistical \& Simulation Background}
 \label{subsec:stat}
+In this section, we present the statistical and simulation background information
+necessary for the rest of the paper.
 
 %Markov Processes
 A Markov Process is a mathematical model that represents a system as a set of states
@@ -167,10 +183,6 @@ processes adhere to the Markov Property, that is, a system's next state depends 
 on its current state, and not on any of its previous states. In that sense, Markov
 processes are called ``memoryless''.
 
-%Hidden Markov Models
-% NOT REALLY USING THESE
-%A Hidden Markov Model (HMM) is simply a Markov process whose states and transitions
-%are unobservable or only partially observable.
 
 \section{Related Work}
 
