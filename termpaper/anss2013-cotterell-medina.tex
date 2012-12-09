@@ -176,6 +176,8 @@ based on a comparison of its results against an ideal alignment result.
 In this section, we present the statistical and simulation background information
 necessary for the rest of the paper.
 
+\textbf{TODO: \textit{what else goes here???}}
+
 %Markov Processes
 A Markov Process is a mathematical model that represents a system as a set of states
 and a set of probabilistic transitions between those states. Most importantly, Markov 
@@ -188,9 +190,10 @@ processes are called ``memoryless''.
 
 Although the problem of fully-automated ontology alignment is far from being solved,
 there has been much work accomplished around fundamental techniques for element
-matching and aggregation of those matching techniques. One class of approaches
+matching and aggregation of those matching techniques.\cite{euzenat:2007:ontology}.
+One class of approaches
 attempts to find element matches based on the relative similarity or dissimilarity
-of the actual labels giving to those elements. Some examples of these string-matching 
+of the actual labels given to those elements. Some examples of these string-matching 
 techniques are the Jaro-Winkler measure, the Levenshtein Distance and latent semantic 
 indexing.
 %
@@ -209,22 +212,25 @@ The use of outside taxonomies can greatly improve the quality of matching result
 but such outside resources are not always readily available.
 
 Yet a third class of matching techniques attempts to exploit the structure of the ontology
-itself. For example, Similarity Flooding takes a directed graph representation of an 
+itself. For example, Similarity Flooding \cite{melnik:2002:similarity} takes a directed graph representation of an 
 ontology and uses neighbor relations between the elements to find matches correspondences
 between them. The idea is that if two elements in heterogeneous ontologies are very similar,
 then their neighboring elements should also be very similar.
 %
 %Convergence Properties
 Similarity flooding has been useful as a foundation in other structure-based
-matching techniques such as anchor flooding 
-%\textbf{**others??*} 
+matching techniques such as anchor flooding,
 but suffers from 
 a few limitations. First, it requires that the edges of the edge-labeled graph 
 representation have identically named labels. In the case that corresponding edge labels
 do not have exactly the same name, but mean the same thing (for example ``hasA'' and ``has\_a'')
-that information is completely lost to the flooding algorithm. It can also be difficult to predict
-wether or not the fixpoint calculation will converge.
-\newline
+that information is completely lost to the flooding algorithm. 
+%Explain Propagation graph
+
+%Note: are we still doing this?
+%--------------------------------
+%It can also be difficult to predict
+%wether or not the fixpoint calculation will converge.
 
 \section{Approach \& Implementation}
 %%%%%%%%%%% APPROACH & IMPLEMENTATION  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -285,11 +291,45 @@ Let $x$ and $y$ be terms in a single ontology. The label set $\Lambda \left( x, 
 
 \subsection{Edge Confidence}
 %%%%%%%%%%% EDGE CONFIDENCE %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+These lexical similarity techniques give us a way of assessing the 
+similarity of two entities regardless of any structural relationships
+they may have within an ontology. Recall that one limitation of the
+Similarity Flooding technique is the necessity that predicates 
+(edge labels when the ontology is represented as a graph) must have
+names that correspond exactly. But this is an unrealistic requirement. 
+It is easy to imagine that two unrelated ontologies might, for instance,
+use predicates labeled ``appearsIn'' and ``actsIn'' to describe the
+relationship that a certain actor has been in a movie (possibly with
+Kevin Bacon).
 
-A simple metric for edge similarity is described below.
-\textbf{TODO:} Provide an intuitive explanation of this.
+We propose using lexical similarity to quantify a degree of similarity
+between predicate levels. If the similarity is above some arbitrary
+threshhold, we will consider the two predicates to mean the same thing.
+In this way, we can include more edges in the propagation graph,
+which provides more information about structural relationships to
+the alignment algorithm.
+
+Next we are faced with the problem of assigning an actual value to the
+edge similarity. In the propagation graph for similarity flooding, each
+outbound edge from a node is given the same weight as all of the other
+edges from that node, and those weights all sum to one. This allows the 
+graph to be described by a row-stochastic matrix. We would like to keep
+that row-stochastic property for our edge confidence implementation, but 
+we would also like to have different weights on each outbound edge,
+proportionate to the degree of similarity (and thus the confidence) shared
+by the ontology predicates represented by the edge in the propagation graph.
+
+To this end, we start with a dissimilarity metric, such as one provided
+by the Levenshtein distance algorithm. Next we derive a complement for this
+weight by taking its difference from the sum of all outbound edge weights
+for a particular node. Finally, the edge weight is given as the ratio of
+that complement, and the sum of all complements for outbound edges of a
+particular node.
+
+This concept is formalized in the definitions that follow.
 
 \begin{defn}
+\label{edgeconfidence}
 Let $\gamma$ be some threshold. Edge confidence $\Gamma \left( \alpha, \beta \right)$ is the similarity score between the labels of two edges $\alpha$ and $\beta$ if that similarity is greater than $\gamma$, otherwise $0$. That is,
 $$ \Gamma \left( \alpha, \beta \right) = \left\{
    	 \begin{array}{ll}
@@ -301,9 +341,8 @@ $$ \Gamma \left( \alpha, \beta \right) = \left\{
 
 \subsection{Unnormalized Pairwise Markov Chain}
 %%%%%%%%%%% UPMC %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\textbf{TODO:} Provide an intuitive explanation of this.
-
-Consider the input ontologies presented in Figure~\ref{fig:input}.
+In the definitions that follow, consider the input ontologies 
+presented in Figure~\ref{fig:input}.
 
 \begin{defn}
 An {\bf Unnormalized Pairwise Markov Chain} is a not-necessarily stochastic Markov Chain that satisfies the following property.
@@ -446,8 +485,11 @@ In our evaluation, the SEALS Platform was used to easily compare the models pres
 
 \section{Results}
 \label{sec:results}
-
-TODO
+We compared our Edge Confidence algorithm to the stock Similarity Flooding algorithm
+using the SEALS Benchmark 1 version 2.0 suite of tests. The SEALS platform subjects
+each algorithm to a battery of alignment tests, then compares the result alignment
+generated by the algorithm to an ideal alignment, which is included as part of the suite.
+For each alignment test, the platform produces scores for \textit{precision} and \textit{recall}.
 
 \section{Conclusions \& Future Work}
 \label{sec:conclusions}
