@@ -130,7 +130,7 @@ class StorageManager (db: Database) extends Actor {
 
       trace.info("received read request from %s for Transaction-%d".format(sender, tid))
       check(tid)
-      logBuffer += new LogEntry(LogType.READ, tid, table, oid, prop)
+      logBuffer += new LogEntry(LogType.READ, tid, table, oid, prop, "", "")
       logBuffer.persist
       sender ! read(table, oid, prop)
 
@@ -141,7 +141,8 @@ class StorageManager (db: Database) extends Actor {
       trace.info("received write request from %s for Transaction-%d".format(sender, tid))
       makeDirty(tid, table, oid)
       check(tid)
-      logBuffer += new LogEntry(LogType.WRITE, tid, table, oid, prop, value)
+      val oldValue = db.table(table)(oid).get(prop)
+      logBuffer += new LogEntry(LogType.WRITE, tid, table, oid, prop, value, oldValue)
       logBuffer.persist
       write(table, oid, prop, value)
 

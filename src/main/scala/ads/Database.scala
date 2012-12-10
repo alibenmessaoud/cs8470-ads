@@ -56,11 +56,7 @@ class Database (val name: String) extends Dynamic {
   trace.info("%s started".format(this))
 
   def recover = {
-
-    trace.info("Checking logs...")
-    trace.info("Database not synced with logs! Starting recovery...")
     LogBuffer.recover(this)
-
   } // recover
 
   /**
