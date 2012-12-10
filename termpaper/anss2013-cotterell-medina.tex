@@ -171,24 +171,6 @@ to a battery of alignment test, and produces \textit{precision} and \textit{reca
 based on a comparison of its results against an ideal alignment result.
 
 
-\subsection{Statistical \& Simulation Background}
-\label{subsec:stat}
-In this section, we present the statistical and simulation background information
-necessary for the rest of the paper.
-
-\textbf{TODO: \textit{what else goes here???}}
-\begin{itemize}
-		\item Markov Chains
-		\item Row Stochastic
-\end{itemize}
-
-%Markov Processes
-A Markov Process is a mathematical model that represents a system as a set of states
-and a set of probabilistic transitions between those states. Most importantly, Markov 
-processes adhere to the Markov Property, that is, a system's next state depends only
-on its current state, and not on any of its previous states. In that sense, Markov
-processes are called ``memoryless''.
-
 
 \section{Related Work}
 
@@ -220,6 +202,23 @@ itself. For example, Similarity Flooding \cite{melnik:2002:similarity} takes a d
 ontology and uses neighbor relations between the elements to find matches correspondences
 between them. The idea is that if two elements in heterogeneous ontologies are very similar,
 then their neighboring elements should also be very similar.
+
+The Similarity Flooding algorithm operates by producing a new graph that
+represents relationships amongst the entities in each input ontology. The
+algorithm first takes the cross-product of all nodes
+in both ontologies, producing a single node in the result graph for each
+pairing of nodes in the input ontologies. Edges in the result graph are 
+produced if and only if the original nodes from the input ontologies
+both shared an edge. This results in a \textit{Pairwise Connectivity Graph}.
+Finally, weights are added to the edges such all outbound edges from a given
+node have equal weight, and sum to one. The result is a \textit{Propagation Graph}.
+
+Once the Propagation Graph has been generated, the similarity score of each node
+is generated as follows: each node is assigned an arbitrary initial similarity
+score which is refined through an iterative fixpoint computation. At each iteration
+the new similarity is equal to the old similarity plus the weighted sum of
+the similarity of all its neighbors in the propagation graph. This fixpoint
+computation proceeds until the new similarity converges to a fixed value.
 %
 %Convergence Properties
 Similarity flooding has been useful as a foundation in other structure-based
@@ -347,6 +346,12 @@ $$ \Gamma \left( \alpha, \beta \right) = \left\{
 %%%%%%%%%%% UPMC %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 In the definitions that follow, consider the input ontologies 
 presented in Figure~\ref{fig:input}.
+
+A Markov Chain is a mathematical model that represents a system as a set of states
+and a set of probabilistic transitions between those states. Most importantly, Markov 
+processes adhere to the Markov Property, that is, a system's next state depends only
+on its current state, and not on any of its previous states. In that sense, Markov
+processes are called ``memoryless''.
 
 \begin{defn}
 An {\bf Unnormalized Pairwise Markov Chain} is a not-necessarily stochastic Markov Chain that satisfies the following property.
