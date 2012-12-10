@@ -62,12 +62,26 @@ class ARIMA (y: VectorD, t: VectorD) extends Predictor with Error {
     //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
     /** Fit an ARIMA model to historical times series data.
      */
-    def train ()
+    def train (): VectorD = 
     {
+         //We need to fit the data in vector y to the following function:
 
+         //     (1- (sum_{1 to i}(AR_params_i*y[i-1]) = (1 + (sum_of_all(MA_params * lag_operator))) * error
+
+         //The key is to find the parameters: AR_params and MA_params, denoted phi and theta from here forward
+         //This proceeeds in three stages:
+         // 1: Ensure that the vector y is stationary, or perform differencing until it is
+         // 2: Find the order of AR <- p; and MA <- q
+         // 3: Estimate the parameters: phi and theta
+         // 4: Verfiy goodness of fit and repeat if necessary
+
+         //STAGE 1: Detect Stationarity and Perform Differencing until the data is stationary
+         // the number of differences = d, the order of integration
+         //Threshhold for determining convergence
          val threshold = 5.0E-5
          var iter      = 0       
   
+         var result:VectorD
          var yt: VectorD         = null
          var r: SimpleRegression = null
 
@@ -90,7 +104,7 @@ class ARIMA (y: VectorD, t: VectorD) extends Predictor with Error {
              for (i <- 0 until t.dim) {
                  x(i, 0) = 1.0
                  x(i, 1) = t(i)
-	     } // for
+	           } // for
 
              // regression on x and padded yt
              r = new SimpleRegression(x, padded)
@@ -100,21 +114,15 @@ class ARIMA (y: VectorD, t: VectorD) extends Predictor with Error {
 
          } while (r.fit._2 > threshold && iter < 3)
 
-         println("iter = %d".format(iter))
+         println("order of integration = %d".format(iter))
        
+         //For debugging, print the Autocorrelation function of the yt vector
+         //plotACF(yt)
 
-         // Find AR order --> p
-              //for p = 1, acf(yt) "should have an exponentially decreasing appearance"
-              //for p > 1, pacf(yt) should become 0 at lag p+1
-
-         // Find MA order --> q
-              // let i = the lag where acf(yt) becomes 0
-              // then q = i-1
-
-         plotACF(yt)
          //Interpreting the autocorrelation function
+         //from NIST handbook http://www.itl.nist.gov/div898/handbook/pmc/section4/pmc446.htm
               //Case: Exponential, decaying to zero -> 
-                //AR, use PACF to determin order
+                //AR, use PACF to determine order
               //Case: Alternating +/-, decaying to zero ->
                 //AR, use PACF to determin order
               //Case: One or more spikes, the rest at zero ->
@@ -127,19 +135,33 @@ class ARIMA (y: VectorD, t: VectorD) extends Predictor with Error {
                 //Data is not stationary
 
 
-        /* Stage 2: (from Wikipedia)
+         //=-=--=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+         //STAGE 2: Model Identification
+          //Find the order (p,q) for AR, MA
+          // This is determined by applying the Akaike estimator to the data
+          //Akaike Information Criteria (AIC)
+          //AIC = 2k - 2ln(L); k=p+q+1; L=maximized value of the likelihood function
+          //The values of p,q that minimize AIC should be taken as the correct order
+            // Find AR order --> p
+            // Find MA order --> q
+
+
+         //=-=--=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+        //STAGE 3: Perform parameter estimation using maximum likelihood method
+        /* (from Wikipedia)
          * Parameter estimation using computation algorithms to arrive at coefficients which 
          * best fit the selected ARIMA model. The most common methods use maximum likelihood 
          * estimation or non-linear least-squares estimation.
          */
-
+        //Estimation of phi and theta 
+          //Yule-Walker Estimation
+         //Maximum Likelihood estimator
          //This is a non-linear optimisation problem, need to search for the max of the likelihood surface
 
-         //Guess at initial values: Yule-Walker Estimation (pure autoregressive) 
+         //Guess at initial values: Yule-Walker Estimation (pure autoregressive, i.e. q == 0) 
          //or for q>0 use Hannan-Rissanan estimation
 
-
-        /* Stage 3: (from Wikipedia)
+        /* STAGE 4: (from Wikipedia)
          * Model checking by testing whether the estimated model conforms to the specifications 
          * of a stationary univariate process. In particular, the residuals should be independent 
          * of each other and constant in mean and variance over time. (Plotting the mean and 
@@ -152,9 +174,9 @@ class ARIMA (y: VectorD, t: VectorD) extends Predictor with Error {
          //calculate a vector of residuals (diff between model and data points)
          //generate white noise (Gaussian distributed) use Scalation random pkg to do this
          //if the residuals are random (i.e. if they have no autocorrelation) then the fit is good
-         //TODO: we may not even have to generate white noise here??
 
-
+         //return the vector of Model Parameters
+         result
     } // train
 
     //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -168,7 +190,8 @@ class ARIMA (y: VectorD, t: VectorD) extends Predictor with Error {
      */
     def predict (t: VectorD): Double = 
     {
-        0.      // FIX: to be implemented
+      0.
+      //return result of model function with fitted params
     } // predict
 
     //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -178,6 +201,11 @@ class ARIMA (y: VectorD, t: VectorD) extends Predictor with Error {
     def predict (z: MatrixD): VectorD =
     {
         throw new UnsupportedOperationException ()
+        //VectorD result
+        //for(i<-0 until z.dim){
+        //  result(i) = predict(z(i))
+       // }
+       //result
     } // predict
 
     //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
