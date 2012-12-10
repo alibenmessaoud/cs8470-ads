@@ -52,48 +52,26 @@ How does a Markov chain perform analytically?
 \section{Introduction}
 
 %\begin{itemize}
-%\item Normalized Levenshtein Disance~\cite{yujian:2007:levenshtein}. 
-%\item Similarity Flooding~\cite{melnik:2002:similarity}.
-%\item Probability and Computing book~\cite{mitzenmacher:2005:probability}.
 %\item Information-Theoretic~\cite{lin:1998:information}.
-%\item Hungarian algorithm~\cite{kuhn:1955:hungarian}.
-%\item Ontology Matching book~\cite{euzenat:2007:ontology}.
-%\item ScalaTion~\cite{miller:2010:scalation}.
 %\item BCNN book~\cite{bcnn:2010:simulation}.
-%\item Scala spec~\cite{odersky:2011:spec}.
-%\item My OEI paper~\cite{cotterell:2012:oei}.
 %\item Linear Algebra textbook~\cite{goodaire:2003:linalgebra}.
-%\item F-measure ref~\cite{rijsbergen:1979:ir}.
 %\end{itemize}
 
-As database technologies become increasingly diverse, the need to integrate those
-technologies has become ever more important. The heterogeneous data problem
-describes a common situation in which multiple data sources
-with incompatible descriptions and data types must be integrated
-for use by a single application. This problem is often encountered in 
-the semantic web, which attempts to view the entire Internet as a unified database. 
-A fundamental step in solving the heterogeneous data problem
-is the production of an \textit{alignment} that can tell the client how to equate
-the descriptions of two heterogeneous data sources.
+As database technologies become increasingly diverse, the need to integrate those technologies has become ever more important. 
+The heterogeneous data problem describes a common situation in which multiple data sources with incompatible descriptions and data types must be integrated for use by a single application. 
+This problem is often encountered in the Semantic Web, which attempts to view the entire Internet as a unified database. 
+A fundamental step in solving the heterogeneous data problem is the production of an \textit{alignment} that can tell the client how to equate the descriptions of two heterogeneous data sources.
 
-An ontology alignment may be informally described as a set of correspondences 
-between semantically related terms in two heterogeneous input ontologies. 
+An ontology alignment may be informally described as a set of correspondences between semantically related terms in two heterogeneous input ontologies. 
 Each correspondence is qualified with a confidence level, $[0,1]$.
-Alignment is useful in data integration tasks dealing with what is sometimes 
-referred to as the semantic heterogeneity problem. 
-It helps in the automation of various important tasks, most important of which 
-is schema merging, enabling the knowledge and data expressed in the input 
-ontologies to interoperate. \\
+Alignment is useful in data integration tasks dealing with what is sometimes referred to as the semantic heterogeneity problem. 
+It helps in the automation of various important tasks, most important of which is schema merging, enabling the knowledge and data expressed in the input ontologies to interoperate.
 
-Ontology alignment algorithms are typically aggregations of multiple
-basic techniques, which may be classified as lexical, symantic, structural etc. \cite{euzenat:2007:ontology}
-In this paper, we consider the structural technique of
-Similarity Flooding and present an improvement to that technique.
+Ontology alignment algorithms are typically aggregations of multiple basic techniques, which may be classified as lexical, symantic, structural etc~\cite{euzenat:2007:ontology}.
+In this paper, we consider the structural technique of Similarity Flooding and present an improvement to that technique.
 
 \noindent The rest of this paper is organized as follows: 
-the remainder of this section will cover some of the background material related 
-to the Semantic Web and ontologies, the cases for fully automated alignment, 
-and some of the background material on the statistical methods used in this paper; 
+the remainder of this section will cover some of the background material related to the Semantic Web and ontologies, the cases for fully automated alignment, and some of the background material on the statistical methods used in this paper; 
 Section~\ref{sec:approach} outlines the approach and implementation details; 
 the evaluation and benchmarks are explained in Section~\ref{sec:eval}; 
 results are presented in Section~\ref{sec:results}; and, 
@@ -104,130 +82,85 @@ conclusions and possible future work are outlined in Section~\ref{sec:conclusion
 First, we define some key terms around the Semantic Web and Ontology Alignment.
 
 %Knowledge bases
-A \textit{knowledge base} is a kind of database that is designed 
-for decision support systems and expert systems. It specifically allows
-machines to perform deductive reasoning over its elements.
-For example, given the instance data ``John is a farmer'' and ``Farmers
-wear overalls'', a knowledge base reasoner could deduce the new information
-that ``John wears overalls''.
+A \textit{knowledge base} is a kind of database that is designed for decision support systems and expert systems. 
+It specifically allows machines to perform deductive reasoning over its elements.
+For example, given the instance data ``John is a farmer'' and ``Farmers wear overalls'', a knowledge base reasoner could deduce the new information that ``John wears overalls''.
 
 %KB representation
-Knowledge bases (KBs) consist of \textit{entities} and
-\textit{relations} between those entites. They are often represented as sets of
-triples, that is, a set of two entities and a relationship between those
-entities. For example, the triple ${\{teachers, lesson\_plans, write\}}$
-defines the relationship that teachers write lesson\_plans.
+Knowledge bases (KBs) consist of \textit{entities} and \textit{relations} between those entites. 
+They are often represented as sets of triples, that is, a set of two entities and a relationship between those entities. 
+For example, the triple ${\{teachers, lesson\_plans, write\}}$ defines the relationship that ``teachers write lesson\_plans''.
 
 %Ontologies
 \textit{Ontologies} describe the relationships between elements in a knowledge base.
-Similar to the notion of schemas in relational databases, ontologies specify
-the structural relationships amongst the entities and classes of the ontology.
+Similar to the notion of schemas in relational databases, ontologies specify the structural relationships amongst the entities and classes of the ontology.
 
 %Heterogeneous Data Problem
-Frequently, queries must be performed across multiple knowledge bases. This is the
-case when departments in a large enterprise maintain their own knowledge bases,
-but must also share information with other departments. It is also a fundamental
-requirement of the semantic web; users perform queries against the web,
-and those queries must be performed against knowledge bases that may belong to 
-entities on opposite sides of the globe. This leads us to the problem of heterogeneous
-data. When knowledge bases are maintained by different organizations, the ontologies
-used to describe them will usually be different. They will use different names
-to describe similar or identical concepts, for instance, one ontology may keep track
-of `cars' while another keeps track of `automobiles' and still another keeps track of 
-`autoProducts'. In fact the list could go on and on.
+Frequently, queries must be performed across multiple knowledge bases. pp
+This is the case when departments in a large enterprise maintain their own knowledge bases, but must also share information with other departments. 
+This also happens in scientific computing, especially in the more domain-specific Informatics areas such as Bioinformatics and Energy Informatics~\cite{cotterell:2012:oei}.
+It is also a fundamental requirement of the semantic web; users perform queries against the web, and those queries must be performed against knowledge bases that may belong to entities on opposite sides of the globe. 
+This leads us to the problem of heterogeneous data. 
+When knowledge bases are maintained by different organizations, the ontologies used to describe them will usually be different. 
+They will use different names to describe similar or identical concepts, for instance, one ontology may keep track of `cars' while another keeps track of `automobiles' and still another keeps track of `autoProducts'. 
+In fact, the list could go on and on.
 
 %Ontology Alignnment
-\textit{Ontology Alignment} is the process of equating two heterogeneous ontologies by
-finding valid correspondences between their sets of elements. 
+\textit{Ontology Alignment} is the process of equating two heterogeneous ontologies by finding valid correspondences between their sets of elements. 
 %
-For instance, an alignment between an auto parts manufacturer and an auto dealership
-might tell us with 85\% certainty that ``anti\_lock\_brakes'' and ``ABS'' represent
-the same thing.
+For instance, an alignment between an auto parts manufacturer and an auto dealership might tell us with 85\% certainty that ``anti\_lock\_brakes'' and ``ABS'' represent the same thing.
 
 %Importance of Ontology Alignment
-This is important because it allows a query management system to translate the terminology
-of a user's query into the terminology used by many different ontologies and thereby
-to query heterogeneous knowledge bases.
+This is important because it allows a query management system to translate the terminology of a user's query into the terminology used by many different ontologies and thereby to query heterogeneous knowledge bases.
 
 \subsection{Why do we need fully automated alignment?}
 \label{subsec:automated}
-Fully-automated alignment techniques, that is, ontology alignment performed without
-any input or approval from a human user, represents the ideal scenario for many
-of the use cases already discussed. For example, in a Semantic Web query, the details
-of equating ontology elements across heterogeneous KBs should remain completely
-invisible to the user, who simply wants to know the showtimes of movies in his or her
-zip code, which star actors with a maximum Kevin-Bacon-Distance of three.
-On the other hand, in an Enterprise Integration context much of the information to
-be integrated is extremely domain specific and even organization specific, and possibly
-only known by a handful of organization veterans. In such a case, a fully-automated
-alignment process may not be entirely feasible.
+Fully-automated alignment techniques (i.e., ontology alignment performed without any input or approval from a human user) represent the ideal scenario for many of the use cases already discussed. 
+For example, in a Semantic Web query, the details of equating ontology elements across heterogeneous KBs should remain completely invisible to the user, who simply wants to know the showtimes of movies in his or her zip code, which star actors with a maximum Kevin-Bacon-Distance of three~\cite{hayes:2000:graph}.
+On the other hand, in an Enterprise Integration context much of the information to be integrated is extremely domain specific and even organization specific, and possibly only known by a handful of organization veterans. 
+In such a case, a fully-automated alignment process may not be entirely feasible.
 
-In any case, fully-automated alignment is an as-yet-unobtained goal. In this paper
-we present an improvement to Similarity Flooding, a structural alignment technique. However,
-both the original algorithm and our improvement rely on comparison against an ideal
-alignment, produced by a human, for evaluation of the quality of the alignment. For our
-evaluation, we have used the SEALS automated testing platform, which subjects an algorithm
-to a battery of alignment test, and produces \textit{precision} and \textit{recall} scores
-based on a comparison of its results against an ideal alignment result.
-
-
+In any case, fully-automated alignment is an as-yet-unobtained goal. 
+In this paper we present an improvement to Similarity Flooding, a structural alignment technique. 
+However, both the original algorithm and our improvement rely on comparison against an ideal alignment, produced by a human, for evaluation of the quality of the alignment. 
+For our evaluation, we have used the SEALS automated testing platform, which subjects an algorithm to a battery of alignment test, and produces \textit{precision} and \textit{recall} scores based on a comparison of its results against an ideal alignment result.
 
 \section{Related Work}
 
-Although the problem of fully-automated ontology alignment is far from being solved,
-there has been much work accomplished around fundamental techniques for element
-matching and aggregation of those matching techniques.\cite{euzenat:2007:ontology}.
-One class of approaches
-attempts to find element matches based on the relative similarity or dissimilarity
-of the actual labels given to those elements. Some examples of these string-matching 
-techniques are the Jaro-Winkler measure, the Levenshtein Distance and latent semantic 
-indexing.
+Although the problem of fully-automated ontology alignment is far from being solved, there has been much work accomplished around fundamental techniques for element matching and aggregation of those matching techniques~\cite{euzenat:2007:ontology}.
+One class of approaches attempts to find element matches based on the relative similarity or dissimilarity of the actual labels given to those elements. 
+Some examples of these string-matching techniques are the Jaro-Winkler measure~\cite{winkler:1999:state}, the Levenshtein Distance~\cite{yujian:2007:levenshtein} and Latent Semantic Indexing~\cite{benzecri:1973:lsi}.
 %
-While useful in many situations, string-based matching techniques suffer from a common 
-shortcoming; similar real-world objects often have very dissimilar names. The words
-``car'' and ``autombile'' provide a good example.
+While useful in many situations, string-based matching techniques suffer from a common shortcoming; similar real-world objects often have very dissimilar names. 
+The words ``car'' and ``autombile'' provide a good example.
 
-Another class of techniques makes use of outside resources as aids in the search for
-good matches between elements. Such outside resources include dictionaries or taxonomies
-such as the WordNet taxonomy. These classes of techniques attempt to produce correspondences
-between elements that may likely refer to the same real-world objects, but that have very
-dissimilar names, such as ``car'' and ``automobile''. Some examples of these semantic 
-approaches include Information-theoretic similarity.
+Another class of techniques makes use of outside resources as aids in the search for good matches between elements. 
+Such outside resources include dictionaries or taxonomies such as the WordNet taxonomy~\cite{miller:1995:wordnet}. 
+These classes of techniques attempt to produce correspondences between elements that may likely refer to the same real-world objects, but that have very dissimilar names, such as ``car'' and ``automobile''. 
+Some examples of these semantic approaches include Information-theoretic similarity~\cite{lin:1998:information}.
 %
-The use of outside taxonomies can greatly improve the quality of matching results,
-but such outside resources are not always readily available.
+The use of outside taxonomies can greatly improve the quality of matching results, but such outside resources are not always readily available.
 
-Yet a third class of matching techniques attempts to exploit the structure of the ontology
-itself. For example, Similarity Flooding \cite{melnik:2002:similarity} takes a directed graph representation of an 
-ontology and uses neighbor relations between the elements to find matches correspondences
-between them. The idea is that if two elements in heterogeneous ontologies are very similar,
-then their neighboring elements should also be very similar.
+Yet a third class of matching techniques attempts to exploit the structure of the ontology itself. 
+For example, Similarity Flooding~\cite{melnik:2002:similarity} takes a directed graph representation of an ontology and uses neighbor relations between the elements to find matching correspondences between them. 
+The idea is that if two elements in heterogeneous ontologies are very similar, then their neighboring elements should also be very similar.
 
-The Similarity Flooding algorithm operates by producing a new graph that
-represents relationships amongst the entities in each input ontology. The
-algorithm first takes the cross-product of all nodes
-in both ontologies, producing a single node in the result graph for each
-pairing of nodes in the input ontologies. Edges in the result graph are 
-produced if and only if the original nodes from the input ontologies
-both shared an edge. This results in a \textit{Pairwise Connectivity Graph}.
-Finally, weights are added to the edges such all outbound edges from a given
-node have equal weight, and sum to one. The result is a \textit{Propagation Graph}.
+The Similarity Flooding algorithm operates by producing a new graph that represents relationships amongst the entities in each input ontology. 
+The algorithm first takes the cross-product of all nodes in both ontologies, producing a single node in the result graph for each pairing of nodes in the input ontologies. 
+Edges in the result graph are produced if and only if the original nodes from the input ontologies both shared an edge. 
+This results in a \textit{Pairwise Connectivity Graph}.
+Finally, weights are added to the edges such all outbound edges from a given node have equal weight, and sum to one. 
+The result is a \textit{Propagation Graph}.
 
-Once the Propagation Graph has been generated, the similarity score of each node
-is generated as follows: each node is assigned an arbitrary initial similarity
-score which is refined through an iterative fixpoint computation. At each iteration
-the new similarity is equal to the old similarity plus the weighted sum of
-the similarity of all its neighbors in the propagation graph. This fixpoint
-computation proceeds until the new similarity converges to a fixed value.
+Once the Propagation Graph has been generated, the similarity score of each node is generated as follows: each node is assigned an arbitrary initial similarity
+score which is refined through an iterative fixpoint computation. 
+At each iteration the new similarity is equal to the old similarity plus the weighted sum of the similarity of all its neighbors in the propagation graph. 
+This fixpoint computation proceeds until the new similarity converges to a fixed value.
 %
 %Convergence Properties
-Similarity flooding has been useful as a foundation in other structure-based
-matching techniques such as anchor flooding,
-but suffers from 
-a few limitations. First, it requires that the edges of the edge-labeled graph 
-representation have identically named labels. In the case that corresponding edge labels
-do not have exactly the same name, but mean the same thing (for example ``hasA'' and ``has\_a'')
-that information is completely lost to the flooding algorithm. 
+Similarity flooding has been useful as a foundation in other structure-based matching techniques such as anchor flooding, but suffers from a few limitations. 
+First, it requires that the edges of the edge-labeled graph representation have identically named labels. 
+In the case that corresponding edge labels do not have exactly the same name, but mean the same thing (for example ``hasA'' and ``has\_a'')that information is completely lost to the flooding algorithm. 
 %Explain Propagation graph
 
 %Note: are we still doing this?
@@ -239,16 +172,13 @@ that information is completely lost to the flooding algorithm.
 %%%%%%%%%%% APPROACH & IMPLEMENTATION  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \label{sec:approach}
 
-The following sections outline and present the details about the model as well as 
-many of the implementation details.
+The following sections outline and present the details about the model as well as many of the implementation details.
 
 \subsection{Levenshtein Edit Distance}
 %%%%%%%%%%% LEVENSHTEIN DISTANCE  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-The Levenshtein distance is a string similarity metric for measuring the difference 
-between two character sequences. 
-The distance between two sequences is equal to the number of single-character 
-operations required to transform one sequence into the other. 
+The Levenshtein distance is a string similarity metric for measuring the difference between two character sequences. 
+The distance between two sequences is equal to the number of single-character operations required to transform one sequence into the other~\cite{yujian:2007:levenshtein}. 
 The single-character operations are insertion, deletion, and substitution.
 
 \begin{defn}
@@ -294,40 +224,24 @@ Let $x$ and $y$ be terms in a single ontology. The label set $\Lambda \left( x, 
 
 \subsection{Edge Confidence}
 %%%%%%%%%%% EDGE CONFIDENCE %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-These lexical similarity techniques give us a way of assessing the 
-similarity of two entities regardless of any structural relationships
-they may have within an ontology. Recall that one limitation of the
-Similarity Flooding technique is the necessity that predicates 
-(edge labels when the ontology is represented as a graph) must have
-names that correspond exactly. But this is an unrealistic requirement. 
-It is easy to imagine that two unrelated ontologies might, for instance,
-use predicates labeled ``appearsIn'' and ``actsIn'' to describe the
-relationship that a certain actor has been in a movie (possibly with
-Kevin Bacon).
+These lexical similarity techniques give us a way of assessing the similarity of two entities regardless of any structural relationships they may have within an ontology. 
+Recall that one limitation of the Similarity Flooding technique is the necessity that predicates (edge labels when the ontology is represented as a graph) must have names that correspond exactly. 
+But this is an unrealistic requirement. 
+It is easy to imagine that two unrelated ontologies might, for instance, use predicates labeled ``appearsIn'' and ``actsIn'' to describe the relationship that a certain actor has been in a movie (possibly with Kevin Bacon).
 
-We propose using lexical similarity to quantify a degree of similarity
-between predicate levels. If the similarity is above some arbitrary
-threshhold, we will consider the two predicates to mean the same thing.
-In this way, we can include more edges in the propagation graph,
-which provides more information about structural relationships to
-the alignment algorithm.
+We propose using lexical similarity to quantify a degree of similarity between predicate levels. 
+If the similarity is above some arbitrary threshhold, we will consider the two predicates to mean the same thing.
+In this way, we can include more edges in the propagation graph, which provides more information about structural relationships to the alignment algorithm.
 
-Next we are faced with the problem of assigning an actual value to the
-edge similarity. In the propagation graph for similarity flooding, each
-outbound edge from a node is given the same weight as all of the other
-edges from that node, and those weights all sum to one. This allows the 
-graph to be described by a row-stochastic matrix. We would like to keep
-that row-stochastic property for our edge confidence implementation, but 
-we would also like to have different weights on each outbound edge,
-proportionate to the degree of similarity (and thus the confidence) shared
-by the ontology predicates represented by the edge in the propagation graph.
+Next we are faced with the problem of assigning an actual value to the edge similarity. 
+In the propagation graph for similarity flooding, each outbound edge from a node is given the same weight as all of the other edges from that node, and those weights all sum to one. 
+This allows the graph to be described by a row-stochastic matrix. 
+We would like to keep that row-stochastic property for our edge confidence implementation, but we would also like to have different weights on each outbound edge,
+proportionate to the degree of similarity (and thus the confidence) shared by the ontology predicates represented by the edge in the propagation graph.
 
-To this end, we start with a dissimilarity metric, such as one provided
-by the Levenshtein distance algorithm. Next we derive a complement for this
-weight by taking its difference from the sum of all outbound edge weights
-for a particular node. Finally, the edge weight is given as the ratio of
-that complement, and the sum of all complements for outbound edges of a
-particular node.
+To this end, we start with a dissimilarity metric, such as one provided by the Levenshtein distance algorithm. 
+Next we derive a complement for this weight by taking its difference from the sum of all outbound edge weights for a particular node. 
+Finally, the edge weight is given as the ratio of that complement, and the sum of all complements for outbound edges of a particular node.
 
 This concept is formalized in the definitions that follow.
 
@@ -344,14 +258,11 @@ $$ \Gamma \left( \alpha, \beta \right) = \left\{
 
 \subsection{Unnormalized Pairwise Markov Chain}
 %%%%%%%%%%% UPMC %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-In the definitions that follow, consider the input ontologies 
-presented in Figure~\ref{fig:input}.
+In the definitions that follow, consider the input ontologies presented in Figure~\ref{fig:input}.
 
-A Markov Chain is a mathematical model that represents a system as a set of states
-and a set of probabilistic transitions between those states. Most importantly, Markov 
-processes adhere to the Markov Property, that is, a system's next state depends only
-on its current state, and not on any of its previous states. In that sense, Markov
-processes are called ``memoryless''.
+A Markov Chain is a mathematical model that represents a system as a set of states and a set of probabilistic transitions between those states. 
+Most importantly, Markov processes adhere to the Markov Property, that is, a system's next state depends only on its current state, and not on any of its previous states. 
+In that sense, Markov processes are called ``memoryless''~\cite{bcnn:2010:simulation}.
 
 \begin{defn}
 An {\bf Unnormalized Pairwise Markov Chain} is a not-necessarily stochastic Markov Chain that satisfies the following property.
@@ -364,11 +275,9 @@ with probability $\Gamma(\Lambda(x, y), \Lambda(x', y'))$ if and only if
 \end{itemize}
 \end{defn}
 
-The creation of a UPMC creates a directed graph between pairs of concepts that relate 
-pairs based on their structural similarity.
+The creation of a UPMC creates a directed graph between pairs of concepts that relate pairs based on their structural similarity.
 The idea is that a pair of concepts are more likely to be similar if they are structurally similar.
-Each pair of ontological terms is connceted to other pairs of ontological terms via directed 
-edges that are proportional to similarity of the edges that exist in the input ontologies. 
+Each pair of ontological terms is connceted to other pairs of ontological terms via directed edges that are proportional to similarity of the edges that exist in the input ontologies. 
 
 \begin{figure*}
 \centering
@@ -431,7 +340,8 @@ This is done by normalizing the row sums of the matrix such that they sum to one
 
 \begin{defn}
 \label{def:npmc}
-a {\bf Normalized Pairwise Markov Chain (NPMC)} is defined as the Markov Chain generated from a UPMC by normalizing the row sums of the matrix such that they sum to one. Let $P$ be the $1$-step probability transition matrix for an UPMC. First, determine the sum of the current recipricol row sums.
+a {\bf Normalized Pairwise Markov Chain (NPMC)} is defined as the Markov Chain generated from a UPMC by normalizing the row sums of the matrix such that they sum to one. Let $P$ be the $1$-step probability transition matrix for an UPMC. 
+First, determine the sum of the current recipricol row sums.
 
 $$ M_i = \sum \frac{1}{P_i} $$
 
@@ -464,7 +374,18 @@ This can be done by solving a left eigenvalue problem:
 $$ \pi = \pi P \Rightarrow \pi (P - I) = 0$$
 where the eigenvalue is $1$ and $I$ is the identity matrix. 
 Simply solve for $\pi$ by computing the left nullspace of the $P - I$ matrix (appropriately sliced) and then normalizing $\pi$ so that $\vert\vert \pi \vert\vert = 1$.
-In order to accomplish this in an easy fashion, the ScalaTion library was used~\cite{miller:2010:scalation}.
+In order to accomplish this in an easy fashion, the ScalaTion library was used~\cite{miller:2010:scalation}. ScalaTion is an Domain-Specific Emebedded Language (DSEL) for Modeling \& Simulation, written in the Scala programming language~\cite{odersky:2011:spec}.
+
+\subsection{Notes on Convergance}
+
+Since the NPMC model is a MC, certain things can be said about the alignment (stationary distribution), such as~\cite{mitzenmacher:2005:probability}:
+
+\begin{itemize}
+\item If the stochastic probability transition matrix P is symmetric then the MC has a unique alignment/stationary distribution.
+\item If P is irreducible (but not necessarily aperiodic), then for any 0 < a < 1, the matrix P' = aP + (1 - a)I is stochastic, irreducible and aperiodic, and has the same stationary distribution as P. Note: I is the identity matrix.
+Since P' is finite, irreducible, and aperiodic, it's also ergodic and therefore has a unique stationary distribution!
+If we can generate such a P' from our NPMC, then we know it has a unique alignment, according to our model.
+\end{itemize}
 
 \subsection{Refining Results}
 
@@ -496,17 +417,12 @@ In our evaluation, the SEALS Platform was used to easily compare the models pres
 
 \section{Results}
 \label{sec:results}
-We compared our Edge Confidence algorithm to the stock Similarity Flooding algorithm
-using the SEALS Benchmark 1 version 2.0 suite of tests. The SEALS platform subjects
-each algorithm to a battery of alignment tests, then compares the result alignment
-generated by the algorithm to an ideal alignment, which is included as part of the suite.
+We compared our Edge Confidence algorithm to the stock Similarity Flooding algorithm using the SEALS Benchmark 1 version 2.0 suite of tests. 
+The SEALS platform subjects each algorithm to a battery of alignment tests, then compares the result alignment generated by the algorithm to an ideal alignment, which is included as part of the suite.
 For each alignment test, the platform produces scores for \textit{precision} and \textit{recall}.
 
-Precision is defined (Def \ref{def:precision} as the ratio of the number of correct correspondences to the total number
-of correspondences returned by the algorithm. It should be noted that precision is mainly
-a penalty against false positives, with no penalty against false negatives. For example if there
-were 100 valid correspondences between two ontologies, a given algorithm could returned only a single
-correspondence and, if that correspondence were correct, would score a 100\% precision. 
+Precision is defined (Def \ref{def:precision} as the ratio of the number of correct correspondences to the total number of correspondences returned by the algorithm. It should be noted that precision is mainly a penalty against false positives, with no penalty against false negatives. 
+For example if there were 100 valid correspondences between two ontologies, a given algorithm could returned only a single correspondence and, if that correspondence were correct, would score a 100\% precision. 
 
 \begin{defn}
 \textbf{Precision}
@@ -516,10 +432,8 @@ $$
 $$
 \end{defn}
 
-The converse of the precision metric is the recall metric (Def \ref{def:recall}, which provides a penalty for 
-false negatives, but not for false positives. Recall considers the ratio of the correct
-correspondences to the total number of correspondences that should have been returned by
-the algorithm.
+The converse of the precision metric is the recall metric (Def \ref{def:recall}, which provides a penalty for false negatives, but not for false positives. 
+Recall considers the ratio of the correct correspondences to the total number of correspondences that should have been returned by the algorithm.
 
 \begin{defn}
 \textbf{Recall}
@@ -529,8 +443,7 @@ $$
 $$
 \end{defn}
 
-Finally, we consider the F-measure (Def \ref{def:fmeasure}), a metric that provides a 
-balance between precision and recall. 
+Finally, we consider the F-measure (Def \ref{def:fmeasure}), a metric that provides a balance between precision and recall~\cite{rijsbergen:1979:ir}.. 
 
 \begin{defn}
 				\textbf{F-measure}
@@ -540,27 +453,19 @@ $$
 $$
 \end{defn}
 
-When comparing Similarity Flooding and Edge Confidence on the basis of precision,
-Similarity Flooding typically outperforms Edge Confidence, as can be seen in Figure
-\ref{fig:precision}. This reflects the conservative nature of Similarity Flooding.
-Because Edge Confidence is more aggressive about including edges, it generates a 
-larger propagation graph, which leads to more correspondences on average, although
-this will typically include more incorrect results, thus lowering the precision
-score.
+When comparing Similarity Flooding and Edge Confidence on the basis of precision, Similarity Flooding typically outperforms Edge Confidence, as can be seen in Figure~\ref{fig:precision}. 
+This reflects the conservative nature of Similarity Flooding.
+Because Edge Confidence is more aggressive about including edges, it generates a larger propagation graph, which leads to more correspondences on average, although this will typically include more incorrect results, thus lowering the precision score.
 
-By the same reasoning, Edge Flooding typically outperforms Similarity Flooding
-on the basis of recall. Because Edge Flooding return more results, it has more
-correct results, which gives a higher recall score. This is evident in Figure \ref{fig:recall}.
+By the same reasoning, Edge Flooding typically outperforms Similarity Flooding on the basis of recall. 
+Because Edge Flooding return more results, it has more correct results, which gives a higher recall score. 
+This is evident in Figure~\ref{fig:recall}.
 
-The real question is: does the more aggressive approach pay off in the F-measure
-score, or does it extract too much of a penalty because of its lack of precision?
-Figure \ref{fig:fmeasure} shows that the Edge Flooding technique performs very
-well against Similarity Flooding, performing orders of magnitude better on many of 
-the tests.
+The real question is: does the more aggressive approach pay off in the F-measure score, or does it extract too much of a penalty because of its lack of precision?
+Figure~\ref{fig:fmeasure} shows that the Edge Flooding technique performs very well against Similarity Flooding, performing orders of magnitude better on many of  the tests.
 
 \section{Conclusions \& Future Work}
 \label{sec:conclusions}
-
 
 Some possible work includes, but is not limitted to, the following:
 
@@ -568,8 +473,6 @@ Some possible work includes, but is not limitted to, the following:
 \item Tweak the definition of edge confidence so that it includes information about the structural relationships between different object properties.
 For example, object properties have parent-child relationships similar to ontological terms.
 A new edge confidence function could take advantage of these relationships in order to consider a more structural approach to the alignment problem.
-\item Investigate the use of Eigenvalues to evaluate the convergence values of the propagation graph in constant time.
-\item Investigate the use of the Hungarian Algorithm to improve the quality of edge confidence values.
 \end{itemize}
 
 %All of the source code for this project can be found at ...
