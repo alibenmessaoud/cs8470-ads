@@ -44,6 +44,9 @@ class StorageManager (db: Database) extends Actor {
     cleanup(tid)
   } // commit
 
+  private val CHECKPOINT_COUNT = 100
+  private var counter = 0
+
   private def getPagesMapFor (table: String): Map[Int, Set[Int]] = dirtyMap.get(table) match {
 
     case Some(map) => return map
@@ -112,11 +115,21 @@ class StorageManager (db: Database) extends Actor {
     } // for
   } // makeClean
 
+  def check (tid: Int) = {
+    counter += 1
+    if (counter >= CHECKPOINT_COUNT) {
+      logBuffer += new LogEntry(LogType.CHK, tid)
+      logBuffer.persist
+      counter = 0
+    } // if
+  } // check
+
   def receive = {
 
     case Read(tid, table, oid, prop) => {
 
       trace.info("received read request from %s for Transaction-%d".format(sender, tid))
+      check(tid)
       logBuffer += new LogEntry(LogType.READ, tid, table, oid, prop)
       logBuffer.persist
       sender ! read(table, oid, prop)
@@ -127,6 +140,7 @@ class StorageManager (db: Database) extends Actor {
 
       trace.info("received write request from %s for Transaction-%d".format(sender, tid))
       makeDirty(tid, table, oid)
+      check(tid)
       logBuffer += new LogEntry(LogType.WRITE, tid, table, oid, prop, value)
       logBuffer.persist
       write(table, oid, prop, value)
@@ -136,7 +150,8 @@ class StorageManager (db: Database) extends Actor {
     case Commit(tid) => {
 
       trace.info("received commit notification from %s for Transaction-%d".format(sender, tid))
-      logBuffer += new LogEntry(LogType.READ, tid)
+      check(tid)
+      logBuffer += new LogEntry(LogType.COMMIT, tid)
       logBuffer.persist
       commit(tid)
 
