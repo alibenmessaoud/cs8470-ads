@@ -16,7 +16,7 @@ object LogType {
 
 object LogEntry {
 
-  val width = 4 + 4 + 64 + 4 + 64 + 64
+  val width = 8 + 4 + 4 + 64 + 4 + 64 + 64
 
   // consistent encoding
   val encoding = "UTF-8"
@@ -102,6 +102,8 @@ object LogBuffer {
     // get the logBuffer
     val logBuffer = new LogBuffer(db)
 
+    db.trace.info("Reading up to two full checkpoints...")
+
     logBuffer.logFile.seek(0)
     var chkCount = 0
     do {
@@ -113,7 +115,13 @@ object LogBuffer {
       } // if
       logBuffer += entry
     } while (chkCount < 2)
-    
+
+    db.trace.info("Starting undo...")
+
+    db.trace.info("Starting redo...")
+
+    db.trace.info("Recovery complete!")
+   
   } // recover
 
 } // LogBuffer

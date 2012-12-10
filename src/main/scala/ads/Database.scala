@@ -55,9 +55,6 @@ class Database (val name: String) extends Dynamic {
   // go ahead and log some stuff
   trace.info("%s started".format(this))
 
-  // recover, if needed
-  recover
-
   def recover = {
 
     trace.info("Checking logs...")

@@ -298,6 +298,9 @@ object TypedTransactionTestSGC extends App {
   db.registerSchema(new PersonSchema())
   db.registerSchema(new StudentSchema())
 
+  // recover
+  db.recover
+
   for (i <- 1 to 10000) {
 
     val timpl = new TransactionImpl(db) {
