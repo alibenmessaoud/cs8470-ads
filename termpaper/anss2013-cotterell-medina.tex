@@ -69,7 +69,7 @@ Alignment is useful in data integration tasks dealing with what is sometimes ref
 It helps in the automation of various important tasks, most important of which is schema merging, enabling the knowledge and data expressed in the input ontologies to inter-operate.
 
 Ontology alignment algorithms are typically aggregations of multiple basic techniques, which may be classified as lexical, semantic, structural etc~\cite{euzenat:2007:ontology}.
-In this paper, we consider the structural technique of Similarity Flooding and present an improvement to that technique.
+In this paper, we consider the structural technique of Similarity Flooding and present an improvement to that technique. \\
 
 \noindent The rest of this paper is organized as follows: 
 the remainder of this section will cover some of the background material related to the Semantic Web and ontologies, the cases for fully automated alignment, and some of the background material on the statistical methods used in this paper; 
@@ -97,13 +97,13 @@ For example, the triple ${\{teachers, lesson\_plans, write\}}$ defines the relat
 Similar to the notion of schemas in relational databases, ontologies specify the structural relationships amongst the entities and classes of the ontology.
 
 %Heterogeneous Data Problem
-Frequently, queries must be performed across multiple knowledge bases. pp
+Frequently, queries must be performed across multiple knowledge bases.
 This is the case when departments in a large enterprise maintain their own knowledge bases, but must also share information with other departments. 
 This also happens in scientific computing, especially in the more domain-specific Informatics areas such as Bioinformatics and Energy Informatics~\cite{cotterell:2012:oei}.
-It is also a fundamental requirement of the semantic web; users perform queries against the web, and those queries must be performed against knowledge bases that may belong to entities on opposite sides of the globe. 
+It is also a fundamental requirement of the Semantic Web; users perform queries against the web, and those queries must be performed against knowledge bases that may belong to entities on opposite sides of the globe. 
 This leads us to the problem of heterogeneous data. 
 When knowledge bases are maintained by different organizations, the ontologies used to describe them will usually be different. 
-They will use different names to describe similar or identical concepts, for instance, one ontology may keep track of `cars' while another keeps track of `automobiles' and still another keeps track of `autoProducts'. 
+For instance, one ontology may keep track of `cars' while another keeps track of `automobiles' and still another keeps track of `autoProducts'. 
 In fact, the list could go on and on.
 
 %Ontology Alignment
@@ -124,7 +124,7 @@ In such a case, a fully-automated alignment process may not be entirely feasible
 In any case, fully-automated alignment is an as-yet-unattained goal. 
 In this paper we present an improvement to Similarity Flooding, a structural alignment technique. 
 However, both the original algorithm and our improvement rely on comparison against an ideal alignment, produced by a human, for evaluation of the quality of the alignment. 
-For our evaluation, we have used the SEALS automated testing platform, which subjects an algorithm to a battery of alignment test, and produces \textit{precision} and \textit{recall} scores based on a comparison of its results against an ideal alignment result.
+For our evaluation, we have used the Semantic Evaluation At Large Scale (SEALS) automated testing platform, which subjects an algorithm to a battery of alignment test, and produces \textit{precision} and \textit{recall} scores based on a comparison of its results against an ideal alignment result.
 
 \section{Related Work}
 
@@ -161,7 +161,7 @@ This fix-point computation proceeds until the new similarity converges to a fixe
 %Convergence Properties
 Similarity flooding has been useful as a foundation in other structure-based matching techniques such as anchor flooding, but suffers from a few limitations. 
 First, it requires that the edges of the edge-labeled graph representation have identically named labels. 
-In the case that corresponding edge labels do not have exactly the same name, but mean the same thing (for example ``hasA'' and ``has\_a'')that information is completely lost to the flooding algorithm. 
+In the case that corresponding edge labels do not have exactly the same name, but mean the same thing (for example ``hasA'' and ``has\_a'') that information is completely lost to the flooding algorithm. 
 %Explain Propagation graph
 
 %Note: are we still doing this?
