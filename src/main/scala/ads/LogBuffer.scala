@@ -14,25 +14,51 @@ object LogType {
   val CHK    = 8 // 2^3
 } // LogType
 
-class LogEntry (val logType: Int, tid: Int, table: String, oid: Int, prop: String, value: Any) {
+object LogEntry {
 
-  def this (logType: Int, tid: Int, table: String, oid: Int, prop: String) = this (logType, tid, "", 0, "", "")
-  def this (logType: Int, tid: Int)  = this (logType, tid, "", 0, "", "")
+  val width = 4 + 4 + 64 + 4 + 64 + 64
 
-  val timestamp = System.currentTimeMillis
+  // consistent encoding
+  val encoding = "UTF-8"
+  def encoder = Charset.forName(encoding).newEncoder
+  def decoder = Charset.forName(encoding).newDecoder
 
-  var persisted = false
+  def fromBytes (bytes: Array[Byte]): LogEntry = {
 
-  def getStringBytes(str: String): Array[Byte] = {
+    // convert from bytes
+    val byteBuffer = ByteBuffer.wrap(bytes)
+    val timestamp  = byteBuffer.getLong
+    val logType    = byteBuffer.getInt
+    val tid        = byteBuffer.getInt
+    val tableArray = (for (i <- 0 until 64) yield byteBuffer.get()).toArray
+    val oid        = byteBuffer.getInt
+    val propArray  = (for (i <- 0 until 64) yield byteBuffer.get()).toArray
+    val valueArray = (for (i <- 0 until 64) yield byteBuffer.get()).toArray
 
-    // consistent encoding
-    val encoding = "UTF-8"
-    def encoder = Charset.forName(encoding).newEncoder
-    def decoder = Charset.forName(encoding).newDecoder
+    // return the log entry
+    val entry = new LogEntry(logType, tid, getStringFromBytes(tableArray), oid, getStringFromBytes(propArray), getStringFromBytes(valueArray))
+    entry.timestamp = timestamp
+    entry
+
+  } // fromBytes
+
+  def getStringFromBytes (bytes: Array[Byte]): String = {
+
+    // convert from bytes
+    val byteBuffer = ByteBuffer.wrap(bytes)
+    val charBuffer = LogEntry.decoder.decode(byteBuffer)
+    val str        = charBuffer.toString
+    
+    // return the string
+    str
+
+  } // getStringFromBytes
+
+  def getStringBytes (str: String): Array[Byte] = {
 
     // generate a byte array with proper encoding
     val charBuffer = CharBuffer.wrap(str)
-    val byteBuffer = encoder.encode(charBuffer)
+    val byteBuffer = LogEntry.encoder.encode(charBuffer)
     val bytes      = byteBuffer.array.slice(byteBuffer.position, byteBuffer.limit)
 
     // calculate and create the padding
@@ -44,26 +70,57 @@ class LogEntry (val logType: Int, tid: Int, table: String, oid: Int, prop: Strin
 
   } // getStringBytes
 
+} // LogEntry
+
+class LogEntry (val logType: Int, tid: Int, table: String, oid: Int, prop: String, value: Any) {
+
+  def this (logType: Int, tid: Int, table: String, oid: Int, prop: String) = this (logType, tid, "", 0, "", "")
+  def this (logType: Int, tid: Int)  = this (logType, tid, "", 0, "", "")
+
+  var timestamp = System.currentTimeMillis
+  var persisted = false
+
   def getBytes: Array[Byte] = {
 
-    val width = 4 + 4 + 64 + 4 + 512
     val tsBytes  = ByteBuffer.allocate(8).putLong(timestamp).array
     val logBytes = ByteBuffer.allocate(4).putInt(logType).array
     val tidBytes = ByteBuffer.allocate(4).putInt(tid).array
-    val tblBytes = getStringBytes(table)
+    val tblBytes = LogEntry.getStringBytes(table)
     val oidBytes = ByteBuffer.allocate(4).putInt(oid).array
-    val prpBytes = getStringBytes(prop)
-    val valBytes = getStringBytes(value.toString)
+    val prpBytes = LogEntry.getStringBytes(prop)
+    val valBytes = LogEntry.getStringBytes(value.toString)
     
     tsBytes ++ logBytes ++ tidBytes ++ tblBytes ++ oidBytes ++ prpBytes ++ valBytes
   } // getBytes
 
 } // LogEntry
 
+object LogBuffer {
 
-class LogBuffer (db: Database) {
+  def recover (db: Database) {
 
-  val logFile = new RandomAccessFile("%s.log".format(db.name), "rw")
+    // get the logBuffer
+    val logBuffer = new LogBuffer(db)
+
+    logBuffer.logFile.seek(0)
+    var chkCount = 0
+    do {
+      val bytes = Array.ofDim[Byte](LogEntry.width)
+      logBuffer.logFile.read(bytes)
+      val entry = LogEntry.fromBytes(bytes)
+      if (entry.logType == LogType.CHK) {
+	chkCount += 1
+      } // if
+      logBuffer += entry
+    } while (chkCount < 2)
+    
+  } // recover
+
+} // LogBuffer
+
+class LogBuffer (val db: Database) {
+
+  var logFile = new RandomAccessFile("%s.log".format(db.name), "rw")
   val buffer  = ListBuffer.empty[LogEntry]
 
   def += (elem: LogEntry) = (buffer += elem)

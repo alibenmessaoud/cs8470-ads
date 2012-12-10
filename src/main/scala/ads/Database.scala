@@ -55,6 +55,17 @@ class Database (val name: String) extends Dynamic {
   // go ahead and log some stuff
   trace.info("%s started".format(this))
 
+  // recover, if needed
+  recover
+
+  def recover = {
+
+    trace.info("Checking logs...")
+    trace.info("Database not synced with logs! Starting recovery...")
+    LogBuffer.recover(this)
+
+  } // recover
+
   /**
    * Creates a Transaction for this database based on an implementation of the
    * Transaction trait.
