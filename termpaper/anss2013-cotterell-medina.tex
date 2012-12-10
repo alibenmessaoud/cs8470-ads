@@ -40,11 +40,12 @@ mepcott@uga.edu, medinat@uga.edu
 \maketitle
 
 \begin{abstract}
-Ontology Alignment -- problem importance
-
-Need for a way to determine convergence.
-
-How does a Markov chain perform analytically?
+The explosion of available data along with the need to integrate and utilize that
+data has led to a pressing interest in data integration techniques. In terms of
+Semantic Web technologies, Ontology Alignment is a key step in the process of 
+integrating heterogeneous knowledge bases. In this paper, we present
+the Edge Confidence technique, a modification and improvement over the popular
+Similarity Flooding technique for Ontology Alignment.
 
 \end{abstract}
 
@@ -390,13 +391,18 @@ In order to accomplish this task, the Hungarian algorithm is used~\cite{kuhn:195
 \section{Evaluation}
 \label{sec:eval}
 
-In order to evaluate the model presented in this paper, the bibliographic ontology benchmark provided by the Ontology Alignment Evaluation Initiative (OAEI) was used.
+In order to evaluate the model presented in this paper, the bibliographic ontology benchmark provided by 
+the Ontology Alignment Evaluation Initiative (OAEI) was used.
 This benchmark test library consists of data sets that are built from the bibliographic reference ontology.
 Each test includes a reference alignment in order to facilitate the calculation of precision and recall.
 
-In order to evaluate the ontology alignment models presented in this paper, the Semantic Evaluation At Large Scale (SEALS) Platform was used~\cite{esteban:2010:executing, wrigley:2010:evaluating}.
-The SEALS Platform is an extensible infrastructure developed by INSERT that facilitates the remote evaluation of various semantic technologies.
+In order to evaluate the ontology alignment models presented in this paper, the Semantic Evaluation 
+At Large Scale (SEALS) Platform was used~\cite{esteban:2010:executing, wrigley:2010:evaluating}.
+The SEALS Platform is an extensible infrastructure that facilitates the remote evaluation of various semantic technologies.
 In our evaluation, the SEALS Platform was used to easily compare the models presented in this paper using the OAEI benchmark.
+We compared the reference implementation of Similarity Flooding available from Stanford Unversity
+to our modified version with the Edge Confidence implementation.
+
 
 \section{Results}
 \label{sec:results}
@@ -449,14 +455,18 @@ Figure~\ref{fig:fmeasure} shows that the Edge Flooding technique performs very w
 
 \section{Conclusions \& Future Work}
 \label{sec:conclusions}
-
-Some possible work includes, but is not limited to, the following:
-
-\begin{itemize}
-\item Tweak the definition of edge confidence so that it includes information about the structural relationships between different object properties.
+In this paper, we have shown an improvement to the popular
+Similarity Flooding technique for prosucing ontology alignment.
+Our evaluation on the SEALS platform has shown promising results. While the overall
+scores for both algorithms are very low, it should be noted that these algorithms
+are not intended for standalone use, but rather as building blocks in more
+sophisticated suites of ontology alignment tools. There is also more work
+to be done in the future.
+One avenue for improvement is to adjust the definition of edge confidence so that it 
+includes information about the structural relationships between different object properties.
 For example, object properties have parent-child relationships similar to ontological terms.
-A new edge confidence function could take advantage of these relationships in order to consider a more structural approach to the alignment problem.
-\end{itemize}
+A new edge confidence function could take advantage of these relationships in order to 
+consider a more structural approach to the alignment problem.
 
 %All of the source code for this project can be found at ...
 
