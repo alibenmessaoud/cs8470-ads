@@ -65,9 +65,9 @@ A fundamental step in solving the heterogeneous data problem is the production o
 An ontology alignment may be informally described as a set of correspondences between semantically related terms in two heterogeneous input ontologies. 
 Each correspondence is qualified with a confidence level, $[0,1]$.
 Alignment is useful in data integration tasks dealing with what is sometimes referred to as the semantic heterogeneity problem. 
-It helps in the automation of various important tasks, most important of which is schema merging, enabling the knowledge and data expressed in the input ontologies to interoperate.
+It helps in the automation of various important tasks, most important of which is schema merging, enabling the knowledge and data expressed in the input ontologies to inter-operate.
 
-Ontology alignment algorithms are typically aggregations of multiple basic techniques, which may be classified as lexical, symantic, structural etc~\cite{euzenat:2007:ontology}.
+Ontology alignment algorithms are typically aggregations of multiple basic techniques, which may be classified as lexical, semantic, structural etc~\cite{euzenat:2007:ontology}.
 In this paper, we consider the structural technique of Similarity Flooding and present an improvement to that technique.
 
 \noindent The rest of this paper is organized as follows: 
@@ -87,7 +87,7 @@ It specifically allows machines to perform deductive reasoning over its elements
 For example, given the instance data ``John is a farmer'' and ``Farmers wear overalls'', a knowledge base reasoner could deduce the new information that ``John wears overalls''.
 
 %KB representation
-Knowledge bases (KBs) consist of \textit{entities} and \textit{relations} between those entites. 
+Knowledge bases (KBs) consist of \textit{entities} and \textit{relations} between those entities. 
 They are often represented as sets of triples, that is, a set of two entities and a relationship between those entities. 
 For example, the triple ${\{teachers, lesson\_plans, write\}}$ defines the relationship that ``teachers write lesson\_plans''.
 
@@ -116,11 +116,11 @@ This is important because it allows a query management system to translate the t
 \subsection{Why do we need fully automated alignment?}
 \label{subsec:automated}
 Fully-automated alignment techniques (i.e., ontology alignment performed without any input or approval from a human user) represent the ideal scenario for many of the use cases already discussed. 
-For example, in a Semantic Web query, the details of equating ontology elements across heterogeneous KBs should remain completely invisible to the user, who simply wants to know the showtimes of movies in his or her zip code, which star actors with a maximum Kevin-Bacon-Distance of three~\cite{hayes:2000:graph}.
+For example, in a Semantic Web query, the details of equating ontology elements across heterogeneous KBs should remain completely invisible to the user, who simply wants to know the show-times of movies in his or her zip code, which star actors with a maximum Kevin-Bacon-Distance of three~\cite{hayes:2000:graph}.
 On the other hand, in an Enterprise Integration context much of the information to be integrated is extremely domain specific and even organization specific, and possibly only known by a handful of organization veterans. 
 In such a case, a fully-automated alignment process may not be entirely feasible.
 
-In any case, fully-automated alignment is an as-yet-unobtained goal. 
+In any case, fully-automated alignment is an as-yet-unattained goal. 
 In this paper we present an improvement to Similarity Flooding, a structural alignment technique. 
 However, both the original algorithm and our improvement rely on comparison against an ideal alignment, produced by a human, for evaluation of the quality of the alignment. 
 For our evaluation, we have used the SEALS automated testing platform, which subjects an algorithm to a battery of alignment test, and produces \textit{precision} and \textit{recall} scores based on a comparison of its results against an ideal alignment result.
@@ -153,9 +153,9 @@ Finally, weights are added to the edges such all outbound edges from a given nod
 The result is a \textit{Propagation Graph}.
 
 Once the Propagation Graph has been generated, the similarity score of each node is generated as follows: each node is assigned an arbitrary initial similarity
-score which is refined through an iterative fixpoint computation. 
+score which is refined through an iterative fix-point computation. 
 At each iteration the new similarity is equal to the old similarity plus the weighted sum of the similarity of all its neighbors in the propagation graph. 
-This fixpoint computation proceeds until the new similarity converges to a fixed value.
+This fix-point computation proceeds until the new similarity converges to a fixed value.
 %
 %Convergence Properties
 Similarity flooding has been useful as a foundation in other structure-based matching techniques such as anchor flooding, but suffers from a few limitations. 
@@ -230,7 +230,7 @@ But this is an unrealistic requirement.
 It is easy to imagine that two unrelated ontologies might, for instance, use predicates labeled ``appearsIn'' and ``actsIn'' to describe the relationship that a certain actor has been in a movie (possibly with Kevin Bacon).
 
 We propose using lexical similarity to quantify a degree of similarity between predicate levels. 
-If the similarity is above some arbitrary threshhold, we will consider the two predicates to mean the same thing.
+If the similarity is above some arbitrary threshold, we will consider the two predicates to mean the same thing.
 In this way, we can include more edges in the propagation graph, which provides more information about structural relationships to the alignment algorithm.
 
 Next we are faced with the problem of assigning an actual value to the edge similarity. 
@@ -277,7 +277,7 @@ with probability $\Gamma(\Lambda(x, y), \Lambda(x', y'))$ if and only if
 
 The creation of a UPMC creates a directed graph between pairs of concepts that relate pairs based on their structural similarity.
 The idea is that a pair of concepts are more likely to be similar if they are structurally similar.
-Each pair of ontological terms is connceted to other pairs of ontological terms via directed edges that are proportional to similarity of the edges that exist in the input ontologies. 
+Each pair of ontological terms is connected to other pairs of ontological terms via directed edges that are proportional to similarity of the edges that exist in the input ontologies. 
 
 \begin{figure*}
 \centering
@@ -314,23 +314,6 @@ Each pair of ontological terms is connceted to other pairs of ontological terms 
 \end{tikzpicture}
 \caption{Example Input Ontologies with Object Properties}
 \label{fig:input}
-\end{figure*}
-
-\begin{figure*}
-\begin{equation*}
-\left( \begin{array}{ccccccccc}
-0 & b & c & a & a & a & a & a & a \\
-d & 0 & f & a & a & a & a & a & a \\
-g & h & 0 & a & a & a & a & a & a \\
-g & h & i & 0 & a & a & a & a & a \\
-g & h & i & j & 0 & a & a & a & a \\
-g & h & 0 & a & a & 0 & a & a & a \\
-g & h & 0 & a & a & a & 0 & a & a \\
-g & h & 0 & a & a & a & a & 0 & a \\
-g & h & 0 & a & a & a & a & a & 0 \end{array} \right)
-\end{equation*}
-\caption{Example an Unnormalized Pairwise Markov Chain}
-\label{fig:upmc}
 \end{figure*}
 
 \subsection{Normalized Pairwise Markov Chain}
@@ -390,12 +373,12 @@ If we can generate such a P' from our NPMC, then we know it has a unique alignme
 \subsection{Refining Results}
 
 The results generated from using either the iterative approach or the steady-state approach are only somewhat meaningful.
-The ouput of both procedures produces a two-dimensional distribution of similarity scores between the two input ontologies.
-Although this satisfies the definition of an alignment as presented earlier in this paper, a user is likely more interested in the set of similarities that yield the best correspondance between the two input ontologies.
+The output of both procedures produces a two-dimensional distribution of similarity scores between the two input ontologies.
+Although this satisfies the definition of an alignment as presented earlier in this paper, a user is likely more interested in the set of similarities that yield the best correspondence between the two input ontologies.
 
 Take the alignment distribution generated by either the iterative or steady-state approach and decompose it into an $m \times n$ matrix.
 Consider this matrix to be representative of a weighted bipartite graph.
-Now, finding the set of similarities that yield the best correspondance between the two ontologies is simply a matter of solving the maximum-weighted bipartite graph matching problem using the generated graph.
+Now, finding the set of similarities that yield the best correspondence between the two ontologies is simply a matter of solving the maximum-weighted bipartite graph matching problem using the generated graph.
 In order to accomplish this task, the Hungarian algorithm is used~\cite{kuhn:1955:hungarian}.
 
 
@@ -467,7 +450,7 @@ Figure~\ref{fig:fmeasure} shows that the Edge Flooding technique performs very w
 \section{Conclusions \& Future Work}
 \label{sec:conclusions}
 
-Some possible work includes, but is not limitted to, the following:
+Some possible work includes, but is not limited to, the following:
 
 \begin{itemize}
 \item Tweak the definition of edge confidence so that it includes information about the structural relationships between different object properties.
