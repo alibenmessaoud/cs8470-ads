@@ -30,7 +30,7 @@ case class OkayMessage () extends Message ()
  * @param t A Transaction object.
  */
 case class BeginMessage (t: Transaction) extends Message ()
-
+case class StatMessage () extends Message ()
 case class TimestampRequest () extends Message ()
 case class TIDRequest () extends Message ()
 case class WriteResponse (postpone: Boolean = false, denied: Boolean = false, rollback: Boolean = false) extends Message ()

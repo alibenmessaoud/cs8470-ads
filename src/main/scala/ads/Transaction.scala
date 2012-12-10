@@ -301,7 +301,9 @@ object TypedTransactionTestSGC extends App {
   // recover
   db.recover
 
-  for (i <- 1 to 10000) {
+  val CL = 200
+
+  for (i <- 1 to 1000) {
 
     val timpl = new TransactionImpl(db) {
       override def body () {
@@ -323,13 +325,30 @@ object TypedTransactionTestSGC extends App {
 
     val t: Transaction = db.makeTransaction(timpl, "Transaction-%d".format(i-1))
 
-    //Thread sleep (20 + rand.nextInt(30))
-    Thread sleep 50
+    Thread sleep (10 + rand.nextInt(5))
+
+    if (i % CL == 0) {
+      var test = false
+      do {
+        TMStats.synchronized {
+          if (TMStats.count > i) test = true
+        } // synchronized
+      } while (!test)
+    } // if
 
     // execute the transactiono
     t.execute
 
   } // for
+
+  Thread sleep 1000
+
+  TMStats.end = System.currentTimeMillis
+  val totalTime = TMStats.end - TMStats.start
+  println("STATS!");
+  println("transaction committed = " + TMStats.count)
+  println("total time = " + totalTime + "ms")
+  println("throughput = " + (TMStats.count.toDouble / (totalTime.toDouble / 1000.0)) + " tps")   
 
 } // TypedTransactionTestSGC
 

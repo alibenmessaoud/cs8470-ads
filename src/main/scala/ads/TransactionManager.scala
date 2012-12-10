@@ -10,10 +10,17 @@ import akka.util.duration._
 import akka.util.Timeout
 
 import ads.concurrency.ConcurrencyControl
-import ads.message.{ BeginMessage, CheckResponse, CommitMessage, ReadMessage, ReadResponse, WriteMessage, WriteResponse }
+import ads.message.{ BeginMessage, CheckResponse, CommitMessage, ReadMessage, ReadResponse, WriteMessage, WriteResponse, StatMessage }
 import ads.message.CheckResponses._
 import ads.util._
 import ads.Op._
+
+// only to be used by the transaction manager (unless shutdown)
+object TMStats {
+  var start: Long = System.currentTimeMillis
+  var end: Long = 0
+  var count: Int = 0
+} // TMStats
 
 /**
  * Handles operation requests from the various Transaction threads.
@@ -33,7 +40,22 @@ class TransactionManager(db: Database) extends Actor with ConcurrencyControl {
    */
   private val opBuffer = new ListBuffer[(Transaction, Op, Int)]()
 
+  def statTally = {
+    val totalTime = System.currentTimeMillis - TMStats.start
+    TMStats.count += 1
+    
+  } // statTally
+
   def receive = {
+    
+    case statMsg: StatMessage => {
+      TMStats.end = System.currentTimeMillis
+      val totalTime = TMStats.end - TMStats.start
+      println("STATS!");
+      println("transaction committed = " + TMStats.count)
+      println("total time = " + totalTime + "ms")
+      println("throughput = " + (TMStats.count.toDouble / (totalTime.toDouble / 1000.0)) + " tps")   
+    } // stats
 
     case bMsg: BeginMessage => {
       trace.info("Message recieved: %s".format(bMsg))
@@ -104,6 +126,7 @@ class TransactionManager(db: Database) extends Actor with ConcurrencyControl {
       trace.info("Message recieved: %s".format(cMsg))
       db.sm ! Commit(cMsg.t.getTID.get)
       TypedActor(db.system).poisonPill(sender)
+      statTally
     } // case
 
   } // recieve

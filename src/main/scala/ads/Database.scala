@@ -37,6 +37,11 @@ class Database (val name: String) extends Dynamic {
    */
   val system = ActorSystem("Database-%s".format(name))
 
+  def shutdown = {
+    trace.info("Shutting down...")
+    system.shutdown
+  } // shutdown
+
   /**
    * This database's TransactionManager as an Actor
    */
