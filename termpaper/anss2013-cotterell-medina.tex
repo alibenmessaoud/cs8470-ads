@@ -40,11 +40,12 @@ mepcott@uga.edu, medinat@uga.edu
 \maketitle
 
 \begin{abstract}
-Ontology Alignment -- problem importance
-
-Need for a way to determine convergence.
-
-How does a Markov chain perform analytically?
+The explosion of available data along with the need to integrate and utilize that
+data has led to a pressing interest in data integration techniques. In terms of
+Semantic Web technologies, Ontology Alignment is a key step in the process of 
+integrating heterogeneous knowledge bases. In this paper, we present
+the Edge Confidence technique, a modification and improvement over the popular
+Similarity Flooding technique for Ontology Alignment.
 
 \end{abstract}
 
@@ -105,7 +106,7 @@ When knowledge bases are maintained by different organizations, the ontologies u
 They will use different names to describe similar or identical concepts, for instance, one ontology may keep track of `cars' while another keeps track of `automobiles' and still another keeps track of `autoProducts'. 
 In fact, the list could go on and on.
 
-%Ontology Alignnment
+%Ontology Alignment
 \textit{Ontology Alignment} is the process of equating two heterogeneous ontologies by finding valid correspondences between their sets of elements. 
 %
 For instance, an alignment between an auto parts manufacturer and an auto dealership might tell us with 85\% certainty that ``anti\_lock\_brakes'' and ``ABS'' represent the same thing.
@@ -132,7 +133,7 @@ One class of approaches attempts to find element matches based on the relative s
 Some examples of these string-matching techniques are the Jaro-Winkler measure~\cite{winkler:1999:state}, the Levenshtein Distance~\cite{yujian:2007:levenshtein} and Latent Semantic Indexing~\cite{benzecri:1973:lsi}.
 %
 While useful in many situations, string-based matching techniques suffer from a common shortcoming; similar real-world objects often have very dissimilar names. 
-The words ``car'' and ``autombile'' provide a good example.
+The words ``car'' and ``automobile'' provide a good example.
 
 Another class of techniques makes use of outside resources as aids in the search for good matches between elements. 
 Such outside resources include dictionaries or taxonomies such as the WordNet taxonomy~\cite{miller:1995:wordnet}. 
@@ -166,7 +167,7 @@ In the case that corresponding edge labels do not have exactly the same name, bu
 %Note: are we still doing this?
 %--------------------------------
 %It can also be difficult to predict
-%wether or not the fixpoint calculation will converge.
+%whether or not the fixpoint calculation will converge.
 
 \section{Approach \& Implementation}
 %%%%%%%%%%% APPROACH & IMPLEMENTATION  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -318,17 +319,17 @@ Each pair of ontological terms is connected to other pairs of ontological terms 
 
 \subsection{Normalized Pairwise Markov Chain}
 
-In order to take advantage of the convergance properties outlined earlier in this paper, the UPMC needs to have its probability transition matrix converted into a row stochastic form. 
+In order to take advantage of the convergence properties outlined earlier in this paper, the UPMC needs to have its probability transition matrix converted into a row stochastic form. 
 This is done by normalizing the row sums of the matrix such that they sum to one.
 
 \begin{defn}
 \label{def:npmc}
 a {\bf Normalized Pairwise Markov Chain (NPMC)} is defined as the Markov Chain generated from a UPMC by normalizing the row sums of the matrix such that they sum to one. Let $P$ be the $1$-step probability transition matrix for an UPMC. 
-First, determine the sum of the current recipricol row sums.
+First, determine the sum of the current reciprocal row sums.
 
 $$ M_i = \sum \frac{1}{P_i} $$
 
-\noindent Then, add the repricol row sums to each value in the matrix, storing each value in a temporary matrix $T$.
+\noindent Then, add the reciprocal row sums to each value in the matrix, storing each value in a temporary matrix $T$.
 
 $$ T_{i,j} = -\frac{1}{P_{i,j}} + M_i $$
 
@@ -359,7 +360,7 @@ where the eigenvalue is $1$ and $I$ is the identity matrix.
 Simply solve for $\pi$ by computing the left nullspace of the $P - I$ matrix (appropriately sliced) and then normalizing $\pi$ so that $\vert\vert \pi \vert\vert = 1$.
 In order to accomplish this in an easy fashion, the ScalaTion library was used~\cite{miller:2010:scalation}. ScalaTion is an Domain-Specific Emebedded Language (DSEL) for Modeling \& Simulation, written in the Scala programming language~\cite{odersky:2011:spec}.
 
-\subsection{Notes on Convergance}
+\subsection{Notes on Convergence}
 
 Since the NPMC model is a MC, certain things can be said about the alignment (stationary distribution), such as~\cite{mitzenmacher:2005:probability}:
 
@@ -390,13 +391,18 @@ In order to accomplish this task, the Hungarian algorithm is used~\cite{kuhn:195
 \section{Evaluation}
 \label{sec:eval}
 
-In order to evaluate the model presented in this paper, the bibliographic ontology benchmark provided by the Ontology Alignment Evaluation Initiative (OAEI) was used.
+In order to evaluate the model presented in this paper, the bibliographic ontology benchmark provided by 
+the Ontology Alignment Evaluation Initiative (OAEI) was used.
 This benchmark test library consists of data sets that are built from the bibliographic reference ontology.
 Each test includes a reference alignment in order to facilitate the calculation of precision and recall.
 
-In order to evaluate the ontology alignment models presented in this paper, the Semantic Evaluation At Large Scale (SEALS) Platform was used~\cite{esteban:2010:executing, wrigley:2010:evaluating}.
-The SEALS Platform is an extensible infrastructure developed by INSERT that facilitates the remote evaluation of various semantic technologies.
+In order to evaluate the ontology alignment models presented in this paper, the Semantic Evaluation 
+At Large Scale (SEALS) Platform was used~\cite{esteban:2010:executing, wrigley:2010:evaluating}.
+The SEALS Platform is an extensible infrastructure that facilitates the remote evaluation of various semantic technologies.
 In our evaluation, the SEALS Platform was used to easily compare the models presented in this paper using the OAEI benchmark.
+We compared the reference implementation of Similarity Flooding available from Stanford University
+to our modified version with the Edge Confidence implementation.
+
 
 \section{Results}
 \label{sec:results}
@@ -449,14 +455,18 @@ Figure~\ref{fig:fmeasure} shows that the Edge Flooding technique performs very w
 
 \section{Conclusions \& Future Work}
 \label{sec:conclusions}
-
-Some possible work includes, but is not limited to, the following:
-
-\begin{itemize}
-\item Tweak the definition of edge confidence so that it includes information about the structural relationships between different object properties.
+In this paper, we have shown an improvement to the popular
+Similarity Flooding technique for producing ontology alignment.
+Our evaluation on the SEALS platform has shown promising results. While the overall
+scores for both algorithms are very low, it should be noted that these algorithms
+are not intended for stand-alone use, but rather as building blocks in more
+sophisticated suites of ontology alignment tools. There is also more work
+to be done in the future.
+One avenue for improvement is to adjust the definition of edge confidence so that it 
+includes information about the structural relationships between different object properties.
 For example, object properties have parent-child relationships similar to ontological terms.
-A new edge confidence function could take advantage of these relationships in order to consider a more structural approach to the alignment problem.
-\end{itemize}
+A new edge confidence function could take advantage of these relationships in order to 
+consider a more structural approach to the alignment problem.
 
 %All of the source code for this project can be found at ...
 
@@ -480,7 +490,7 @@ His email address is \href{mailto:mepcott@uga.edu}{mepcott@uga.edu}.
 His curriculum vitae and list of publications are available at \url{http://michaelcotterell.com/}.
 
 \vspace{8 pt}
-\noindent \textbf{TERRANCE MEDINA} is a Master's student in Computer Science at the University of Georiga.  
+\noindent \textbf{TERRANCE MEDINA} is a Master's student in Computer Science at the University of Georgia.  
 His research interests include Agent-based Modeling and Simulation, Computational Music and Robot Control Architectures.
 His email address is \href{mailto:medinat@uga.edu}{medinat@uga.edu}.
 
