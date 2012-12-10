@@ -27,6 +27,9 @@ class StorageManager (db: Database) extends Actor {
   // map from table names to maps of page ids to sets of transaction ids
   private val dirtyMap: Map[String, Map[Int, Set[Int]]] = new HashMap[String, Map[Int, Set[Int]]]()
 
+  // log buffer for recoverability
+  private val logBuffer = new LogBuffer(db)
+
   private def read (table: String, oid: Int, prop: String): Option[Any] = {
     val ret = db.table(table)(oid).get(prop)
     if (ret != null) return Some(ret) else None
@@ -114,6 +117,8 @@ class StorageManager (db: Database) extends Actor {
     case Read(tid, table, oid, prop) => {
 
       trace.info("received read request from %s for Transaction-%d".format(sender, tid))
+      logBuffer += new LogEntry(LogType.READ, tid, table, oid, prop)
+      logBuffer.persist
       sender ! read(table, oid, prop)
 
     } // Read
@@ -122,6 +127,8 @@ class StorageManager (db: Database) extends Actor {
 
       trace.info("received write request from %s for Transaction-%d".format(sender, tid))
       makeDirty(tid, table, oid)
+      logBuffer += new LogEntry(LogType.WRITE, tid, table, oid, prop, value)
+      logBuffer.persist
       write(table, oid, prop, value)
 
     } // Write
@@ -129,6 +136,8 @@ class StorageManager (db: Database) extends Actor {
     case Commit(tid) => {
 
       trace.info("received commit notification from %s for Transaction-%d".format(sender, tid))
+      logBuffer += new LogEntry(LogType.READ, tid)
+      logBuffer.persist
       commit(tid)
 
     } // Commit
