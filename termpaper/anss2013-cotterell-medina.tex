@@ -177,6 +177,10 @@ In this section, we present the statistical and simulation background informatio
 necessary for the rest of the paper.
 
 \textbf{TODO: \textit{what else goes here???}}
+\begin{itemize}
+		\item Markov Chains
+		\item Row Stochastic
+\end{itemize}
 
 %Markov Processes
 A Markov Process is a mathematical model that represents a system as a set of states
@@ -468,9 +472,11 @@ Consider this matrix to be representative of a weighted bipartite graph.
 Now, finding the set of similarities that yield the best correspondance between the two ontologies is simply a matter of solving the maximum-weighted bipartite graph matching problem using the generated graph.
 In order to accomplish this task, the Hungarian algorithm is used~\cite{kuhn:1955:hungarian}.
 
-\subsection{Implementation Details}
 
-Talk about the implementation here..
+%\subsection{Implementation Details}
+%NOTE: I don't think we need to go into this too much (TM)
+%
+%Talk about the implementation here..
 
 \section{Evaluation}
 \label{sec:eval}
@@ -557,10 +563,11 @@ Some possible work includes, but is not limitted to, the following:
 \item Tweak the definition of edge confidence so that it includes information about the structural relationships between different object properties.
 For example, object properties have parent-child relationships similar to ontological terms.
 A new edge confidence function could take advantage of these relationships in order to consider a more structural approach to the alignment problem.
-\item TODO
+\item Investigate the use of Eigenvalues to evaluate the convergence values of the propagation graph in constant time.
+\item Investigate the use of the Hungarian Algorithm to improve the quality of edge confidence values.
 \end{itemize}
 
-All of the source code for this project can be found at ...
+%All of the source code for this project can be found at ...
 
 %ACKNOWLEDGMENTS are optional
 \section*{Acknowledgments}
