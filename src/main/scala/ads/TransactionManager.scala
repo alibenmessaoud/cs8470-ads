@@ -20,6 +20,8 @@ object TMStats {
   var start: Long = System.currentTimeMillis
   var end: Long = 0
   var count: Int = 0
+  var txns: Int= 0
+  var rolls: Int = 0
 } // TMStats
 
 /**
@@ -59,6 +61,7 @@ class TransactionManager(db: Database) extends Actor with ConcurrencyControl {
 
     case bMsg: BeginMessage => {
       trace.info("Message recieved: %s".format(bMsg))
+      TMStats.txns += 1
     }
 
     case rMsg: ReadMessage => {
@@ -82,6 +85,7 @@ class TransactionManager(db: Database) extends Actor with ConcurrencyControl {
 	case Rollbacked => {
 	  trace.info("read request resulted in rollback: %s".format(rMsg))
 	  sender ! ReadResponse(value = "hello", rollback = true)
+          TMStats.rolls += 1
 	} // case
 	case _ => {
 	  trace.info("read request resulted in unknown message: %s".format(rMsg))
@@ -113,6 +117,7 @@ class TransactionManager(db: Database) extends Actor with ConcurrencyControl {
 	case Rollbacked => {
 	  trace.info("write request resulted in rollback: %s".format(wMsg))
 	  sender ! WriteResponse(false, false, true)
+          TMStats.rolls += 1
 	} // case
 	case Thomas     => {
 	  trace.info("write request invoked Thomas Write Rule?: %s".format(wMsg))
@@ -127,6 +132,7 @@ class TransactionManager(db: Database) extends Actor with ConcurrencyControl {
       db.sm ! Commit(cMsg.t.getTID.get)
       TypedActor(db.system).poisonPill(sender)
       statTally
+      TMStats.txns -= 1
     } // case
 
   } // recieve

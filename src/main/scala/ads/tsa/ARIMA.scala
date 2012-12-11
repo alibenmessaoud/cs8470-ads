@@ -62,7 +62,7 @@ class ARIMA (y: VectorD, t: VectorD) extends Predictor with Error {
     //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
     /** Fit an ARIMA model to historical times series data.
      */
-    def train (): VectorD = 
+    def train (): Unit = 
     {
          //We need to fit the data in vector y to the following function:
 
@@ -81,7 +81,7 @@ class ARIMA (y: VectorD, t: VectorD) extends Predictor with Error {
          val threshold = 5.0E-5
          var iter      = 0       
   
-         var result:VectorD
+         var result:VectorD      = null
          var yt: VectorD         = null
          var r: SimpleRegression = null
 
@@ -105,19 +105,21 @@ class ARIMA (y: VectorD, t: VectorD) extends Predictor with Error {
                  x(i, 0) = 1.0
                  x(i, 1) = t(i)
 	           } // for
+             println("before")
 
              // regression on x and padded yt
              r = new SimpleRegression(x, padded)
+             println("after")
              r.train
 
              println("made it here! iter = %d".format(iter))
 
-         } while (r.fit._2 > threshold && iter < 3)
+         } while (r.fit._2 > threshold && iter < 2)
 
          println("order of integration = %d".format(iter))
        
          //For debugging, print the Autocorrelation function of the yt vector
-         //plotACF(yt)
+         plotACF(yt)
 
          //Interpreting the autocorrelation function
          //from NIST handbook http://www.itl.nist.gov/div898/handbook/pmc/section4/pmc446.htm
@@ -214,15 +216,19 @@ class ARIMA (y: VectorD, t: VectorD) extends Predictor with Error {
      */
     def plotACF(t: VectorD) 
     {
-      val st = new StatVector(t)
+      println("AAA")
+      val st = new StatVector(t.dim, false)
+      for(i <- 0 until t.dim) st(i) = t(i)
+      println("BBB")
       val acf = new VectorD(t.dim)
       val lag_axis = new VectorD(t.dim)
       val zero = new VectorD(t.dim)
+      println("t.dim = " + t.dim)
       for(i <- 0 until t.dim)
       {
         zero(i) = 0
         lag_axis(i) = i
-        //println("autocorrelation at %d = %f\n".format( i, st.acorr(i)))
+        println("autocorrelation at %d = %f\n".format( i, st.acorr(i)))
         acf(i) = st.acorr(i)
       }
       new Plot (lag_axis, acf, zero, "Plot of autocorrelation function")

@@ -278,6 +278,9 @@ object TypedTransactionTestSGC extends App {
 
   import ads.concurrency.{ SGC, TSO }
 
+  //val CL = 60
+  for (CL <- 10 to 100 by 10) {
+
   val rand = new Random()
 
   // set up the database
@@ -301,22 +304,24 @@ object TypedTransactionTestSGC extends App {
   // recover
   db.recover
 
-  val CL = 200
+  TMStats.start = System.currentTimeMillis
+  TMStats.rolls = 0
+  TMStats.count = 0
 
   for (i <- 1 to 1000) {
 
     val timpl = new TransactionImpl(db) {
       override def body () {
 
-	val oid  = rand.nextInt(1000)
+	val oid  = rand.nextInt(500)
 
-	val name = read("person", oid, "name").get.asInstanceOf[String]
-	val age  = read("person", oid, "age").get.asInstanceOf[Int]
+	val name = read("person", oid, "name").get
+	val age  = read("person", oid, "age").get
 	
 	write("person", oid, "name", "bob")
-	write("person", oid, "age", age + 1)
+	write("person", oid, "age", rand.nextInt(100))
 
-        val sName = read("student", oid, "name").get.asInstanceOf[String]
+        val sName = read("student", oid, "name").get
 
         write("student", oid, "name", name)
 
@@ -325,16 +330,12 @@ object TypedTransactionTestSGC extends App {
 
     val t: Transaction = db.makeTransaction(timpl, "Transaction-%d".format(i-1))
 
-    Thread sleep (10 + rand.nextInt(5))
+    Thread sleep (5 + rand.nextInt(5))
 
-    if (i % CL == 0) {
-      var test = false
-      do {
-        TMStats.synchronized {
-          if (TMStats.count > i) test = true
-        } // synchronized
-      } while (!test)
-    } // if
+    while (TMStats.txns == CL) {
+       val test = TMStats.txns
+       Thread sleep 5 // println(test)
+    }
 
     // execute the transactiono
     t.execute
@@ -343,12 +344,15 @@ object TypedTransactionTestSGC extends App {
 
   Thread sleep 1000
 
-  TMStats.end = System.currentTimeMillis
-  val totalTime = TMStats.end - TMStats.start
-  println("STATS!");
-  println("transaction committed = " + TMStats.count)
-  println("total time = " + totalTime + "ms")
-  println("throughput = " + (TMStats.count.toDouble / (totalTime.toDouble / 1000.0)) + " tps")   
+    TMStats.end = System.currentTimeMillis
+    val totalTime = TMStats.end - TMStats.start
+//    println("STATS!");
+//    println("transaction committed = " + TMStats.count)
+//    println("total time = " + totalTime + "ms")
+//    println("throughput = " + (TMStats.count.toDouble / (totalTime.toDouble / 1000.0)) + " tps")
+    val tps = (TMStats.count.toDouble / (totalTime.toDouble / 1000.0))
+    println("%d, %f, %d".format(CL, tps, TMStats.rolls))
+  } 
 
 } // TypedTransactionTestSGC
 

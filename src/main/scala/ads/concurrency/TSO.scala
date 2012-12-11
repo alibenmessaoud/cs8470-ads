@@ -72,7 +72,7 @@ trait TSO extends ConcurrencyControl {
 	    if (timestamp > ts.r) ts.r = timestamp
 	    return Granted
 
-	  } else {
+	  } /*else {
 
 	    // If the last transaction to write to the object has not committed,
 	    // then we need to send a postpone message to the transaction in
@@ -81,7 +81,7 @@ trait TSO extends ConcurrencyControl {
 	    // TODO t ! PostponeReadMessage()
 	    return Postponed
 
-	  } // if
+	  } // if */
 
 	} // if
 
@@ -123,7 +123,7 @@ trait TSO extends ConcurrencyControl {
 
 	    return Thomas
 
-	  } else {
+	  } /*else {
 
 	    // If the last transaction to write to the object has not committed,
 	    // then postpone the write
@@ -131,7 +131,7 @@ trait TSO extends ConcurrencyControl {
 	    // TODO t ! PostponeWriteMessage()
 	    return Postponed
 
-	  } // if
+	  } // if*/
 
 	} else {
 
@@ -148,12 +148,12 @@ trait TSO extends ConcurrencyControl {
 
 	    return Granted
 
-	  } else {
+	  } /*else {
 
 	    // TODO t ! PostponeWriteMessage()
 	    return Postponed
 
-	  } // if
+	  } // if*/
 
 	} // if
 
