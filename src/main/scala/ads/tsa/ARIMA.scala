@@ -62,7 +62,11 @@ class ARIMA (y: VectorD, t: VectorD) extends Predictor with Error {
     //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
     /** Fit an ARIMA model to historical times series data.
      */
+<<<<<<< HEAD
     def train (): Unit = 
+=======
+    def train ()
+>>>>>>> 0ec9a14bd2f98efe1bbb8c1a5f9a4c53845d20ab
     {
          //We need to fit the data in vector y to the following function:
 
@@ -81,7 +85,11 @@ class ARIMA (y: VectorD, t: VectorD) extends Predictor with Error {
          val threshold = 5.0E-5
          var iter      = 0       
   
+<<<<<<< HEAD
          var result:VectorD      = null
+=======
+         var result:VectorD     = null
+>>>>>>> 0ec9a14bd2f98efe1bbb8c1a5f9a4c53845d20ab
          var yt: VectorD         = null
          var r: SimpleRegression = null
 
@@ -156,12 +164,18 @@ class ARIMA (y: VectorD, t: VectorD) extends Predictor with Error {
          * estimation or non-linear least-squares estimation.
          */
         //Estimation of phi and theta 
-          //Yule-Walker Estimation
          //Maximum Likelihood estimator
          //This is a non-linear optimisation problem, need to search for the max of the likelihood surface
 
          //Guess at initial values: Yule-Walker Estimation (pure autoregressive, i.e. q == 0) 
+         		//(Wikipedia)Formulation as a least squares regression problem in which an ordinary least squares prediction 
+         		//problem is constructed, basing prediction of values of Xt on the p previous values of the same 
+         		//series. This can be thought of as a forward-prediction scheme. The normal equations for this 
+         		//problem can be seen to correspond to an approximation of the matrix form of the Yule-Walker 
+         		//equations in which each appearance of an autocovariance of the same lag is replaced by a slightly 
+         		//different estimate.
          //or for q>0 use Hannan-Rissanan estimation
+            
 
         /* STAGE 4: (from Wikipedia)
          * Model checking by testing whether the estimated model conforms to the specifications 
@@ -178,7 +192,7 @@ class ARIMA (y: VectorD, t: VectorD) extends Predictor with Error {
          //if the residuals are random (i.e. if they have no autocorrelation) then the fit is good
 
          //return the vector of Model Parameters
-         result
+         //result
     } // train
 
     //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
