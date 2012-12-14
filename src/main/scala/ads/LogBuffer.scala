@@ -8,10 +8,11 @@ import java.nio.{ByteBuffer, CharBuffer}
 import java.nio.charset.Charset
 
 object LogType {
-  val READ   = 1 // 2^0
-  val WRITE  = 2 // 2^1
-  val COMMIT = 4 // 2^2
-  val CHK    = 8 // 2^3
+  val READ   = 1  // 2^0
+  val WRITE  = 2  // 2^1
+  val COMMIT = 4  // 2^2
+  val CHK    = 8  // 2^3
+  val BEGIN  = 16 // 2^4
 } // LogType
 
 object LogEntry {
@@ -192,7 +193,7 @@ object LogBuffer {
 class LogBuffer (val db: Database) {
 
   var logFile = new RandomAccessFile("%s.log".format(db.name), "rw")
-  val buffer  = ListBuffer.empty[LogEntry]
+  var buffer  = ListBuffer.empty[LogEntry]
 
   def += (elem: LogEntry) = (buffer += elem)
 
@@ -221,6 +222,49 @@ class LogBuffer (val db: Database) {
       entry.persisted = true
     } // for
 
+    // cleanup
+    cleanup()
+
   } // persist
 
+  def cleanup(): Unit = {
+
+    // remove stuff that's more than 5 checkpoints old
+
+    var count = 0
+    var len   = 0
+
+    val newBuffer = ListBuffer.empty[LogEntry]
+
+    for (entry <- buffer.reverse) {
+      if (entry.logType == LogType.CHK) count += 1
+      if (count <= 5) newBuffer += entry 
+    } // for TODO optimize
+    
+    this.buffer = newBuffer
+
+  } // cleanup
+
 } // LogBuffer
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

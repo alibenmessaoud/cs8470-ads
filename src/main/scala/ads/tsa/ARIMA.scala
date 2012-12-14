@@ -62,11 +62,7 @@ class ARIMA (y: VectorD, t: VectorD) extends Predictor with Error {
     //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
     /** Fit an ARIMA model to historical times series data.
      */
-<<<<<<< HEAD
-    def train (): Unit = 
-=======
     def train ()
->>>>>>> 0ec9a14bd2f98efe1bbb8c1a5f9a4c53845d20ab
     {
          //We need to fit the data in vector y to the following function:
 
@@ -85,11 +81,7 @@ class ARIMA (y: VectorD, t: VectorD) extends Predictor with Error {
          val threshold = 5.0E-5
          var iter      = 0       
   
-<<<<<<< HEAD
          var result:VectorD      = null
-=======
-         var result:VectorD     = null
->>>>>>> 0ec9a14bd2f98efe1bbb8c1a5f9a4c53845d20ab
          var yt: VectorD         = null
          var r: SimpleRegression = null
 
