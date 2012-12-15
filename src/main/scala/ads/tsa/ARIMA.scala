@@ -119,7 +119,8 @@ class ARIMA (y: VectorD, t: VectorD) extends Predictor with Error {
          println("order of integration = %d".format(iter))
        
          //For debugging, print the Autocorrelation function of the yt vector
-         plotACF(yt)
+         plotACF(acf(yt))
+         plotPACF(pacf(yt))
 
          //Interpreting the autocorrelation function
          //from NIST handbook http://www.itl.nist.gov/div898/handbook/pmc/section4/pmc446.htm
@@ -217,28 +218,41 @@ class ARIMA (y: VectorD, t: VectorD) extends Predictor with Error {
     } // predict
 
     //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-    /** Plot the autocorrelation functin of a passed-in vector of data.
+    /** Plot the autocorrelation function of a passed-in vector of data.
      *  @param t the data vector
      */
-    def plotACF(t: VectorD) 
+    def acf (t: VectorD): VectorD = 
     {
-      println("AAA")
-      val st = new StatVector(t.dim, false)
-      for(i <- 0 until t.dim) st(i) = t(i)
-      println("BBB")
-      val acf = new VectorD(t.dim)
-      val lag_axis = new VectorD(t.dim)
-      val zero = new VectorD(t.dim)
-      println("t.dim = " + t.dim)
-      for(i <- 0 until t.dim)
-      {
-        zero(i) = 0
-        lag_axis(i) = i
-        println("autocorrelation at %d = %f\n".format( i, st.acorr(i)))
-        acf(i) = st.acorr(i)
-      }
-      new Plot (lag_axis, acf, zero, "Plot of autocorrelation function")
-    }
+      val st   = new StatVector(t)
+      val acfv = new VectorD(t.dim)
+      for(i <- 0 until t.dim) acfv(i) = st.acorr(i)
+      acfv
+    } // acf
+
+    def pacf (t: VectorD): VectorD = 
+    {
+      val acfv  = acf(t)
+      val pacfv = new VectorD(t.dim - 1)
+      for(i <- 0 until pacfv.dim) pacfv(i) = acfv(i + 1) - acfv(i)
+      pacfv
+    } // pacf
+
+    def plotACF (acfv: VectorD)
+    {
+        val lag_axis = new VectorD(acfv.dim)
+        val zero     = new VectorD(acfv.dim)
+        for(i <- 0 until acfv.dim) lag_axis(i) = i
+        new Plot (lag_axis, acfv, zero, "Plot of autocorrelation function")
+    } // plotACF
+
+    def plotPACF (pacfv: VectorD)
+    {
+        val lag_axis = new VectorD(pacfv.dim)
+        val zero     = new VectorD(pacfv.dim)
+        for(i <- 0 until pacfv.dim) lag_axis(i) = i
+        new Plot (lag_axis, pacfv, zero, "Plot of partial autocorrelation function")
+    } // plotACF
+
 
 } // ARIMA class
 

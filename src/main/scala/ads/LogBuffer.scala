@@ -110,7 +110,7 @@ class LogEntry (val logType: Int, tid: Int, table: String, oid: Int, prop: Strin
     case 8 => "Checkpoint"
   } // logTypeString
 
-  override def toString = "LogEntry(%d, %s, %d, %s, %d, %s, %s)".format(timestamp, logTypeString(logType), tid, table, oid, prop, value)
+  override def toString = "LogEntry(%d, %s, %d, %s, %d, %s, %s, %s)".format(timestamp, logTypeString(logType), tid, table, oid, prop, value, oldValue)
 
 } // LogEntry
 
@@ -155,7 +155,8 @@ object LogBuffer {
 	entry.logType match {
 	  case 2 => {
  	    db.trace.info("undoing a write = %s".format(entry))
-	    // TODO db.table(entry.getTable)(entry.getOID).set(entry.getProp)(entry.getOldValue)
+	    // db.table(entry.getTable)(entry.getOID).set(entry.getProp)(entry.getOldValue)
+            // TODO fix error on schema not yet being available
 	  }
 	  case 4 => {
 	    db.trace.info("recording commit")
@@ -164,6 +165,7 @@ object LogBuffer {
 	  case 8 => {
 	    db.trace.info("recording checkpoint")
 	  }
+          case _ => {}
 	} // match
       } // for
       
@@ -177,8 +179,7 @@ object LogBuffer {
 	    // TODO db.table(entry.getTable)(entry.getOID).set(entry.getProp)(entry.getValue)
 	    fixCount += 1
 	  }
-	  case 4 => {}
-	  case 8 => {}
+          case _ => {}
 	} // match
       } // for
 
@@ -215,6 +216,8 @@ class LogBuffer (val db: Database) {
 
   def persist: Unit = {
 
+    db.trace.info("Persisting log buffer...")
+
     // go to end of file
     logFile.seek(logFile.length)
     for (entry <- this.iterator if !entry.persisted) {
@@ -228,6 +231,8 @@ class LogBuffer (val db: Database) {
   } // persist
 
   def cleanup(): Unit = {
+
+    db.trace.info("Cleaning up log buffer...")
 
     // remove stuff that's more than 5 checkpoints old
 

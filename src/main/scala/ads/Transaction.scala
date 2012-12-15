@@ -278,8 +278,8 @@ object TypedTransactionTestSGC extends App {
 
   import ads.concurrency.{ SGC, TSO }
 
-  //val CL = 60
-  for (CL <- 10 to 100 by 10) {
+  val CL = 50
+  //for (CL <- 10 to 100 by 10) {
 
   val rand = new Random()
 
@@ -340,7 +340,7 @@ object TypedTransactionTestSGC extends App {
     // execute the transactiono
     t.execute
 
-  } // for
+  } // CC for
 
   Thread sleep 1000
 
@@ -352,7 +352,7 @@ object TypedTransactionTestSGC extends App {
 //    println("throughput = " + (TMStats.count.toDouble / (totalTime.toDouble / 1000.0)) + " tps")
     val tps = (TMStats.count.toDouble / (totalTime.toDouble / 1000.0))
     println("%d, %f, %d".format(CL, tps, TMStats.rolls))
-  } 
+  // }  // CC Loop
 
 } // TypedTransactionTestSGC
 
